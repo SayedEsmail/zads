@@ -70,7 +70,7 @@ What's left to complete before launch.
   - Skip option
   - Store onboarding completed in SharedPreferences
 
-- [ ] **Favorites Feature UI**
+- [x] **Favorites Feature UI** ✅
   - Heart icon on teacher cards
   - Favorites list screen
   - Add/remove favorites API connected

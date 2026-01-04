@@ -5,6 +5,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../parent/providers/parent_provider.dart';
 import '../../search/providers/search_provider.dart';
+import '../../favorites/providers/favorites_provider.dart';
 
 class ParentHomeScreen extends ConsumerStatefulWidget {
   const ParentHomeScreen({super.key});
@@ -20,6 +21,7 @@ class _ParentHomeScreenState extends ConsumerState<ParentHomeScreen> {
     Future.microtask(() {
       ref.read(parentProfileProvider.notifier).loadProfile();
       ref.read(parentChildrenProvider.notifier).loadChildren();
+      ref.read(favoritesProvider.notifier).loadFavorites();
     });
   }
 
@@ -47,6 +49,7 @@ class _ParentHomeScreenState extends ConsumerState<ParentHomeScreen> {
     final profileState = ref.watch(parentProfileProvider);
     final childrenState = ref.watch(parentChildrenProvider);
     final searchState = ref.watch(teacherSearchProvider);
+    final favoritesState = ref.watch(favoritesProvider);
 
     // Load teachers when profile loads
     ref.listen<ParentProfileState>(parentProfileProvider, (prev, next) {
@@ -197,9 +200,9 @@ class _ParentHomeScreenState extends ConsumerState<ParentHomeScreen> {
                     child: _QuickAction(
                       icon: Icons.favorite,
                       label: 'المفضلة',
-                      count: 0,
+                      count: favoritesState.favorites.length,
                       color: Colors.red,
-                      onTap: () {},
+                      onTap: () => context.push('/parent/favorites'),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -400,13 +403,13 @@ class _QuickAction extends StatelessWidget {
   }
 }
 
-class _TeacherCard extends StatelessWidget {
+class _TeacherCard extends ConsumerWidget {
   final Map<String, dynamic> teacher;
 
   const _TeacherCard({required this.teacher});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final user = teacher['user'] ?? {};
     final subjects = (teacher['subjects'] as List? ?? []);
     final subjectNames = subjects
@@ -419,6 +422,11 @@ class _TeacherCard extends StatelessWidget {
     final rating =
         double.tryParse(teacher['avgRating']?.toString() ?? '0') ?? 0;
     final isVerified = teacher['isVerified'] == true;
+
+    final teacherId = teacher['id'] as String?;
+    final favoritesState = ref.watch(favoritesProvider);
+    final isFavorite =
+        teacherId != null && favoritesState.isFavorite(teacherId);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -569,11 +577,20 @@ class _TeacherCard extends StatelessWidget {
                   ),
                 ),
 
-                // Arrow
-                const Icon(
-                  Icons.arrow_forward_ios,
-                  size: 16,
-                  color: AppColors.textSecondary,
+                // Favorite Heart Button
+                IconButton(
+                  icon: Icon(
+                    isFavorite ? Icons.favorite : Icons.favorite_border,
+                    color: isFavorite ? Colors.red : AppColors.textSecondary,
+                    size: 24,
+                  ),
+                  onPressed: () {
+                    if (teacherId != null) {
+                      ref
+                          .read(favoritesProvider.notifier)
+                          .toggleFavorite(teacherId);
+                    }
+                  },
                 ),
               ],
             ),

@@ -14,6 +14,7 @@ import '../../features/parent/presentation/parent_location_edit_screen.dart';
 import '../../features/parent/presentation/parent_children_manage_screen.dart';
 import '../../features/parent/presentation/parent_requests_screen.dart';
 import '../../features/parent/presentation/request_details_screen.dart';
+import '../../features/favorites/presentation/favorites_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
@@ -71,6 +72,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/parent/children',
         builder: (context, state) => const ParentChildrenManageScreen(),
+      ),
+      GoRoute(
+        path: '/parent/favorites',
+        builder: (context, state) => const FavoritesScreen(),
       ),
       GoRoute(
         path: '/parent/requests',

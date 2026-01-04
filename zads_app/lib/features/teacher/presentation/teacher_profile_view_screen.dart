@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../search/data/search_repository.dart';
+import '../../favorites/providers/favorites_provider.dart';
 
 class TeacherProfileViewScreen extends ConsumerStatefulWidget {
   final String teacherId;
@@ -129,10 +130,23 @@ class _TeacherProfileViewScreenState
               onPressed: () => context.pop(),
             ),
             actions: [
-              IconButton(
-                icon: const Icon(Icons.favorite_border, color: Colors.white),
-                onPressed: () {
-                  // TODO: Add to favorites
+              Consumer(
+                builder: (context, ref, child) {
+                  final favoritesState = ref.watch(favoritesProvider);
+                  final isFavorite = favoritesState.isFavorite(
+                    widget.teacherId,
+                  );
+                  return IconButton(
+                    icon: Icon(
+                      isFavorite ? Icons.favorite : Icons.favorite_border,
+                      color: isFavorite ? Colors.red : Colors.white,
+                    ),
+                    onPressed: () {
+                      ref
+                          .read(favoritesProvider.notifier)
+                          .toggleFavorite(widget.teacherId);
+                    },
+                  );
                 },
               ),
               IconButton(

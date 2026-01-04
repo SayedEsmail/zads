@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 class AppColors {
   // Main colors - Zads Brand Colors
-  static const Color primary = Color(0xFF1A237E); // Dark Blue
-  static const Color secondary = Color(0xFFFFC107); // Orange
+  static const Color primary = Color(0xFF003B95); // Brand Blue from logo
+  static const Color secondary = Color(0xFFF58220); // Brand Orange from logo
 
   // Neutral colors
   static const Color background = Color(
