@@ -5,6 +5,8 @@ import 'package:intl/intl.dart';
 import '../../../core/theme/app_colors.dart';
 import '../providers/parent_provider.dart';
 
+import '../../contact/providers/contact_provider.dart';
+
 class ParentRequestsScreen extends ConsumerStatefulWidget {
   const ParentRequestsScreen({super.key});
 
@@ -13,15 +15,25 @@ class ParentRequestsScreen extends ConsumerStatefulWidget {
       _ParentRequestsScreenState();
 }
 
-class _ParentRequestsScreenState extends ConsumerState<ParentRequestsScreen> {
+class _ParentRequestsScreenState extends ConsumerState<ParentRequestsScreen>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
   String selectedFilter = 'all'; // all, active, expired
 
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 2, vsync: this);
     Future.microtask(() {
       ref.read(tutorRequestsProvider.notifier).loadRequests();
+      ref.read(contactProvider.notifier).loadOutgoingRequests();
     });
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 
   List<dynamic> _getFilteredRequests(List<dynamic> requests) {
@@ -31,9 +43,6 @@ class _ParentRequestsScreenState extends ConsumerState<ParentRequestsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final requestsState = ref.watch(tutorRequestsProvider);
-    final filteredRequests = _getFilteredRequests(requestsState.requests);
-
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -50,114 +59,195 @@ class _ParentRequestsScreenState extends ConsumerState<ParentRequestsScreen> {
             fontWeight: FontWeight.bold,
           ),
         ),
+        bottom: TabBar(
+          controller: _tabController,
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white70,
+          labelStyle: const TextStyle(
+            fontFamily: 'Cairo',
+            fontWeight: FontWeight.bold,
+          ),
+          indicatorColor: Colors.white,
+          tabs: const [
+            Tab(text: 'طلبات الدروس'),
+            Tab(text: 'طلبات التواصل'),
+          ],
+        ),
       ),
-      body: requestsState.isLoading
-          ? const Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
-            )
-          : RefreshIndicator(
-              onRefresh: () =>
-                  ref.read(tutorRequestsProvider.notifier).loadRequests(),
-              child: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Filter Chips
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: [
-                          _FilterChip(
-                            label: 'الكل',
-                            isSelected: selectedFilter == 'all',
-                            count: requestsState.requests.length,
-                            onTap: () => setState(() => selectedFilter = 'all'),
-                          ),
-                          const SizedBox(width: 8),
-                          _FilterChip(
-                            label: 'نشط',
-                            isSelected: selectedFilter == 'active',
-                            count: requestsState.requests
-                                .where((r) => r['status'] == 'active')
-                                .length,
-                            onTap: () =>
-                                setState(() => selectedFilter = 'active'),
-                          ),
-                          const SizedBox(width: 8),
-                          _FilterChip(
-                            label: 'منتهي',
-                            isSelected: selectedFilter == 'closed',
-                            count: requestsState.requests
-                                .where((r) => r['status'] == 'closed')
-                                .length,
-                            onTap: () =>
-                                setState(() => selectedFilter = 'closed'),
-                          ),
-                        ],
-                      ),
-                    ),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          _buildTutorRequests(),
+          _buildContactRequests(),
+        ],
+      ),
+    );
+  }
 
-                    const SizedBox(height: 24),
+  Widget _buildTutorRequests() {
+    final requestsState = ref.watch(tutorRequestsProvider);
+    final filteredRequests = _getFilteredRequests(requestsState.requests);
 
-                    // Requests List
-                    if (filteredRequests.isEmpty)
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(48),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Column(
-                          children: [
-                            Icon(
-                              Icons.assignment_outlined,
-                              size: 64,
-                              color: AppColors.textSecondary,
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              selectedFilter == 'all'
-                                  ? 'لا توجد طلبات'
-                                  : selectedFilter == 'active'
-                                  ? 'لا توجد طلبات نشطة'
-                                  : 'لا توجد طلبات منتهية',
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'Cairo',
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            const Text(
-                              'سيتم إنشاء طلبات تلقائياً عند إضافة أبناء',
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: AppColors.textSecondary,
-                                fontFamily: 'Cairo',
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    else
-                      ...filteredRequests.map((request) {
-                        return GestureDetector(
-                          onTap: () {
-                            context.push(
-                              '/parent/requests/${request['id']}',
-                              extra: request,
-                            );
-                          },
-                          child: _RequestCard(request: request),
-                        );
-                      }),
-                  ],
-                ),
+    if (requestsState.isLoading) {
+      return const Center(
+          child: CircularProgressIndicator(color: AppColors.primary));
+    }
+
+    return RefreshIndicator(
+      onRefresh: () => ref.read(tutorRequestsProvider.notifier).loadRequests(),
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Filter Chips
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  _FilterChip(
+                    label: 'الكل',
+                    isSelected: selectedFilter == 'all',
+                    count: requestsState.requests.length,
+                    onTap: () => setState(() => selectedFilter = 'all'),
+                  ),
+                  const SizedBox(width: 8),
+                  _FilterChip(
+                    label: 'نشط',
+                    isSelected: selectedFilter == 'active',
+                    count: requestsState.requests
+                        .where((r) => r['status'] == 'active')
+                        .length,
+                    onTap: () => setState(() => selectedFilter = 'active'),
+                  ),
+                  const SizedBox(width: 8),
+                  _FilterChip(
+                    label: 'منتهي',
+                    isSelected: selectedFilter == 'closed',
+                    count: requestsState.requests
+                        .where((r) => r['status'] == 'closed')
+                        .length,
+                    onTap: () => setState(() => selectedFilter = 'closed'),
+                  ),
+                ],
               ),
             ),
+
+            const SizedBox(height: 24),
+
+            // Requests List
+            if (filteredRequests.isEmpty)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(48),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Column(
+                  children: [
+                    const Icon(
+                      Icons.assignment_outlined,
+                      size: 64,
+                      color: AppColors.textSecondary,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      selectedFilter == 'all'
+                          ? 'لا توجد طلبات'
+                          : selectedFilter == 'active'
+                              ? 'لا توجد طلبات نشطة'
+                              : 'لا توجد طلبات منتهية',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Cairo',
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'سيتم إنشاء طلبات تلقائياً عند إضافة أبناء',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: AppColors.textSecondary,
+                        fontFamily: 'Cairo',
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            else
+              ...filteredRequests.map((request) {
+                return GestureDetector(
+                  onTap: () {
+                    context.push(
+                      '/parent/requests/${request['id']}',
+                      extra: request,
+                    );
+                  },
+                  child: _RequestCard(request: request),
+                );
+              }),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildContactRequests() {
+    final contactState = ref.watch(contactProvider);
+
+    if (contactState.isLoading) {
+      return const Center(
+          child: CircularProgressIndicator(color: AppColors.primary));
+    }
+
+    if (contactState.requests.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.contact_mail_outlined,
+              size: 64,
+              color: AppColors.textSecondary,
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'لا توجد طلبات تواصل',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Cairo',
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'يمكنك التواصل مع المعلمين من خلال صفحاتهم الشخصية',
+              style: TextStyle(
+                fontSize: 13,
+                color: AppColors.textSecondary,
+                fontFamily: 'Cairo',
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: () => ref.read(contactProvider.notifier).loadOutgoingRequests(),
+      child: ListView.separated(
+        padding: const EdgeInsets.all(16),
+        itemCount: contactState.requests.length,
+        separatorBuilder: (context, index) => const SizedBox(height: 12),
+        itemBuilder: (context, index) {
+          final request = contactState.requests[index];
+          return _ContactRequestCard(request: request);
+        },
+      ),
     );
   }
 }
@@ -483,4 +573,107 @@ class _RequestCard extends StatelessWidget {
       ),
     );
   }
+
+class _ContactRequestCard extends StatelessWidget {
+  final Map<String, dynamic> request;
+
+  const _ContactRequestCard({required this.request});
+
+  @override
+  Widget build(BuildContext context) {
+    final teacher = request['teacher'];
+    final teacherUser = teacher?['user'] ?? {};
+    final status = request['status'];
+    final createdAt = request['createdAt'];
+
+    final statusLabel = status == 'pending'
+        ? 'قيد الانتظار'
+        : status == 'accepted'
+            ? 'مقبول'
+            : status == 'rejected'
+                ? 'مرفوض'
+                : status;
+
+    final statusColor = status == 'pending'
+        ? Colors.orange
+        : status == 'accepted'
+            ? Colors.green
+            : status == 'rejected'
+                ? Colors.red
+                : Colors.grey;
+
+    final date = createdAt != null
+        ? DateFormat('dd/MM/yyyy').format(DateTime.parse(createdAt))
+        : '';
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 25,
+            backgroundColor: AppColors.primary.withOpacity(0.1),
+            backgroundImage: teacherUser['avatarUrl'] != null
+                ? NetworkImage(teacherUser['avatarUrl'])
+                : null,
+            child: teacherUser['avatarUrl'] == null
+                ? Text(
+                    (teacherUser['name'] ?? 'م')[0],
+                    style: const TextStyle(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  )
+                : null,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  teacherUser['name'] ?? 'معلم',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'Cairo',
+                  ),
+                ),
+                Text(
+                  'تاريخ الطلب: $date',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textSecondary,
+                    fontFamily: 'Cairo',
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: statusColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              statusLabel,
+              style: TextStyle(
+                fontSize: 12,
+                color: statusColor,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Cairo',
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
+

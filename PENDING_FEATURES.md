@@ -76,7 +76,7 @@ What's left to complete before launch.
   - Add/remove favorites API connected
   - Empty state when no favorites
 
-- [ ] **Teacher Search Results Screen**
+- [x] **Teacher Search Results Screen** ✅
   - List view of search results
   - Filter chips (subject, stage, price range)
   - Sort options (rating, price, distance)
@@ -96,11 +96,11 @@ What's left to complete before launch.
   - Link to relevant screens
   - Empty state
 
-- [ ] **Contact Request Flow** (Parent → Teacher)
+- [x] **Contact Request Flow** (Parent → Teacher) ✅
   - Contact button on teacher profile
   - Confirmation dialog
   - Success/error feedback
-  - View sent requests
+  - [x] View sent requests ✅
 
 ### Medium Priority - Polish
 - [ ] **App Icon & Splash Screen**
@@ -208,8 +208,8 @@ These can wait until after launch:
 | Parent Requests | ✅ Done | |
 | Request Details | ✅ Done | |
 | **Onboarding** | ❌ Missing | High priority |
-| **Favorites** | ❌ Missing | High priority |
-| **Search Results** | ❌ Missing | High priority |
+| **Favorites** | ✅ Done | High priority |
+| **Search Results** | ✅ Done | High priority |
 | **Settings** | ❌ Missing | Medium priority |
 | **Notifications** | ❌ Missing | Medium priority |
 

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../search/data/search_repository.dart';
 import '../../favorites/providers/favorites_provider.dart';
+import '../../contact/providers/contact_provider.dart';
 
 class TeacherProfileViewScreen extends ConsumerStatefulWidget {
   final String teacherId;
@@ -514,30 +515,100 @@ class _TeacherProfileViewScreenState
         child: Row(
           children: [
             Expanded(
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  // TODO: Contact teacher
+              child: Consumer(
+                builder: (context, ref, child) {
+                  final contactState = ref.watch(contactProvider);
+
+                  // Listen for success/error
+                  ref.listen(contactProvider, (previous, next) {
+                    if (next.error != null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(next.error!),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    } else if (next.isSuccess) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('تم إرسال طلب التواصل بنجاح'),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                    }
+                  });
+
+                  return ElevatedButton.icon(
+                    onPressed: contactState.isLoading
+                        ? null
+                        : () => _showContactConfirmation(context, ref),
+                    icon: contactState.isLoading
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Icon(Icons.message, color: Colors.white),
+                    label: Text(
+                      contactState.isLoading
+                          ? 'جاري الإرسال...'
+                          : 'تواصل مع المعلم',
+                      style: const TextStyle(
+                        fontFamily: 'Cairo',
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  );
                 },
-                icon: const Icon(Icons.message, color: Colors.white),
-                label: const Text(
-                  'تواصل مع المعلم',
-                  style: TextStyle(
-                    fontFamily: 'Cairo',
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showContactConfirmation(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('طلب تواصل', style: TextStyle(fontFamily: 'Cairo')),
+        content: const Text(
+          'سيتم إرسال طلب تواصل إلى المعلم. هل تود المتابعة؟',
+          style: TextStyle(fontFamily: 'Cairo'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => context.pop(),
+            child: const Text(
+              'إلغاء',
+              style: TextStyle(fontFamily: 'Cairo', color: Colors.grey),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              context.pop();
+              ref
+                  .read(contactProvider.notifier)
+                  .sendContactRequest(widget.teacherId);
+            },
+            child: const Text(
+              'تأكيد',
+              style: TextStyle(fontFamily: 'Cairo', color: AppColors.primary),
+            ),
+          ),
+        ],
       ),
     );
   }
