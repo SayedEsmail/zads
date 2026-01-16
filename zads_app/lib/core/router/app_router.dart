@@ -17,6 +17,7 @@ import '../../features/parent/presentation/request_details_screen.dart';
 import '../../features/favorites/presentation/favorites_screen.dart';
 import '../../features/onboarding/presentation/onboarding_screen.dart';
 import '../../features/onboarding/providers/onboarding_provider.dart';
+import '../../features/search/presentation/teacher_search_screen.dart';
 
 // final routerProvider = Provider<GoRouter>((ref) {
 //   return GoRouter(
@@ -98,6 +99,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/parent/children',
         builder: (context, state) => const ParentChildrenManageScreen(),
+      ),
+      GoRoute(
+        path: '/parent/search',
+        builder: (context, state) => const TeacherSearchScreen(),
       ),
       GoRoute(
         path: '/parent/favorites',

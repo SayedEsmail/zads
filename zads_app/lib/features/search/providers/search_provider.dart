@@ -56,6 +56,8 @@ class TeacherSearchNotifier extends StateNotifier<TeacherSearchState> {
     String? subjectId,
     String? stageId,
     String? lessonType,
+    int? minPrice,
+    int? maxPrice,
     int page = 1,
     bool append = false,
   }) async {
@@ -71,6 +73,8 @@ class TeacherSearchNotifier extends StateNotifier<TeacherSearchState> {
         subjectId: subjectId,
         stageId: stageId,
         lessonType: lessonType,
+        minPrice: minPrice,
+        maxPrice: maxPrice,
         page: page,
       );
 
@@ -97,6 +101,8 @@ class TeacherSearchNotifier extends StateNotifier<TeacherSearchState> {
     String? governorateId,
     String? subjectId,
     String? stageId,
+    int? minPrice,
+    int? maxPrice,
   }) async {
     if (state.page >= state.totalPages || state.isLoading) return;
 
@@ -106,6 +112,8 @@ class TeacherSearchNotifier extends StateNotifier<TeacherSearchState> {
       governorateId: governorateId,
       subjectId: subjectId,
       stageId: stageId,
+      minPrice: minPrice,
+      maxPrice: maxPrice,
       page: state.page + 1,
       append: true,
     );
