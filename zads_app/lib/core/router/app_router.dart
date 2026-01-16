@@ -15,11 +15,37 @@ import '../../features/parent/presentation/parent_children_manage_screen.dart';
 import '../../features/parent/presentation/parent_requests_screen.dart';
 import '../../features/parent/presentation/request_details_screen.dart';
 import '../../features/favorites/presentation/favorites_screen.dart';
+import '../../features/onboarding/presentation/onboarding_screen.dart';
+import '../../features/onboarding/providers/onboarding_provider.dart';
 
+// final routerProvider = Provider<GoRouter>((ref) {
+//   return GoRouter(
+//     initialLocation: '/login',
+//     routes: [
 final routerProvider = Provider<GoRouter>((ref) {
+  final onboardingCompleted = ref.watch(onboardingStateProvider);
+
   return GoRouter(
     initialLocation: '/login',
+    redirect: (context, state) {
+      final isLogin = state.fullPath == '/login';
+      final isOnboarding = state.fullPath == '/onboarding';
+
+      if (!onboardingCompleted) {
+        return isOnboarding ? null : '/onboarding';
+      }
+
+      if (isOnboarding && onboardingCompleted) {
+        return '/login';
+      }
+
+      return null;
+    },
     routes: [
+      GoRoute(
+        path: '/onboarding',
+        builder: (context, state) => const OnboardingScreen(),
+      ),
       // Auth Routes
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
       GoRoute(
