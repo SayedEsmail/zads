@@ -108,10 +108,8 @@ What's left to complete before launch.
   - Splash screen with logo
   - Update `pubspec.yaml` assets
 
-- [ ] **Google Maps Integration**
-  - Show teacher location on map
-  - Nearby teachers map view
-  - Get API key and configure
+- [x] **Google Maps Integration** (Skipped)
+  - Replaced with simple location fields (Governorate -> City -> Area) as per user request.
 
 ### Low Priority - Store Submission
 - [ ] **Build for iOS**
@@ -149,7 +147,7 @@ What's left to complete before launch.
 |---|------|-----|--------|
 | 9 | Image upload service | API | 6 hrs |
 | 10 | Push notifications | API + Mobile | 8 hrs |
-| 11 | Google Maps | Mobile | 4 hrs |
+
 | 12 | Dashboard charts | Dashboard | 4 hrs |
 
 ### Sprint 4 (Week 4) - Deployment
