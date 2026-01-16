@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../locations/providers/locations_provider.dart';
 import '../../teacher/providers/teacher_provider.dart';
 import '../providers/parent_provider.dart';
 
@@ -26,10 +25,19 @@ class _ParentChildrenManageScreenState
     });
   }
 
-  void _showAddChildDialog() {
-    final nameController = TextEditingController();
-    String? selectedStageId;
+  void _showChildDialog([Map<String, dynamic>? child]) {
+    final isEditing = child != null;
+    final nameController = TextEditingController(text: child?['name']);
+    String? selectedStageId = child?['stageId'] ?? child?['stage']?['id'];
+
     List<String> selectedSubjectIds = [];
+    if (child != null && child['subjects'] != null) {
+      for (var s in child['subjects']) {
+        if (s['subject'] != null && s['subject']['id'] != null) {
+          selectedSubjectIds.add(s['subject']['id']);
+        }
+      }
+    }
 
     showDialog(
       context: context,
@@ -39,9 +47,9 @@ class _ParentChildrenManageScreenState
           final subjectsAsync = ref.watch(subjectsProvider);
 
           return AlertDialog(
-            title: const Text(
-              'إضافة ابن',
-              style: TextStyle(fontFamily: 'Cairo'),
+            title: Text(
+              isEditing ? 'تعديل بيانات الابن' : 'إضافة ابن',
+              style: const TextStyle(fontFamily: 'Cairo'),
             ),
             content: SingleChildScrollView(
               child: Column(
@@ -67,7 +75,7 @@ class _ParentChildrenManageScreenState
                   const SizedBox(height: 8),
                   stagesAsync.when(
                     data: (stages) => DropdownButtonFormField<String>(
-                      value: selectedStageId,
+                      initialValue: selectedStageId,
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
                         hintText: 'اختر المرحلة',
@@ -151,27 +159,47 @@ class _ParentChildrenManageScreenState
                     return;
                   }
 
-                  await ref
-                      .read(parentChildrenProvider.notifier)
-                      .addChild(
-                        name: nameController.text,
-                        stageId: selectedStageId!,
-                        subjectIds: selectedSubjectIds,
-                      );
+                  if (isEditing) {
+                    await ref
+                        .read(parentChildrenProvider.notifier)
+                        .updateChild(
+                          childId: child!['id'],
+                          name: nameController.text,
+                          stageId: selectedStageId,
+                          subjectIds: selectedSubjectIds,
+                        );
+                  } else {
+                    await ref
+                        .read(parentChildrenProvider.notifier)
+                        .addChild(
+                          name: nameController.text,
+                          stageId: selectedStageId!,
+                          subjectIds: selectedSubjectIds,
+                        );
+                  }
 
                   if (context.mounted) {
                     Navigator.pop(context);
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('تم إضافة الابن بنجاح')),
+                      SnackBar(
+                        content: Text(
+                          isEditing
+                              ? 'تم حفظ التعديلات بنجاح'
+                              : 'تم إضافة الابن بنجاح',
+                        ),
+                      ),
                     );
                   }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                 ),
-                child: const Text(
-                  'إضافة',
-                  style: TextStyle(fontFamily: 'Cairo', color: Colors.white),
+                child: Text(
+                  isEditing ? 'حفظ' : 'إضافة',
+                  style: const TextStyle(
+                    fontFamily: 'Cairo',
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ],
@@ -254,7 +282,7 @@ class _ParentChildrenManageScreenState
                         ),
                       ),
                       ElevatedButton.icon(
-                        onPressed: _showAddChildDialog,
+                        onPressed: () => _showChildDialog(),
                         icon: const Icon(Icons.add, color: Colors.white),
                         label: const Text(
                           'إضافة',
@@ -376,6 +404,13 @@ class _ParentChildrenManageScreenState
                                     ),
                                 ],
                               ),
+                            ),
+                            IconButton(
+                              icon: const Icon(
+                                Icons.edit_outlined,
+                                color: AppColors.primary,
+                              ),
+                              onPressed: () => _showChildDialog(child),
                             ),
                             IconButton(
                               icon: const Icon(
