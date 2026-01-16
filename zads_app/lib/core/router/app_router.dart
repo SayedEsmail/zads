@@ -15,6 +15,7 @@ import '../../features/parent/presentation/parent_children_manage_screen.dart';
 import '../../features/parent/presentation/parent_requests_screen.dart';
 import '../../features/parent/presentation/request_details_screen.dart';
 import '../../features/favorites/presentation/favorites_screen.dart';
+import '../../features/notifications/presentation/notifications_screen.dart';
 import '../../features/onboarding/presentation/onboarding_screen.dart';
 import '../../features/onboarding/providers/onboarding_provider.dart';
 import '../../features/search/presentation/teacher_search_screen.dart';
@@ -29,7 +30,6 @@ final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: '/login',
     redirect: (context, state) {
-      final isLogin = state.fullPath == '/login';
       final isOnboarding = state.fullPath == '/onboarding';
 
       if (!onboardingCompleted) {
@@ -118,6 +118,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           final request = state.extra as Map<String, dynamic>;
           return RequestDetailsScreen(request: request);
         },
+      ),
+      GoRoute(
+        path: '/notifications',
+        builder: (context, state) => const NotificationsScreen(),
       ),
     ],
   );

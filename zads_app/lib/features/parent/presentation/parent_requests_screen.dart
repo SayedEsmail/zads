@@ -76,10 +76,7 @@ class _ParentRequestsScreenState extends ConsumerState<ParentRequestsScreen>
       ),
       body: TabBarView(
         controller: _tabController,
-        children: [
-          _buildTutorRequests(),
-          _buildContactRequests(),
-        ],
+        children: [_buildTutorRequests(), _buildContactRequests()],
       ),
     );
   }
@@ -90,7 +87,8 @@ class _ParentRequestsScreenState extends ConsumerState<ParentRequestsScreen>
 
     if (requestsState.isLoading) {
       return const Center(
-          child: CircularProgressIndicator(color: AppColors.primary));
+        child: CircularProgressIndicator(color: AppColors.primary),
+      );
     }
 
     return RefreshIndicator(
@@ -157,8 +155,8 @@ class _ParentRequestsScreenState extends ConsumerState<ParentRequestsScreen>
                       selectedFilter == 'all'
                           ? 'لا توجد طلبات'
                           : selectedFilter == 'active'
-                              ? 'لا توجد طلبات نشطة'
-                              : 'لا توجد طلبات منتهية',
+                          ? 'لا توجد طلبات نشطة'
+                          : 'لا توجد طلبات منتهية',
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -200,7 +198,8 @@ class _ParentRequestsScreenState extends ConsumerState<ParentRequestsScreen>
 
     if (contactState.isLoading) {
       return const Center(
-          child: CircularProgressIndicator(color: AppColors.primary));
+        child: CircularProgressIndicator(color: AppColors.primary),
+      );
     }
 
     if (contactState.requests.isEmpty) {
@@ -238,7 +237,8 @@ class _ParentRequestsScreenState extends ConsumerState<ParentRequestsScreen>
     }
 
     return RefreshIndicator(
-      onRefresh: () => ref.read(contactProvider.notifier).loadOutgoingRequests(),
+      onRefresh: () =>
+          ref.read(contactProvider.notifier).loadOutgoingRequests(),
       child: ListView.separated(
         padding: const EdgeInsets.all(16),
         itemCount: contactState.requests.length,
@@ -573,6 +573,7 @@ class _RequestCard extends StatelessWidget {
       ),
     );
   }
+}
 
 class _ContactRequestCard extends StatelessWidget {
   final Map<String, dynamic> request;
@@ -589,18 +590,18 @@ class _ContactRequestCard extends StatelessWidget {
     final statusLabel = status == 'pending'
         ? 'قيد الانتظار'
         : status == 'accepted'
-            ? 'مقبول'
-            : status == 'rejected'
-                ? 'مرفوض'
-                : status;
+        ? 'مقبول'
+        : status == 'rejected'
+        ? 'مرفوض'
+        : status;
 
     final statusColor = status == 'pending'
         ? Colors.orange
         : status == 'accepted'
-            ? Colors.green
-            : status == 'rejected'
-                ? Colors.red
-                : Colors.grey;
+        ? Colors.green
+        : status == 'rejected'
+        ? Colors.red
+        : Colors.grey;
 
     final date = createdAt != null
         ? DateFormat('dd/MM/yyyy').format(DateTime.parse(createdAt))
@@ -676,4 +677,3 @@ class _ContactRequestCard extends StatelessWidget {
     );
   }
 }
-

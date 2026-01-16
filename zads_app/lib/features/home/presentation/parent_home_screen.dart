@@ -96,6 +96,13 @@ class _ParentHomeScreenState extends ConsumerState<ParentHomeScreen> {
         ),
         actions: [
           IconButton(
+            icon: const Icon(
+              Icons.notifications_none_rounded,
+              color: Colors.white,
+            ),
+            onPressed: () => context.push('/notifications'),
+          ),
+          IconButton(
             icon: const Icon(Icons.logout, color: Colors.white),
             onPressed: () {
               ref.read(authProvider.notifier).logout();
