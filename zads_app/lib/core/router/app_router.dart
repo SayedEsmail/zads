@@ -16,6 +16,7 @@ import '../../features/parent/presentation/parent_requests_screen.dart';
 import '../../features/parent/presentation/request_details_screen.dart';
 import '../../features/favorites/presentation/favorites_screen.dart';
 import '../../features/notifications/presentation/notifications_screen.dart';
+import '../../features/settings/presentation/settings_screen.dart';
 import '../../features/onboarding/presentation/onboarding_screen.dart';
 import '../../features/onboarding/providers/onboarding_provider.dart';
 import '../../features/search/presentation/teacher_search_screen.dart';
@@ -122,6 +123,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/notifications',
         builder: (context, state) => const NotificationsScreen(),
+      ),
+      GoRoute(
+        path: '/settings',
+        builder: (context, state) => const SettingsScreen(),
       ),
     ],
   );

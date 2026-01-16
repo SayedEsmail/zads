@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../auth/providers/auth_provider.dart';
 
 class TeacherHomeScreen extends ConsumerWidget {
   const TeacherHomeScreen({super.key});
@@ -23,11 +22,8 @@ class TeacherHomeScreen extends ConsumerWidget {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.logout, color: Colors.white),
-            onPressed: () {
-              ref.read(authProvider.notifier).logout();
-              context.go('/login');
-            },
+            icon: const Icon(Icons.settings, color: Colors.white),
+            onPressed: () => context.push('/settings'),
           ),
         ],
       ),

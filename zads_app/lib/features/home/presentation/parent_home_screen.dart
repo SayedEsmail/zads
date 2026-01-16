@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../auth/providers/auth_provider.dart';
 import '../../parent/providers/parent_provider.dart';
 import '../../search/providers/search_provider.dart';
 import '../../favorites/providers/favorites_provider.dart';
@@ -103,11 +102,8 @@ class _ParentHomeScreenState extends ConsumerState<ParentHomeScreen> {
             onPressed: () => context.push('/notifications'),
           ),
           IconButton(
-            icon: const Icon(Icons.logout, color: Colors.white),
-            onPressed: () {
-              ref.read(authProvider.notifier).logout();
-              context.go('/login');
-            },
+            icon: const Icon(Icons.settings, color: Colors.white),
+            onPressed: () => context.push('/settings'),
           ),
         ],
       ),
