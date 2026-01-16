@@ -23,6 +23,11 @@ export default [
         icon: { icon: 'tabler-messages' },
     },
     {
+        title: 'طلبات الدروس',
+        to: { name: 'tutor-requests' },
+        icon: { icon: 'tabler-clipboard-list' },
+    },
+    {
         heading: 'الإعدادات',
     },
     {
