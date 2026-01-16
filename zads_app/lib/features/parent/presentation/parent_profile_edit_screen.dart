@@ -672,7 +672,7 @@ class _ParentProfileEditScreenState
             borderRadius: BorderRadius.circular(12),
           ),
           child: DropdownButtonFormField<String>(
-            value: items.any((item) => item.value == value) ? value : null,
+            initialValue: items.any((item) => item.value == value) ? value : null,
             items: items,
             onChanged: onChanged,
             decoration: InputDecoration(
