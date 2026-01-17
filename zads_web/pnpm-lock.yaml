@@ -22,9 +22,6 @@ dependencies:
   '@formkit/drag-and-drop':
     specifier: 0.1.6
     version: 0.1.6
-  '@intlify/message-compiler':
-    specifier: ^11.2.8
-    version: 11.2.8
   '@nuxtjs/i18n':
     specifier: 9.1.1
     version: 9.1.1(eslint@8.57.1)(rollup@4.28.1)(typescript@5.7.2)(vue@3.5.13)
@@ -174,6 +171,9 @@ devDependencies:
   '@iconify/vue':
     specifier: 4.1.2
     version: 4.1.2(vue@3.5.13)
+  '@intlify/message-compiler':
+    specifier: ^11.2.8
+    version: 11.2.8
   '@intlify/unplugin-vue-i18n':
     specifier: 5.3.1
     version: 5.3.1(eslint@8.57.1)(rollup@4.28.1)(typescript@5.7.2)(vue@3.5.13)
@@ -1590,7 +1590,7 @@ packages:
     dependencies:
       '@intlify/shared': 11.2.8
       source-map-js: 1.2.1
-    dev: false
+    dev: true
 
   /@intlify/message-compiler@12.0.0-alpha.3:
     resolution: {integrity: sha512-mDDTN3gfYOHhBnpnlby19UHyvMaOnzdlpsIrxUfs44R/vCATfn8pMOkE8PXD2t410xkocEj3FpDcC9XC/0v4Dg==}

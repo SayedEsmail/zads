@@ -7,13 +7,13 @@ import { fileURLToPath } from 'node:url'
 export default defineNuxtConfig({
   app: {
     head: {
-      titleTemplate: '%s - NuxtJS Admin Template',
-      title: 'Vuexy',
+      titleTemplate: '%s - زاد',
+      title: 'زاد - معلمين خصوصيين',
 
       link: [{
         rel: 'icon',
         type: 'image/x-icon',
-        href: process.env.NUXT_APP_BASE_URL+'/favicon.ico',
+        href: '/favicon.ico',
       }],
     },
   },
@@ -43,7 +43,6 @@ export default defineNuxtConfig({
       mapboxAccessToken: process.env.MAPBOX_ACCESS_TOKEN,
     },
   },
-
   components: {
     dirs: [{
       path: '@/@core/components',
@@ -170,6 +169,4 @@ export default defineNuxtConfig({
     '@sidebase/nuxt-auth',
     '@pinia/nuxt',
   ],
-
-  compatibilityDate: '2026-01-18',
 })
