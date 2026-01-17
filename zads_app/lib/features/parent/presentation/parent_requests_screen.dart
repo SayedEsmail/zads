@@ -44,30 +44,32 @@ class _ParentRequestsScreenState extends ConsumerState<ParentRequestsScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: AppColors.primary,
+        backgroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
           onPressed: () => context.pop(),
         ),
         title: const Text(
           'طلباتي',
           style: TextStyle(
-            color: Colors.white,
+            color: Colors.black,
             fontFamily: 'Cairo',
             fontWeight: FontWeight.bold,
           ),
         ),
         bottom: TabBar(
           controller: _tabController,
-          labelColor: Colors.white,
-          unselectedLabelColor: Colors.white70,
+          labelColor: AppColors.primary,
+          unselectedLabelColor: Colors.grey,
           labelStyle: const TextStyle(
             fontFamily: 'Cairo',
             fontWeight: FontWeight.bold,
           ),
-          indicatorColor: Colors.white,
+          indicatorColor: AppColors.primary,
           tabs: const [
             Tab(text: 'طلبات الدروس'),
             Tab(text: 'طلبات التواصل'),

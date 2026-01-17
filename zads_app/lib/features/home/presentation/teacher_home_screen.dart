@@ -17,6 +17,7 @@ class _TeacherHomeScreenState extends ConsumerState<TeacherHomeScreen> {
     super.initState();
     Future.microtask(() {
       ref.read(teacherProfileProvider.notifier).loadProfile();
+      ref.read(teacherTutorRequestsProvider.notifier).loadRequests();
     });
   }
 
@@ -27,7 +28,6 @@ class _TeacherHomeScreenState extends ConsumerState<TeacherHomeScreen> {
 
     // Fallback if profile is loading or null
     final userName = profile?['user']?['name']?.split(' ').first ?? 'يا معلم';
-    final userImage = profile?['user']?['image'];
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -156,6 +156,40 @@ class _TeacherHomeScreenState extends ConsumerState<TeacherHomeScreen> {
               const Divider(color: Color(0xFFEEEEEE), thickness: 1),
               const SizedBox(height: 12),
 
+              // Parents/Students Requests Section
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'طلبات الطلاب في منطقتك',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      context.push('/teacher/requests');
+                    },
+                    child: const Text(
+                      'عرض الكل',
+                      style: TextStyle(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+
+              const _HomeRequestsList(),
+
+              const SizedBox(height: 12),
+              const Divider(color: Color(0xFFEEEEEE), thickness: 1),
+              const SizedBox(height: 12),
+
               // Quick Actions
               const Text(
                 'إجراءات سريعة',
@@ -204,7 +238,9 @@ class _TeacherHomeScreenState extends ConsumerState<TeacherHomeScreen> {
         unselectedItemColor: AppColors.textSecondary,
         type: BottomNavigationBarType.fixed,
         onTap: (index) {
-          if (index == 2) {
+          if (index == 1) {
+            context.push('/teacher/requests');
+          } else if (index == 2) {
             context.push('/notifications');
           } else if (index == 3) {
             context.push('/settings');
@@ -255,8 +291,7 @@ class _StatCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.border),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(8),
@@ -266,20 +301,31 @@ class _StatCard extends StatelessWidget {
             ),
             child: Icon(icon, color: iconColor, size: 24),
           ),
-          const SizedBox(height: 12),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 12,
-              color: AppColors.textSecondary,
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                    fontFamily: 'Cairo',
+                    height: 1.1,
+                  ),
+                ),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textSecondary,
+                    fontFamily: 'Cairo',
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -354,6 +400,205 @@ class _ActionCard extends StatelessWidget {
                 size: 16,
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _HomeRequestsList extends ConsumerWidget {
+  const _HomeRequestsList();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(teacherTutorRequestsProvider);
+
+    if (state.isLoading) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(32.0),
+          child: CircularProgressIndicator(color: AppColors.primary),
+        ),
+      );
+    }
+
+    if (state.requests.isEmpty) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: Colors.grey[50],
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.border),
+        ),
+        child: Column(
+          children: [
+            Icon(
+              Icons.school_outlined,
+              size: 48,
+              color: AppColors.textSecondary.withOpacity(0.5),
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'لا توجد طلبات جديدة في منطقتك',
+              style: TextStyle(
+                fontFamily: 'Cairo',
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Vertical List
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: state.requests.take(5).length,
+      itemBuilder: (context, index) {
+        final request = state.requests[index];
+        return _HomeRequestCard(request: request);
+      },
+    );
+  }
+}
+
+class _HomeRequestCard extends StatelessWidget {
+  final Map<String, dynamic> request;
+
+  const _HomeRequestCard({required this.request});
+
+  @override
+  Widget build(BuildContext context) {
+    // Determine data based on request type structure
+    final parent = request['parent'];
+    final parentUser = parent?['user'];
+    final parentName = parentUser?['name'] ?? 'ولي أمر';
+    final userAvatar = parentUser?['avatarUrl'];
+
+    final subjectName =
+        request['subject']?['nameAr'] ??
+        request['subject']?['nameEn'] ??
+        'مادة';
+    final stageName =
+        request['stage']?['nameAr'] ?? request['stage']?['nameEn'] ?? 'مرحلة';
+    final description = request['description'] ?? '';
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            context.push('/teacher/requests');
+          },
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Avatar
+                CircleAvatar(
+                  radius: 30,
+                  backgroundColor: AppColors.primary.withOpacity(0.1),
+                  backgroundImage: userAvatar != null
+                      ? NetworkImage(userAvatar)
+                      : null,
+                  child: userAvatar == null
+                      ? Text(
+                          (parentName.isNotEmpty ? parentName[0] : 'U'),
+                          style: const TextStyle(
+                            color: AppColors.primary,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        )
+                      : null,
+                ),
+                const SizedBox(width: 12),
+
+                // Info
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              parentName,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Cairo',
+                              ),
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.success.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: const Text(
+                              'جديد',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.success,
+                                fontFamily: 'Cairo',
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        subjectName,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primary,
+                          fontFamily: 'Cairo',
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        description.isNotEmpty
+                            ? description
+                            : '$stageName - $subjectName',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppColors.textSecondary,
+                          fontFamily: 'Cairo',
+                          height: 1.4,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

@@ -135,4 +135,27 @@ class TeacherRepository {
       throw e.response?.data['message'] ?? 'فشل حذف المادة';
     }
   }
+
+  /// Get tutor requests (jobs)
+  Future<List<dynamic>> getTutorRequests({
+    String? subjectId,
+    String? stageId,
+    double? latitude,
+    double? longitude,
+  }) async {
+    try {
+      final response = await _dio.get(
+        '/tutor-requests',
+        queryParameters: {
+          if (subjectId != null) 'subjectId': subjectId,
+          if (stageId != null) 'stageId': stageId,
+          if (latitude != null) 'latitude': latitude,
+          if (longitude != null) 'longitude': longitude,
+        },
+      );
+      return response.data['data'] ?? [];
+    } on DioException catch (e) {
+      throw e.response?.data['message'] ?? 'فشل تحميل الطلبات المتاحة';
+    }
+  }
 }

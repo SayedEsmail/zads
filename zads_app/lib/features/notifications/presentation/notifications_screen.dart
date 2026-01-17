@@ -27,17 +27,19 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
     final state = ref.watch(notificationsProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: AppColors.primary,
+        backgroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
           onPressed: () => context.pop(),
         ),
         title: const Text(
           'الإشعارات',
           style: TextStyle(
-            color: Colors.white,
+            color: Colors.black,
             fontFamily: 'Cairo',
             fontWeight: FontWeight.bold,
           ),
@@ -51,7 +53,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
               child: const Text(
                 'تحديد الكل كمقروء',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: AppColors.primary,
                   fontFamily: 'Cairo',
                   fontSize: 12,
                 ),
@@ -151,7 +153,7 @@ class _NotificationItem extends ConsumerWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: isRead ? Colors.white : AppColors.primary.withOpacity(0.05),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isRead
                 ? Colors.transparent

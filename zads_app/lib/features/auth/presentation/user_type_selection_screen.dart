@@ -24,7 +24,7 @@ class _UserTypeSelectionScreenState extends State<UserTypeSelectionScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 24.0),
@@ -81,6 +81,9 @@ class _UserTypeSelectionScreenState extends State<UserTypeSelectionScreen> {
                     backgroundColor: AppColors.primary,
                     disabledBackgroundColor: AppColors.border,
                     disabledForegroundColor: AppColors.textSecondary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                   ),
                   child: const Text('التالي'),
                 ),
