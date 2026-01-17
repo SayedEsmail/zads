@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/app_colors.dart';
 import '../providers/parent_provider.dart';
 
@@ -616,64 +617,123 @@ class _ContactRequestCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.border),
       ),
-      child: Row(
+      child: Column(
         children: [
-          CircleAvatar(
-            radius: 25,
-            backgroundColor: AppColors.primary.withOpacity(0.1),
-            backgroundImage: teacherUser['avatarUrl'] != null
-                ? NetworkImage(teacherUser['avatarUrl'])
-                : null,
-            child: teacherUser['avatarUrl'] == null
-                ? Text(
-                    (teacherUser['name'] ?? 'م')[0],
-                    style: const TextStyle(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.bold,
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 25,
+                backgroundColor: AppColors.primary.withOpacity(0.1),
+                backgroundImage: teacherUser['avatarUrl'] != null
+                    ? NetworkImage(teacherUser['avatarUrl'])
+                    : null,
+                child: teacherUser['avatarUrl'] == null
+                    ? Text(
+                        (teacherUser['name'] ?? 'م')[0],
+                        style: const TextStyle(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      )
+                    : null,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      teacherUser['name'] ?? 'معلم',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Cairo',
+                      ),
                     ),
-                  )
-                : null,
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  teacherUser['name'] ?? 'معلم',
-                  style: const TextStyle(
-                    fontSize: 16,
+                    Text(
+                      'تاريخ الطلب: $date',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textSecondary,
+                        fontFamily: 'Cairo',
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: statusColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  statusLabel,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: statusColor,
                     fontWeight: FontWeight.bold,
                     fontFamily: 'Cairo',
                   ),
                 ),
+              ),
+            ],
+          ),
+          if (status == 'accepted') ...[
+            const SizedBox(height: 16),
+            const Divider(height: 1, color: AppColors.border),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Icon(
+                  Icons.phone_rounded,
+                  size: 20,
+                  color: AppColors.textSecondary,
+                ),
+                const SizedBox(width: 8),
                 Text(
-                  'تاريخ الطلب: $date',
+                  teacherUser['phone'] ?? '---',
                   style: const TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textSecondary,
                     fontFamily: 'Cairo',
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const Spacer(),
+                ElevatedButton.icon(
+                  onPressed: () async {
+                    final phone = teacherUser['phone'];
+                    if (phone == null) return;
+                    final Uri launchUri = Uri(scheme: 'tel', path: phone);
+                    if (await canLaunchUrl(launchUri)) {
+                      await launchUrl(launchUri);
+                    } else {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('لا يمكن إجراء الاتصال'),
+                          ),
+                        );
+                      }
+                    }
+                  },
+                  icon: const Icon(Icons.call, size: 18),
+                  label: const Text('اتصال'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
                   ),
                 ),
               ],
             ),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: statusColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              statusLabel,
-              style: TextStyle(
-                fontSize: 12,
-                color: statusColor,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'Cairo',
-              ),
-            ),
-          ),
+          ],
         ],
       ),
     );

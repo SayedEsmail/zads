@@ -46,6 +46,16 @@ class TeacherRepository {
     }
   }
 
+  /// Get teacher stats
+  Future<Map<String, dynamic>> getStats() async {
+    try {
+      final response = await _dio.get('/teachers/me/stats');
+      return response.data['data'] ?? {};
+    } on DioException catch (e) {
+      throw e.response?.data['message'] ?? 'فشل تحميل الإحصائيات';
+    }
+  }
+
   /// Get all subjects
   Future<List<dynamic>> getSubjects() async {
     try {

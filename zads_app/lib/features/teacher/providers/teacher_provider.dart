@@ -211,6 +211,52 @@ class TeacherSubjectsNotifier extends StateNotifier<TeacherSubjectsState> {
   }
 }
 
+// State for teacher stats
+class TeacherStatsState {
+  final bool isLoading;
+  final String? error;
+  final Map<String, dynamic> stats;
+
+  TeacherStatsState({
+    this.isLoading = false,
+    this.error,
+    this.stats = const {'views': 0, 'contactRequests': 0},
+  });
+
+  TeacherStatsState copyWith({
+    bool? isLoading,
+    String? error,
+    Map<String, dynamic>? stats,
+  }) {
+    return TeacherStatsState(
+      isLoading: isLoading ?? this.isLoading,
+      error: error,
+      stats: stats ?? this.stats,
+    );
+  }
+}
+
+final teacherStatsProvider =
+    StateNotifierProvider<TeacherStatsNotifier, TeacherStatsState>((ref) {
+      return TeacherStatsNotifier(ref.read(teacherRepositoryProvider));
+    });
+
+class TeacherStatsNotifier extends StateNotifier<TeacherStatsState> {
+  final TeacherRepository _repository;
+
+  TeacherStatsNotifier(this._repository) : super(TeacherStatsState());
+
+  Future<void> loadStats() async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final stats = await _repository.getStats();
+      state = state.copyWith(isLoading: false, stats: stats);
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+    }
+  }
+}
+
 // State for open tutor requests (jobs)
 class TeacherTutorRequestsState {
   final bool isLoading;
