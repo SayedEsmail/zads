@@ -18,6 +18,7 @@ class _TeacherHomeScreenState extends ConsumerState<TeacherHomeScreen> {
     Future.microtask(() {
       ref.read(teacherProfileProvider.notifier).loadProfile();
       ref.read(teacherTutorRequestsProvider.notifier).loadRequests();
+      ref.read(teacherStatsProvider.notifier).loadStats();
     });
   }
 
@@ -94,59 +95,47 @@ class _TeacherHomeScreenState extends ConsumerState<TeacherHomeScreen> {
               ),
 
               const SizedBox(height: 12),
-              const Divider(color: Color(0xFFEEEEEE), thickness: 1),
-              const SizedBox(height: 12),
-
-              // Stats Grid
-              const Text(
-                'إحصائياتك',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              const SizedBox(height: 12),
-
               Row(
                 children: [
                   Expanded(
-                    child: _StatCard(
+                    child: _InfoCard(
                       icon: Icons.visibility_rounded,
-                      iconColor: Colors.blue,
-                      value: '${profile?['views'] ?? 0}',
                       label: 'المشاهدات',
+                      value:
+                          '${ref.watch(teacherStatsProvider).stats['views'] ?? 0}',
+                      color: const Color(0xFFE3F2FD),
+                      iconColor: AppColors.primary,
+                      onTap: () {},
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 8),
                   Expanded(
-                    child: _StatCard(
+                    child: _InfoCard(
                       icon: Icons.message_rounded,
-                      iconColor: Colors.green,
-                      value: '0', // TODO: Get requests count
-                      label: 'الطلبات',
+                      label: 'الرسائل',
+                      value:
+                          '${ref.watch(teacherStatsProvider).stats['contactRequests'] ?? 0}',
+                      color: const Color(0xFFE0F2F1),
+                      iconColor: Colors.teal,
+                      onTap: () {
+                        // Navigate to contact requests tab
+                        context.push('/teacher/requests');
+                      },
                     ),
                   ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
+                  const SizedBox(width: 8),
                   Expanded(
-                    child: _StatCard(
-                      icon: Icons.star_rounded,
-                      iconColor: Colors.amber,
-                      value: '${profile?['rating'] ?? 0.0}',
-                      label: 'التقييم',
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _StatCard(
-                      icon: Icons.favorite_rounded,
-                      iconColor: Colors.red,
-                      value: '0', // TODO: Get favorites count
-                      label: 'المفضلة',
+                    child: _InfoCard(
+                      icon: Icons.school_rounded,
+                      label: 'الفرص',
+                      value:
+                          '${ref.watch(teacherTutorRequestsProvider).requests.length}',
+                      color: const Color(0xFFFFF3E0),
+                      iconColor: Colors.orange,
+                      onTap: () {
+                        // Navigate to students/jobs tab
+                        context.push('/teacher/requests');
+                      },
                     ),
                   ),
                 ],
@@ -269,66 +258,70 @@ class _TeacherHomeScreenState extends ConsumerState<TeacherHomeScreen> {
   }
 }
 
-class _StatCard extends StatelessWidget {
+class _InfoCard extends StatelessWidget {
   final IconData icon;
-  final Color iconColor;
-  final String value;
   final String label;
+  final String value;
+  final Color color;
+  final Color iconColor;
+  final VoidCallback onTap;
 
-  const _StatCard({
+  const _InfoCard({
     required this.icon,
-    required this.iconColor,
-    required this.value,
     required this.label,
+    required this.value,
+    required this.color,
+    required this.iconColor,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: iconColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(icon, color: iconColor, size: 24),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(16),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  value,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
-                    fontFamily: 'Cairo',
-                    height: 1.1,
-                  ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                Text(
-                  label,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: AppColors.textSecondary,
-                    fontFamily: 'Cairo',
-                  ),
+                child: Icon(icon, color: iconColor),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                value,
+                style: TextStyle(
+                  fontFamily: 'Cairo',
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: iconColor,
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                label,
+                style: TextStyle(
+                  fontFamily: 'Cairo',
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: iconColor.withOpacity(0.8),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

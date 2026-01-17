@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../contact/providers/contact_provider.dart';
 import '../../teacher/providers/teacher_provider.dart';
@@ -432,8 +433,22 @@ class _RequestCard extends StatelessWidget {
               ),
               const Spacer(),
               ElevatedButton.icon(
-                onPressed: () {
-                  // TODO: Implement call action
+                onPressed: () async {
+                  final Uri launchUri = Uri(scheme: 'tel', path: parentPhone);
+                  if (await canLaunchUrl(launchUri)) {
+                    await launchUrl(launchUri);
+                  } else {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'لا يمكن إجراء الاتصال',
+                            style: TextStyle(fontFamily: 'Cairo'),
+                          ),
+                        ),
+                      );
+                    }
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
