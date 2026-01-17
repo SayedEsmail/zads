@@ -54,4 +54,16 @@ class AuthRepository {
       throw e.response?.data['message'] ?? 'فشل التسجيل';
     }
   }
+
+  Future<void> registerFcmToken(String token) async {
+    try {
+      await _dio.post(
+        '/notifications/register-token',
+        data: {'fcmToken': token},
+      );
+    } catch (e) {
+      // Fail silently, token registration isn't critical for login
+      print('Failed to register FCM token: $e');
+    }
+  }
 }
