@@ -75,6 +75,22 @@ class TeacherProfileNotifier extends StateNotifier<TeacherProfileState> {
       return false;
     }
   }
+
+  /// Update avatar
+  Future<bool> updateAvatar(String filePath) async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      await _repository.updateAvatar(filePath);
+
+      // Reload profile to get new avatar url
+      await loadProfile();
+      return true;
+    } catch (e) {
+      print('❌ Update Avatar Error: $e');
+      state = state.copyWith(isLoading: false, error: e.toString());
+      return false;
+    }
+  }
 }
 
 // Provider for subjects list
