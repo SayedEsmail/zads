@@ -17,17 +17,19 @@ class AppTheme {
       scaffoldBackgroundColor: AppColors.background,
 
       // AppBar Theme
-      appBarTheme: const AppBarTheme(
-        backgroundColor: AppColors.surface,
+      appBarTheme: AppBarTheme(
+        backgroundColor: Colors.white,
+        scrolledUnderElevation: 0,
+        shape: const Border(
+          bottom: BorderSide(color: Color(0xFFEEEEEE), width: 1),
+        ),
         elevation: 0,
         centerTitle: true,
-        iconTheme: IconThemeData(color: AppColors.textPrimary),
-        titleTextStyle: TextStyle(
+        iconTheme: const IconThemeData(color: AppColors.textPrimary),
+        titleTextStyle: GoogleFonts.cairo(
           color: AppColors.textPrimary,
           fontSize: 18,
           fontWeight: FontWeight.bold,
-          fontFamily:
-              'Cairo', // We will need to add Cairo font or use Google Fonts
         ),
       ),
 
@@ -35,6 +37,7 @@ class AppTheme {
       textTheme: GoogleFonts.cairoTextTheme().apply(
         bodyColor: AppColors.textPrimary,
         displayColor: AppColors.textPrimary,
+        fontFamily: GoogleFonts.cairo().fontFamily,
       ),
 
       // Button Themes
@@ -42,10 +45,11 @@ class AppTheme {
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+          minimumSize: const Size(double.infinity, 56), // Full width, 56 height
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(16),
           ),
+          elevation: 0,
           textStyle: GoogleFonts.cairo(
             fontSize: 16,
             fontWeight: FontWeight.bold,
@@ -56,21 +60,26 @@ class AppTheme {
       // Input Decoration Theme
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.surface,
+        fillColor: AppColors.inputFill,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey.shade300),
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey.shade300),
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.primary, width: 2),
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: AppColors.primary, width: 1),
         ),
-        contentPadding: const EdgeInsets.all(16),
-        labelStyle: const TextStyle(color: AppColors.textSecondary),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 20,
+          vertical: 18,
+        ),
+        hintStyle: GoogleFonts.cairo(color: AppColors.textSecondary),
+        labelStyle: GoogleFonts.cairo(color: AppColors.textSecondary),
+        errorStyle: GoogleFonts.cairo(color: AppColors.error),
       ),
     );
   }

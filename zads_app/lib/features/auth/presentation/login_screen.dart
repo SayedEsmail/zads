@@ -77,42 +77,98 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // Header
-                const SizedBox(height: 40),
+                const SizedBox(height: 20),
+                Center(
+                  child: Column(
+                    children: [
+                      // Logo + Name
+                      // Logo
+                      Image.asset('assets/images/logo.png', height: 80),
+                      const SizedBox(height: 24),
+                      // Education Illustration Placeholder
+                      Container(
+                        height: 180,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: AppColors.surface,
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            const Icon(
+                              Icons.school_rounded,
+                              size: 80,
+                              color: AppColors.border,
+                            ),
+                            Positioned(
+                              bottom: 20,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 8,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(20),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.05),
+                                      blurRadius: 10,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                  ],
+                                ),
+                                child: const Row(
+                                  children: [
+                                    Icon(
+                                      Icons.star_rounded,
+                                      color: AppColors.warning,
+                                      size: 20,
+                                    ),
+                                    SizedBox(width: 4),
+                                    Text(
+                                      "تعليم متميز",
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 32),
+
                 const Text(
                   'تسجيل الدخول',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 28,
+                    fontSize: 24,
                     fontWeight: FontWeight.bold,
                     color: AppColors.textPrimary,
-                    fontFamily: 'Cairo',
                   ),
                 ),
-                const SizedBox(height: 60),
+                const SizedBox(height: 32),
 
                 // Phone Input
-                _buildLabel('رقم الهاتف'),
-                const SizedBox(height: 8),
                 TextFormField(
                   controller: _phoneController,
                   keyboardType: TextInputType.phone,
                   textDirection: TextDirection.ltr,
-                  style: const TextStyle(fontFamily: 'Roboto'),
-                  decoration: InputDecoration(
-                    hintText: '01xxxxxxxxx',
-                    prefixIcon: const Icon(
-                      Icons.phone_android_rounded,
+                  style: const TextStyle(fontSize: 16),
+                  decoration: const InputDecoration(
+                    hintText: 'رقم الهاتف',
+                    prefixIcon: Icon(
+                      Icons.phone_outlined,
                       color: AppColors.textSecondary,
-                    ),
-                    filled: true,
-                    fillColor: AppColors.surface,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(color: AppColors.border),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(color: AppColors.border),
                     ),
                   ),
                   validator: (value) {
@@ -122,25 +178,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
 
                 // Password Input
-                _buildLabel('كلمة المرور'),
-                const SizedBox(height: 8),
                 TextFormField(
                   controller: _passwordController,
                   obscureText: !_isPasswordVisible,
                   decoration: InputDecoration(
-                    hintText: '••••••••',
+                    hintText: 'كلمة المرور',
                     prefixIcon: const Icon(
-                      Icons.lock_rounded,
+                      Icons.lock_outline_rounded,
                       color: AppColors.textSecondary,
                     ),
                     suffixIcon: IconButton(
                       icon: Icon(
                         _isPasswordVisible
-                            ? Icons.visibility_rounded
-                            : Icons.visibility_off_rounded,
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
                         color: AppColors.textSecondary,
                       ),
                       onPressed: () {
@@ -148,16 +202,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           _isPasswordVisible = !_isPasswordVisible;
                         });
                       },
-                    ),
-                    filled: true,
-                    fillColor: AppColors.surface,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(color: AppColors.border),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(color: AppColors.border),
                     ),
                   ),
                   validator: (value) {
@@ -177,45 +221,34 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       'نسيت كلمة المرور؟',
                       style: TextStyle(
                         color: AppColors.textSecondary,
-                        fontFamily: 'Cairo',
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
-                  ),
-                ),
-
-                const SizedBox(height: 32),
-
-                // Login Button
-                SizedBox(
-                  height: 56,
-                  child: ElevatedButton(
-                    onPressed: authState.isLoading ? null : _handleLogin,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      elevation: 0,
-                    ),
-                    child: authState.isLoading
-                        ? const CircularProgressIndicator(color: Colors.white)
-                        : const Text(
-                            'تسجيل الدخول',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: 'Cairo',
-                              color: Colors.white,
-                            ),
-                          ),
                   ),
                 ),
 
                 const SizedBox(height: 24),
 
+                // Login Button
+                ElevatedButton(
+                  onPressed: authState.isLoading ? null : _handleLogin,
+                  child: authState.isLoading
+                      ? const SizedBox(
+                          height: 24,
+                          width: 24,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : const Text('تسجيل الدخول'),
+                ),
+
+                const SizedBox(height: 32),
+
                 // Or Divider
-                Row(
-                  children: const [
+                const Row(
+                  children: [
                     Expanded(child: Divider(color: AppColors.border)),
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 16),
@@ -224,6 +257,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         style: TextStyle(
                           color: AppColors.textSecondary,
                           fontSize: 12,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ),
@@ -233,19 +267,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                 const SizedBox(height: 24),
 
-                // Social Login (Placeholder buttons)
+                // Social Login
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     _buildSocialButton(
+                      'assets/icons/google.png', // Ideally valid asset path, using Icon for now inside method
                       Icons.g_mobiledata,
                       Colors.red,
-                    ), // Google placeholder
+                    ),
                     const SizedBox(width: 16),
                     _buildSocialButton(
+                      'assets/icons/facebook.png',
                       Icons.facebook,
-                      Colors.blue,
-                    ), // Facebook placeholder
+                      const Color(0xFF1877F2),
+                    ),
                   ],
                 ),
 
@@ -281,19 +317,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
   }
 
-  Widget _buildLabel(String text) {
-    return Text(
-      text,
-      style: const TextStyle(
-        fontSize: 14,
-        color: AppColors.textSecondary,
-        fontWeight: FontWeight.w500,
-        fontFamily: 'Cairo',
-      ),
-    );
-  }
-
-  Widget _buildSocialButton(IconData icon, Color color) {
+  Widget _buildSocialButton(String asset, IconData icon, Color color) {
     return Container(
       width: 50,
       height: 50,
@@ -301,6 +325,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         color: Colors.white,
         shape: BoxShape.circle,
         border: Border.all(color: AppColors.border),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Icon(icon, color: color, size: 30),
     );

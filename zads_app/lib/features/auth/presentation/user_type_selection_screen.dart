@@ -2,8 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 
-class UserTypeSelectionScreen extends StatelessWidget {
+class UserTypeSelectionScreen extends StatefulWidget {
   const UserTypeSelectionScreen({super.key});
+
+  @override
+  State<UserTypeSelectionScreen> createState() =>
+      _UserTypeSelectionScreenState();
+}
+
+class _UserTypeSelectionScreenState extends State<UserTypeSelectionScreen> {
+  String? _selectedType; // 'teacher' or 'parent'
+
+  void _handleNext() {
+    if (_selectedType == 'teacher') {
+      context.push('/register/teacher');
+    } else if (_selectedType == 'parent') {
+      context.push('/register/parent');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -11,108 +27,63 @@ class UserTypeSelectionScreen extends StatelessWidget {
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 24.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(height: 60),
-
-              // Logo
-              Center(
-                child: Container(
-                  width: 100,
-                  height: 100,
-                  decoration: BoxDecoration(
-                    color: AppColors.primary,
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  child: const Center(
-                    child: Text(
-                      'زاد',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Cairo',
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-
               const SizedBox(height: 40),
-
-              // Title
-              const Text(
-                'أهلاً بك في زاد',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                  fontFamily: 'Cairo',
-                ),
-              ),
-
-              const SizedBox(height: 12),
 
               const Text(
                 'اختر نوع الحساب',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 16,
-                  color: AppColors.textSecondary,
-                  fontFamily: 'Cairo',
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
                 ),
               ),
 
-              const Spacer(),
+              const SizedBox(height: 60),
 
-              // Teacher Card
-              _UserTypeCard(
-                icon: Icons.school_rounded,
-                iconColor: AppColors.primary,
-                title: 'مُعلم',
-                description: 'أقدم دروس خصوصية للطلاب',
-                onTap: () => context.push('/register/teacher'),
-              ),
-
-              const SizedBox(height: 16),
-
-              // Parent Card
-              _UserTypeCard(
-                icon: Icons.family_restroom_rounded,
-                iconColor: AppColors.secondary,
-                title: 'ولي أمر',
-                description: 'أبحث عن معلم لأبنائي',
-                onTap: () => context.push('/register/parent'),
-              ),
-
-              const Spacer(),
-
-              // Already have account
+              // Cards Row
               Row(
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text(
-                    'لديك حساب بالفعل؟',
-                    style: TextStyle(
-                      color: AppColors.textSecondary,
-                      fontFamily: 'Cairo',
+                  Expanded(
+                    child: _UserTypeCard(
+                      icon: Icons.school_rounded,
+                      title: 'معلم',
+                      description: 'أرغب في تقديم\nدروس',
+                      isSelected: _selectedType == 'teacher',
+                      onTap: () => setState(() => _selectedType = 'teacher'),
                     ),
                   ),
-                  TextButton(
-                    onPressed: () => context.go('/login'),
-                    child: const Text(
-                      'تسجيل الدخول',
-                      style: TextStyle(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Cairo',
-                      ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _UserTypeCard(
+                      icon: Icons.family_restroom_rounded,
+                      title: 'ولي أمر',
+                      description: 'أبحث عن مدرس\nلأبنائي',
+                      isSelected: _selectedType == 'parent',
+                      onTap: () => setState(() => _selectedType = 'parent'),
                     ),
                   ),
                 ],
+              ),
+
+              const Spacer(),
+
+              // Next Button
+              SizedBox(
+                height: 56,
+                child: ElevatedButton(
+                  onPressed: _selectedType != null ? _handleNext : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    disabledBackgroundColor: AppColors.border,
+                    disabledForegroundColor: AppColors.textSecondary,
+                  ),
+                  child: const Text('التالي'),
+                ),
               ),
 
               const SizedBox(height: 24),
@@ -126,77 +97,86 @@ class UserTypeSelectionScreen extends StatelessWidget {
 
 class _UserTypeCard extends StatelessWidget {
   final IconData icon;
-  final Color iconColor;
   final String title;
   final String description;
+  final bool isSelected;
   final VoidCallback onTap;
 
   const _UserTypeCard({
     required this.icon,
-    required this.iconColor,
     required this.title,
     required this.description,
+    required this.isSelected,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: AppColors.surface,
-      borderRadius: BorderRadius.circular(16),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.border),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 220,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: isSelected ? AppColors.primary : AppColors.border,
+            width: isSelected ? 2 : 1,
           ),
-          child: Row(
-            children: [
-              Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  color: iconColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Icon(icon, color: iconColor, size: 32),
+          boxShadow: [
+            BoxShadow(
+              color: isSelected
+                  ? AppColors.primary.withOpacity(0.1)
+                  : Colors.black.withOpacity(0.05),
+              blurRadius: 20,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Illustration Placeholder
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? AppColors.primary.withOpacity(0.1)
+                    : AppColors.surface,
+                borderRadius: BorderRadius.circular(16),
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
-                        fontFamily: 'Cairo',
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      description,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: AppColors.textSecondary,
-                        fontFamily: 'Cairo',
-                      ),
-                    ),
-                  ],
-                ),
+              // Show actual illustration here if available
+              child: Icon(
+                icon,
+                size: 40,
+                color: isSelected ? AppColors.primary : AppColors.textSecondary,
               ),
-              const Icon(
-                Icons.arrow_forward_ios_rounded,
-                color: AppColors.textSecondary,
-                size: 20,
+            ),
+            const SizedBox(height: 20),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+
+                color: isSelected ? AppColors.primary : AppColors.textPrimary,
               ),
-            ],
-          ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              description,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+
+                color: isSelected
+                    ? AppColors.textPrimary
+                    : AppColors.textSecondary,
+                height: 1.5,
+              ),
+            ),
+          ],
         ),
       ),
     );
