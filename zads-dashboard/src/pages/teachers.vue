@@ -1,9 +1,12 @@
 <script setup>
 import AppListingTable from '@/components/AppListingTable.vue'
+import TeacherDetailDialog from '@/views/teachers/TeacherDetailDialog.vue'
 
 // Table ref for refresh
 const tableRef = ref(null)
 const selectedRows = ref([])
+const isDetailDialogVisible = ref(false)
+const selectedTeacher = ref({})
 
 // Table headers
 const headers = [
@@ -57,8 +60,8 @@ const actions = {
 // Handle actions
 const handleAction = async ({ type, item }) => {
     if (type === 'view') {
-        // TODO: Navigate to details or open modal
-        console.log('View teacher:', item)
+        selectedTeacher.value = item
+        isDetailDialogVisible.value = true
     }
     else if (type === 'suspend') {
         await updateStatus(item.user?.id, 'suspended')
@@ -210,5 +213,10 @@ const getStatusLabel = status => {
                 {{ formatDate(item.createdAt) }}
             </template>
         </AppListingTable>
+
+        <TeacherDetailDialog
+            v-model="isDetailDialogVisible"
+            :teacher="selectedTeacher"
+        />
     </div>
 </template>

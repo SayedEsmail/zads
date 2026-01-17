@@ -44,7 +44,7 @@ What's left to complete before launch.
   - Filter by status, subject, stage
   - View request details
 
-- [ ] **User Detail Modals**
+- [x] **User Detail Modals** ✅
   - Click on teacher → show full profile modal
   - Click on parent → show full profile modal
   - Include children info for parents
@@ -63,7 +63,7 @@ What's left to complete before launch.
 ## 🟡 zads_app (Mobile App)
 
 ### High Priority - Core Features
-- [ ] **Onboarding Screens** (3 slides)
+- [x] **Onboarding Screens** (3 slides) ✅
   - Welcome illustration + Arabic text
   - Features overview
   - Get started button
@@ -83,14 +83,14 @@ What's left to complete before launch.
   - Map view toggle (optional)
 
 ### Medium Priority - User Experience
-- [ ] **Settings Screen**
+- [x] **Settings Screen** ✅
   - Language toggle (Arabic/English)
   - Notification preferences
   - Account settings
   - Logout button
   - App version display
 
-- [ ] **Notifications Screen**
+- [x] **Notifications Screen** ✅
   - List of notifications
   - Read/unread states
   - Link to relevant screens
@@ -103,7 +103,7 @@ What's left to complete before launch.
   - [x] View sent requests ✅
 
 ### Medium Priority - Polish
-- [ ] **App Icon & Splash Screen**
+- [x] **App Icon & Splash Screen** ✅
   - Design app icon (iOS + Android sizes)
   - Splash screen with logo
   - Update `pubspec.yaml` assets
@@ -140,7 +140,7 @@ What's left to complete before launch.
 | 5 | Settings screen | Mobile | 3 hrs |
 | 6 | Tutor requests page | Dashboard | 4 hrs |
 | 7 | App icon & splash | Mobile | 2 hrs |
-| 8 | User detail modals | Dashboard | 4 hrs |
+| 8 | User detail modals | Dashboard | 4 hrs | <span style="color:green">Done</span> |
 
 ### Sprint 3 (Week 3) - Infrastructure
 | # | Task | App | Effort |
@@ -205,11 +205,11 @@ These can wait until after launch:
 | Parent Children | ✅ Done | |
 | Parent Requests | ✅ Done | |
 | Request Details | ✅ Done | |
-| **Onboarding** | ❌ Missing | High priority |
+| **Onboarding** | ✅ Done | High priority |
 | **Favorites** | ✅ Done | High priority |
 | **Search Results** | ✅ Done | High priority |
-| **Settings** | ❌ Missing | Medium priority |
-| **Notifications** | ❌ Missing | Medium priority |
+| **Settings** | ✅ Done | Medium priority |
+| **Notifications** | ✅ Done | Medium priority |
 
 ### API Endpoints Status
 
