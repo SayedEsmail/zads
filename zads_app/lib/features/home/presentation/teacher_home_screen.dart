@@ -2,172 +2,200 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../teacher/providers/teacher_provider.dart';
 
-class TeacherHomeScreen extends ConsumerWidget {
+class TeacherHomeScreen extends ConsumerStatefulWidget {
   const TeacherHomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<TeacherHomeScreen> createState() => _TeacherHomeScreenState();
+}
+
+class _TeacherHomeScreenState extends ConsumerState<TeacherHomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      ref.read(teacherProfileProvider.notifier).loadProfile();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state = ref.watch(teacherProfileProvider);
+    final profile = state.profile;
+
+    // Fallback if profile is loading or null
+    final userName = profile?['user']?['name']?.split(' ').first ?? 'يا معلم';
+    final userImage = profile?['user']?['image'];
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: AppColors.primary,
-        title: const Text(
-          'لوحة التحكم',
-          style: TextStyle(
-            fontFamily: 'Cairo',
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings, color: Colors.white),
-            onPressed: () => context.push('/settings'),
-          ),
-        ],
+        backgroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: true,
+        title: Image.asset('assets/images/logo.png', height: 60),
+        actions: const [],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Welcome Card
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [AppColors.primary, Color(0xFF303F9F)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+      body: RefreshIndicator(
+        onRefresh: () async {
+          await ref.read(teacherProfileProvider.notifier).loadProfile();
+        },
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Greeting Section
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: const Color(
+                    0xFFFFF4E6,
+                  ), // Light orange/beige background
+                  borderRadius: BorderRadius.circular(24),
                 ),
-                borderRadius: BorderRadius.circular(16),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'مرحباً $userName',
+                            style: const TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF2D2D2D),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          const Text(
+                            'أكمل ملفك الشخصي لتظهر للطلاب\nوابدأ في التدريس',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Color(0xFF666666),
+                              height: 1.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Image.asset(
+                      'assets/images/logo.png', // Placeholder
+                      height: 80,
+                      width: 80,
+                    ),
+                  ],
+                ),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  Text(
-                    'مرحباً بك! 👋',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      fontFamily: 'Cairo',
+
+              const SizedBox(height: 12),
+              const Divider(color: Color(0xFFEEEEEE), thickness: 1),
+              const SizedBox(height: 12),
+
+              // Stats Grid
+              const Text(
+                'إحصائياتك',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              Row(
+                children: [
+                  Expanded(
+                    child: _StatCard(
+                      icon: Icons.visibility_rounded,
+                      iconColor: Colors.blue,
+                      value: '${profile?['views'] ?? 0}',
+                      label: 'المشاهدات',
                     ),
                   ),
-                  SizedBox(height: 8),
-                  Text(
-                    'ابدأ بإكمال ملفك الشخصي لتظهر للآباء',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.white70,
-                      fontFamily: 'Cairo',
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _StatCard(
+                      icon: Icons.message_rounded,
+                      iconColor: Colors.green,
+                      value: '0', // TODO: Get requests count
+                      label: 'الطلبات',
                     ),
                   ),
                 ],
               ),
-            ),
-
-            const SizedBox(height: 24),
-
-            // Quick Actions
-            const Text(
-              'إجراءات سريعة',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
-                fontFamily: 'Cairo',
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: _StatCard(
+                      icon: Icons.star_rounded,
+                      iconColor: Colors.amber,
+                      value: '${profile?['rating'] ?? 0.0}',
+                      label: 'التقييم',
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _StatCard(
+                      icon: Icons.favorite_rounded,
+                      iconColor: Colors.red,
+                      value: '0', // TODO: Get favorites count
+                      label: 'المفضلة',
+                    ),
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(height: 12),
 
-            _ActionCard(
-              icon: Icons.person_rounded,
-              title: 'تعديل الملف الشخصي',
-              subtitle: 'أضف معلوماتك ومواد التدريس',
-              onTap: () {
-                context.push('/teacher/profile/edit');
-              },
-            ),
-            const SizedBox(height: 12),
-            _ActionCard(
-              icon: Icons.attach_money_rounded,
-              title: 'تحديد المواد والمراحل',
-              subtitle: 'حدد المواد والمراحل التي تدرسها',
-              onTap: () {
-                context.push('/teacher/subjects');
-              },
-            ),
-            const SizedBox(height: 12),
-            _ActionCard(
-              icon: Icons.location_on_rounded,
-              title: 'تحديد الموقع',
-              subtitle: 'حدد منطقتك الجغرافية',
-              onTap: () {
-                // TODO: Navigate to location
-              },
-            ),
+              const SizedBox(height: 12),
+              const Divider(color: Color(0xFFEEEEEE), thickness: 1),
+              const SizedBox(height: 12),
 
-            const SizedBox(height: 24),
-
-            // Stats Grid
-            const Text(
-              'إحصائياتك',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
-                fontFamily: 'Cairo',
+              // Quick Actions
+              const Text(
+                'إجراءات سريعة',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
               ),
-            ),
-            const SizedBox(height: 12),
+              const SizedBox(height: 12),
 
-            Row(
-              children: [
-                Expanded(
-                  child: _StatCard(
-                    icon: Icons.visibility_rounded,
-                    iconColor: Colors.blue,
-                    value: '0',
-                    label: 'المشاهدات',
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _StatCard(
-                    icon: Icons.message_rounded,
-                    iconColor: Colors.green,
-                    value: '0',
-                    label: 'الطلبات',
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: _StatCard(
-                    icon: Icons.star_rounded,
-                    iconColor: Colors.amber,
-                    value: '0.0',
-                    label: 'التقييم',
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _StatCard(
-                    icon: Icons.favorite_rounded,
-                    iconColor: Colors.red,
-                    value: '0',
-                    label: 'المفضلة',
-                  ),
-                ),
-              ],
-            ),
-          ],
+              _ActionCard(
+                icon: Icons.person_rounded,
+                title: 'تعديل الملف الشخصي',
+                subtitle: 'أضف معلوماتك ومواد التدريس',
+                onTap: () {
+                  context.push('/teacher/profile/edit');
+                },
+              ),
+              const SizedBox(height: 12),
+              _ActionCard(
+                icon: Icons.attach_money_rounded,
+                title: 'تحديد المواد والمراحل',
+                subtitle: 'حدد المواد والمراحل التي تدرسها',
+                onTap: () {
+                  context.push('/teacher/subjects');
+                },
+              ),
+              const SizedBox(height: 12),
+              _ActionCard(
+                icon: Icons.location_on_rounded,
+                title: 'تحديد الموقع',
+                subtitle: 'حدد منطقتك الجغرافية',
+                onTap: () {
+                  // context.push('/teacher/location'); // TODO
+                },
+              ),
+              const SizedBox(height: 24),
+            ],
+          ),
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -175,6 +203,13 @@ class TeacherHomeScreen extends ConsumerWidget {
         selectedItemColor: AppColors.primary,
         unselectedItemColor: AppColors.textSecondary,
         type: BottomNavigationBarType.fixed,
+        onTap: (index) {
+          if (index == 2) {
+            context.push('/notifications');
+          } else if (index == 3) {
+            context.push('/settings');
+          }
+        },
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home_rounded),
@@ -183,6 +218,10 @@ class TeacherHomeScreen extends ConsumerWidget {
           BottomNavigationBarItem(
             icon: Icon(Icons.message_rounded),
             label: 'الطلبات',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.notifications_rounded),
+            label: 'الإشعارات',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person_rounded),
@@ -212,8 +251,8 @@ class _StatCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(12),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.border),
       ),
       child: Column(
@@ -241,7 +280,6 @@ class _StatCard extends StatelessWidget {
             style: const TextStyle(
               fontSize: 12,
               color: AppColors.textSecondary,
-              fontFamily: 'Cairo',
             ),
           ),
         ],
@@ -266,7 +304,7 @@ class _ActionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AppColors.surface,
+      color: Colors.white,
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: onTap,
@@ -298,7 +336,6 @@ class _ActionCard extends StatelessWidget {
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                         color: AppColors.textPrimary,
-                        fontFamily: 'Cairo',
                       ),
                     ),
                     Text(
@@ -306,7 +343,6 @@ class _ActionCard extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 12,
                         color: AppColors.textSecondary,
-                        fontFamily: 'Cairo',
                       ),
                     ),
                   ],

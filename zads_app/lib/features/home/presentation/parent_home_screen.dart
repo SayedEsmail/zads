@@ -48,9 +48,9 @@ class _ParentHomeScreenState extends ConsumerState<ParentHomeScreen> {
   @override
   Widget build(BuildContext context) {
     final profileState = ref.watch(parentProfileProvider);
-    final childrenState = ref.watch(parentChildrenProvider);
+    // final childrenState = ref.watch(parentChildrenProvider);
     final searchState = ref.watch(teacherSearchProvider);
-    final favoritesState = ref.watch(favoritesProvider);
+    // final favoritesState = ref.watch(favoritesProvider);
 
     // Load teachers when profile loads
     ref.listen<ParentProfileState>(parentProfileProvider, (prev, next) {
@@ -67,45 +67,13 @@ class _ParentHomeScreenState extends ConsumerState<ParentHomeScreen> {
         'لم يتم تحديد الموقع';
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: AppColors.primary,
+        backgroundColor: Colors.white,
         elevation: 0,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'مرحباً 👋',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.white70,
-                fontFamily: 'Cairo',
-              ),
-            ),
-            Text(
-              profile?['user']?['name'] ?? 'ولي الأمر',
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-                fontFamily: 'Cairo',
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(
-              Icons.notifications_none_rounded,
-              color: Colors.white,
-            ),
-            onPressed: () => context.push('/notifications'),
-          ),
-          IconButton(
-            icon: const Icon(Icons.settings, color: Colors.white),
-            onPressed: () => context.push('/settings'),
-          ),
-        ],
+        centerTitle: true,
+        title: Image.asset('assets/images/logo.png', height: 60),
+        actions: const [],
       ),
       body: RefreshIndicator(
         onRefresh: () async {
@@ -118,112 +86,147 @@ class _ParentHomeScreenState extends ConsumerState<ParentHomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Location Banner
-              GestureDetector(
-                onTap: () => context.push('/parent/location/edit'),
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: hasLocation
-                          ? [
-                              AppColors.primary,
-                              AppColors.primary.withOpacity(0.8),
-                            ]
-                          : [
-                              AppColors.warning,
-                              AppColors.warning.withOpacity(0.8),
-                            ],
+              // Greeting Section
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: const Color(
+                    0xFFFFF4E6,
+                  ), // Light orange/beige background
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'مرحباً ${profile?['user']?['name']?.split(' ').first ?? 'يا زائر'}',
+                            style: const TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF2D2D2D),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          const Text(
+                            'اعثر على أفضل المعلمين\nلأبنائك بسهولة',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Color(0xFF666666),
+                              height: 1.5,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Icon(
-                          hasLocation ? Icons.location_on : Icons.location_off,
-                          color: Colors.white,
-                          size: 28,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              hasLocation ? 'موقعك الحالي' : 'حدد موقعك',
-                              style: TextStyle(
-                                color: Colors.white.withOpacity(0.8),
-                                fontSize: 12,
-                                fontFamily: 'Cairo',
-                              ),
-                            ),
-                            Text(
-                              locationName,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'Cairo',
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const Icon(
-                        Icons.arrow_forward_ios,
-                        color: Colors.white,
-                        size: 18,
-                      ),
-                    ],
-                  ),
+                    // Illustration
+                    Image.asset(
+                      'assets/images/logo.png', // Placeholder for illustration (users illustration from ref)
+                      height: 100,
+                      width: 100,
+                    ),
+                  ],
                 ),
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 24),
+
+              // Location Banner (Simplified or Removed? Keeping simplified below Greeting)
+              if (hasLocation) ...[
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.location_on,
+                      color: AppColors.primary,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      locationName,
+                      style: const TextStyle(
+                        color: AppColors.textPrimary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const Spacer(),
+                    TextButton(
+                      onPressed: () => context.push('/parent/location/edit'),
+                      child: const Text('تغيير'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+              ] else ...[
+                // Keep "Select Location" prominent if missing
+                GestureDetector(
+                  onTap: () => context.push('/parent/location/edit'),
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppColors.warning.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: AppColors.warning),
+                    ),
+                    child: const Row(
+                      children: [
+                        Icon(
+                          Icons.warning_amber_rounded,
+                          color: AppColors.warning,
+                        ),
+                        SizedBox(width: 12),
+                        Text('يرجى تحديد موقعك لعرض المعلمين'),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+              ],
+
+              const SizedBox(height: 12),
+              const Divider(color: Color(0xFFEEEEEE), thickness: 1),
+              const SizedBox(height: 12),
 
               // Quick Actions
               Row(
                 children: [
                   Expanded(
                     child: _QuickAction(
-                      icon: Icons.child_care,
+                      icon: Icons.child_care_rounded,
                       label: 'أبنائي',
-                      count: childrenState.children.length,
-                      color: AppColors.primary,
+                      color: const Color(0xFFE3F2FD), // Light Blue
+                      iconColor: AppColors.primary,
                       onTap: () => context.push('/parent/children'),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 16),
                   Expanded(
                     child: _QuickAction(
-                      icon: Icons.favorite,
+                      icon: Icons.favorite_rounded,
                       label: 'المفضلة',
-                      count: favoritesState.favorites.length,
-                      color: Colors.red,
+                      color: const Color(0xFFFFEBEE), // Light Red
+                      iconColor: Colors.red,
                       onTap: () => context.push('/parent/favorites'),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 16),
                   Expanded(
                     child: _QuickAction(
-                      icon: Icons.assignment_outlined,
+                      icon: Icons.assignment_rounded,
                       label: 'طلباتي',
-                      count: 0,
-                      color: Colors.green,
+                      color: const Color(0xFFE0F2F1), // Light Green
+                      iconColor: Colors.teal,
                       onTap: () => context.push('/parent/requests'),
                     ),
                   ),
                 ],
               ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: 12),
+              const Divider(color: Color(0xFFEEEEEE), thickness: 1),
+              const SizedBox(height: 12),
 
               // Teachers Section
               Row(
@@ -238,7 +241,6 @@ class _ParentHomeScreenState extends ConsumerState<ParentHomeScreen> {
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: AppColors.textPrimary,
-                          fontFamily: 'Cairo',
                         ),
                       ),
                       if (hasLocation)
@@ -247,7 +249,6 @@ class _ParentHomeScreenState extends ConsumerState<ParentHomeScreen> {
                           style: const TextStyle(
                             fontSize: 13,
                             color: AppColors.textSecondary,
-                            fontFamily: 'Cairo',
                           ),
                         ),
                     ],
@@ -257,10 +258,7 @@ class _ParentHomeScreenState extends ConsumerState<ParentHomeScreen> {
                       onPressed: () => context.push('/parent/search'),
                       child: const Text(
                         'عرض الكل',
-                        style: TextStyle(
-                          color: AppColors.primary,
-                          fontFamily: 'Cairo',
-                        ),
+                        style: TextStyle(color: AppColors.primary),
                       ),
                     ),
                 ],
@@ -305,14 +303,16 @@ class _ParentHomeScreenState extends ConsumerState<ParentHomeScreen> {
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: 0,
-        selectedItemColor: AppColors.secondary,
+        selectedItemColor: AppColors.primary,
         unselectedItemColor: AppColors.textSecondary,
         type: BottomNavigationBarType.fixed,
         onTap: (index) {
           if (index == 1) {
             context.push('/parent/search');
           } else if (index == 2) {
-            context.push('/parent/favorites');
+            context.push('/notifications');
+          } else if (index == 3) {
+            context.push('/settings');
           }
         },
         items: const [
@@ -325,8 +325,8 @@ class _ParentHomeScreenState extends ConsumerState<ParentHomeScreen> {
             label: 'البحث',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.favorite_rounded),
-            label: 'المفضلة',
+            icon: Icon(Icons.notifications_rounded),
+            label: 'الإشعارات',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person_rounded),
@@ -341,76 +341,45 @@ class _ParentHomeScreenState extends ConsumerState<ParentHomeScreen> {
 class _QuickAction extends StatelessWidget {
   final IconData icon;
   final String label;
-  final int count;
   final Color color;
+  final Color iconColor;
   final VoidCallback onTap;
 
   const _QuickAction({
     required this.icon,
     required this.label,
-    required this.count,
     required this.color,
+    required this.iconColor,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(12),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: color.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Icon(icon, color: color, size: 24),
-                  ),
-                  if (count > 0)
-                    Positioned(
-                      top: -4,
-                      right: -4,
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: color,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Text(
-                          '$count',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Text(
-                label,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: AppColors.textPrimary,
-                  fontFamily: 'Cairo',
-                ),
-              ),
-            ],
+    return Column(
+      children: [
+        InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(20),
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 20),
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Icon(icon, color: iconColor, size: 32),
           ),
         ),
-      ),
+        const SizedBox(height: 8),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: AppColors.textPrimary,
+          ),
+        ),
+      ],
     );
   }
 }
@@ -449,7 +418,6 @@ class _EmptyState extends StatelessWidget {
               fontSize: 16,
               fontWeight: FontWeight.bold,
               color: AppColors.textPrimary,
-              fontFamily: 'Cairo',
             ),
           ),
           const SizedBox(height: 8),
@@ -458,7 +426,6 @@ class _EmptyState extends StatelessWidget {
             style: const TextStyle(
               fontSize: 13,
               color: AppColors.textSecondary,
-              fontFamily: 'Cairo',
             ),
             textAlign: TextAlign.center,
           ),
@@ -468,16 +435,11 @@ class _EmptyState extends StatelessWidget {
               onPressed: onAction,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                // shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), // Removed to inherit Theme (16)
               ),
               child: Text(
                 actionLabel!,
-                style: const TextStyle(
-                  fontFamily: 'Cairo',
-                  color: Colors.white,
-                ),
+                style: const TextStyle(color: Colors.white),
               ),
             ),
           ],
