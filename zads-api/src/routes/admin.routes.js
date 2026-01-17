@@ -21,4 +21,8 @@ router.patch('/users/:userId/status', adminController.updateUserStatus);
 // Stats
 router.get('/stats/contacts', adminController.getContactStats);
 
+// Tutor Requests management
+router.get('/tutor-requests', adminController.getAllTutorRequests);
+router.delete('/tutor-requests/:requestId', adminController.deleteTutorRequest);
+
 module.exports = router;

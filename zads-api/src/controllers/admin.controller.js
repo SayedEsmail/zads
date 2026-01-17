@@ -241,10 +241,92 @@ const getContactStats = async (req, res, next) => {
     }
 };
 
+/**
+ * Get all tutor requests (paginated)
+ */
+const getAllTutorRequests = async (req, res, next) => {
+    try {
+        const { page = 1, limit = 20, status, search } = req.query;
+        const skip = (parseInt(page) - 1) * parseInt(limit);
+
+        const where = {};
+
+        if (status) {
+            where.status = status;
+        }
+
+        if (search) {
+            where.parent = {
+                user: {
+                    OR: [
+                        { name: { contains: search, mode: 'insensitive' } },
+                        { phone: { contains: search } }
+                    ]
+                }
+            };
+        }
+
+        const [requests, total] = await Promise.all([
+            prisma.tutorRequest.findMany({
+                where,
+                include: {
+                    parent: {
+                        include: {
+                            user: {
+                                select: {
+                                    id: true,
+                                    name: true,
+                                    phone: true,
+                                    avatarUrl: true
+                                }
+                            }
+                        }
+                    },
+                    subject: true,
+                    stage: true
+                },
+                skip,
+                take: parseInt(limit),
+                orderBy: { createdAt: 'desc' }
+            }),
+            prisma.tutorRequest.count({ where })
+        ]);
+
+        return response.paginated(res, requests, {
+            page: parseInt(page),
+            limit: parseInt(limit),
+            total,
+            totalPages: Math.ceil(total / parseInt(limit))
+        });
+
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * Delete a tutor request
+ */
+const deleteTutorRequest = async (req, res, next) => {
+    try {
+        const { requestId } = req.params;
+
+        await prisma.tutorRequest.delete({
+            where: { id: requestId }
+        });
+
+        return response.success(res, null, 'Request deleted successfully');
+    } catch (error) {
+        next(error);
+    }
+};
+
 module.exports = {
     getDashboardStats,
     getAllTeachers,
     getAllParents,
     updateUserStatus,
-    getContactStats
+    getContactStats,
+    getAllTutorRequests,
+    deleteTutorRequest
 };
