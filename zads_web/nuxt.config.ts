@@ -43,6 +43,7 @@ export default defineNuxtConfig({
       mapboxAccessToken: process.env.MAPBOX_ACCESS_TOKEN,
     },
   },
+
   components: {
     dirs: [{
       path: '@/@core/components',
@@ -169,4 +170,6 @@ export default defineNuxtConfig({
     '@sidebase/nuxt-auth',
     '@pinia/nuxt',
   ],
+
+  compatibilityDate: '2026-01-18',
 })

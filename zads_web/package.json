@@ -16,6 +16,7 @@
     "@casl/vue": "2.2.2",
     "@floating-ui/dom": "1.6.8",
     "@formkit/drag-and-drop": "0.1.6",
+    "@intlify/message-compiler": "^11.2.8",
     "@nuxtjs/i18n": "9.1.1",
     "@sindresorhus/is": "7.0.1",
     "@tiptap/extension-highlight": "^2.10.3",
