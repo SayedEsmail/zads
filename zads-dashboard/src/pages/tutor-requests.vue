@@ -1,14 +1,18 @@
 <script setup>
 import api from '@/services/api'
 
-// Placeholder data for Tutor Requests
+// Data
 const requests = ref([])
 const loading = ref(true)
-
-// Pagination
 const page = ref(1)
 const itemsPerPage = ref(10)
 const totalItems = ref(0)
+const searchQuery = ref('')
+
+// Delete Dialog
+const deleteDialog = ref(false)
+const requestToDelete = ref(null)
+const deleting = ref(false)
 
 // Table headers
 const headers = [
@@ -18,45 +22,23 @@ const headers = [
     { title: 'ملاحظات', key: 'notes', sortable: false },
     { title: 'الحالة', key: 'status', sortable: true },
     { title: 'التاريخ', key: 'createdAt', sortable: true },
+    { title: 'إجراءات', key: 'actions', sortable: false },
 ]
 
 // Fetch requests
 const fetchRequests = async () => {
     try {
         loading.value = true
-
-        // TODO: Integrate real API endpoint
-        // const response = await api.get('/admin/tutor-requests', {
-        //     params: { page: page.value, limit: itemsPerPage.value }
-        // })
-
-        // Simulating delay
-        await new Promise(resolve => setTimeout(resolve, 800))
-
-        // Placeholder Data
-        requests.value = [
-            {
-                id: 1,
-                parent: { user: { name: 'أحمد محمد', phone: '01012345678' } },
-                subject: { nameAr: 'اللغة العربية' },
-                stage: { nameAr: 'الصف الثالث الإعدادي' },
-                type: 'at_student',
-                notes: 'محتاج مدرس شاطر في النحو',
-                status: 'pending',
-                createdAt: new Date().toISOString(),
+        const response = await api.get('/admin/tutor-requests', {
+            params: {
+                page: page.value,
+                limit: itemsPerPage.value,
+                search: searchQuery.value,
             },
-            {
-                id: 2,
-                parent: { user: { name: 'سارة علي', phone: '01234567890' } },
-                subject: { nameAr: 'الرياضيات' },
-                stage: { nameAr: 'الصف الأول الثانوي' },
-                type: 'online',
-                notes: '',
-                status: 'accepted',
-                createdAt: new Date(Date.now() - 86400000).toISOString(),
-            },
-        ]
-        totalItems.value = 2
+        })
+
+        requests.value = response.data
+        totalItems.value = response.pagination.total
     }
     catch (error) {
         console.error('Failed to fetch tutor requests:', error)
@@ -66,8 +48,44 @@ const fetchRequests = async () => {
     }
 }
 
+// Delete Request
+const confirmDelete = item => {
+    requestToDelete.value = item
+    deleteDialog.value = true
+}
+
+const deleteRequest = async () => {
+    if (!requestToDelete.value) return
+
+    try {
+        deleting.value = true
+        await api.delete(`/admin/tutor-requests/${requestToDelete.value.id}`)
+        deleteDialog.value = false
+        fetchRequests() // Typo fix: fetchRequests
+    }
+    catch (error) {
+        console.error('Failed to delete request:', error)
+    }
+    finally {
+        deleting.value = false
+        requestToDelete.value = null
+        // Reload
+        fetchRequests()
+    }
+}
+
 watch([page, itemsPerPage], () => {
     fetchRequests()
+})
+
+// Debounced search
+let searchTimeout
+watch(searchQuery, () => {
+    clearTimeout(searchTimeout)
+    searchTimeout = setTimeout(() => {
+        page.value = 1
+        fetchRequests()
+    }, 500)
 })
 
 onMounted(() => {
@@ -78,7 +96,7 @@ onMounted(() => {
 const formatDate = dateStr => {
     if (!dateStr)
         return '-'
-  
+
     return new Date(dateStr).toLocaleDateString('ar-EG', {
         year: 'numeric',
         month: 'short',
@@ -140,6 +158,21 @@ const getTypeLabel = type => {
             </VBtn>
         </div>
 
+        <VCard class="mb-6">
+            <VCardText>
+                <VTextField
+                    v-model="searchQuery"
+                    label="بحث عن ولي أمر..."
+                    prepend-inner-icon="tabler-search"
+                    density="compact"
+                    variant="outlined"
+                    hide-details
+                    single-line
+                    style="max-width: 300px"
+                />
+            </VCardText>
+        </VCard>
+
         <!-- Table -->
         <VCard>
             <VDataTableServer
@@ -160,11 +193,15 @@ const getTypeLabel = type => {
                             color="info"
                             variant="tonal"
                         >
-                            <span>{{ item.parent?.user?.name?.charAt(0) }}</span>
+                            <VImg
+                                v-if="item.parent?.user?.avatarUrl"
+                                :src="item.parent.user.avatarUrl"
+                            />
+                            <span v-else>{{ item.parent?.user?.name?.charAt(0) }}</span>
                         </VAvatar>
                         <div>
                             <div class="text-body-1 font-weight-medium">
-                                {{ item.parent?.user?.name }}
+                                {{ item.parent?.user?.name || 'غير معروف' }}
                             </div>
                             <div
                                 class="text-body-2 text-medium-emphasis"
@@ -205,13 +242,18 @@ const getTypeLabel = type => {
 
                 <!-- Notes -->
                 <template #item.notes="{ item }">
-                    <span
-                        v-if="item.notes"
-                        class="text-body-2 text-truncate d-inline-block"
-                        style="max-width: 200px;"
-                    >
-                        {{ item.notes }}
-                    </span>
+                    <VTooltip v-if="item.notes" location="top">
+                        <template #activator="{ props }">
+                            <span
+                                v-bind="props"
+                                class="text-body-2 text-truncate d-inline-block cursor-pointer"
+                                style="max-width: 200px;"
+                            >
+                                {{ item.notes }}
+                            </span>
+                        </template>
+                        <span>{{ item.notes }}</span>
+                    </VTooltip>
                     <span
                         v-else
                         class="text-disabled"
@@ -235,7 +277,17 @@ const getTypeLabel = type => {
                 </template>
 
                 <!-- Actions -->
-                <!-- Could add view details button here if needed -->
+                <template #item.actions="{ item }">
+                    <VBtn
+                        icon
+                        variant="text"
+                        color="error"
+                        size="small"
+                        @click="confirmDelete(item)"
+                    >
+                        <VIcon icon="tabler-trash" />
+                    </VBtn>
+                </template>
 
                 <template #no-data>
                     <div class="text-center pa-8">
@@ -252,5 +304,36 @@ const getTypeLabel = type => {
                 </template>
             </VDataTableServer>
         </VCard>
+
+        <!-- Delete Dialog -->
+        <VDialog
+            v-model="deleteDialog"
+            max-width="400"
+        >
+            <VCard title="حذف الطلب">
+                <VCardText>
+                    هل أنت متأكد من رغبتك في حذف هذا الطلب؟ لا يمكن التراجع عن هذا الإجراء.
+                </VCardText>
+
+                <VCardActions>
+                    <VSpacer />
+                    <VBtn
+                        color="secondary"
+                        variant="text"
+                        @click="deleteDialog = false"
+                    >
+                        إلغاء
+                    </VBtn>
+                    <VBtn
+                        color="error"
+                        variant="elevated"
+                        :loading="deleting"
+                        @click="deleteRequest"
+                    >
+                        حذف
+                    </VBtn>
+                </VCardActions>
+            </VCard>
+        </VDialog>
     </div>
 </template>
