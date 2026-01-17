@@ -1,3 +1,4 @@
+import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -27,6 +28,10 @@ class _TeacherProfileEditScreenState
   String? _selectedGovernorateId;
   String? _selectedCityId;
   String? _selectedAreaId;
+
+  // Image Picker
+  final ImagePicker _picker = ImagePicker();
+  bool _isUploadingImage = false;
 
   @override
   void initState() {
@@ -71,6 +76,45 @@ class _TeacherProfileEditScreenState
     }
   }
 
+  Future<void> _pickImage() async {
+    try {
+      final XFile? image = await _picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 70,
+      );
+
+      if (image != null) {
+        setState(() => _isUploadingImage = true);
+
+        final success = await ref
+            .read(teacherProfileProvider.notifier)
+            .updateAvatar(image.path);
+
+        if (mounted) {
+          setState(() => _isUploadingImage = false);
+          if (success) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('تم تحديث الصورة بنجاح'),
+                backgroundColor: AppColors.success,
+              ),
+            );
+          }
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isUploadingImage = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('فشل اختيار الصورة: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
+  }
+
   Future<void> _saveProfile() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -107,6 +151,7 @@ class _TeacherProfileEditScreenState
   @override
   Widget build(BuildContext context) {
     final profileState = ref.watch(teacherProfileProvider);
+    final user = profileState.profile?['user'] ?? {};
     final governoratesAsync = ref.watch(governoratesProvider);
 
     // Initialize form when profile loads
@@ -135,7 +180,7 @@ class _TeacherProfileEditScreenState
           onPressed: () => context.pop(),
         ),
       ),
-      body: profileState.isLoading
+      body: profileState.isLoading && profileState.profile == null
           ? const Center(
               child: CircularProgressIndicator(color: AppColors.primary),
             )
@@ -146,6 +191,60 @@ class _TeacherProfileEditScreenState
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Avatar Edit
+                    Center(
+                      child: Stack(
+                        children: [
+                          CircleAvatar(
+                            radius: 50,
+                            backgroundColor: AppColors.primary.withOpacity(0.1),
+                            backgroundImage: user['avatarUrl'] != null
+                                ? NetworkImage(user['avatarUrl'])
+                                : null,
+                            child: user['avatarUrl'] == null
+                                ? Text(
+                                    (user['name'] ?? 'م')[0],
+                                    style: const TextStyle(
+                                      color: AppColors.primary,
+                                      fontSize: 36,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  )
+                                : null,
+                          ),
+                          Positioned(
+                            bottom: 0,
+                            right: 0,
+                            child: GestureDetector(
+                              onTap: _isUploadingImage ? null : _pickImage,
+                              child: Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: const BoxDecoration(
+                                  color: AppColors.primary,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: _isUploadingImage
+                                    ? const SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(
+                                          color: Colors.white,
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                    : const Icon(
+                                        Icons.camera_alt,
+                                        color: Colors.white,
+                                        size: 20,
+                                      ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+
                     // Bio
                     _buildSectionTitle('السيرة الذاتية'),
                     TextFormField(

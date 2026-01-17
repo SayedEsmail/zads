@@ -46,6 +46,24 @@ class TeacherRepository {
     }
   }
 
+  /// Update avatar
+  Future<Map<String, dynamic>> updateAvatar(String filePath) async {
+    try {
+      String fileName = filePath.split('/').last;
+      FormData formData = FormData.fromMap({
+        'avatar': await MultipartFile.fromFile(filePath, filename: fileName),
+      });
+
+      final response = await _dio.put(
+        '/users/me/avatar', // Assumption based on common practice, or checks auth
+        data: formData,
+      );
+      return response.data;
+    } on DioException catch (e) {
+      throw e.response?.data['message'] ?? 'فشل تحديث الصورة';
+    }
+  }
+
   /// Get teacher stats
   Future<Map<String, dynamic>> getStats() async {
     try {
