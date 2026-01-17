@@ -1,10 +1,13 @@
 <script setup>
 import AppListingTable from '@/components/AppListingTable.vue'
+import ParentDetailDialog from '@/views/parents/ParentDetailDialog.vue'
 import api from '@/services/api'
 
 // Table ref for refresh
 const tableRef = ref(null)
 const selectedRows = ref([])
+const isDetailDialogVisible = ref(false)
+const selectedParent = ref({})
 
 // Table headers
 const headers = [
@@ -19,6 +22,12 @@ const headers = [
 // Actions
 const actions = {
     single: [
+        {
+            key: 'view',
+            label: 'عرض التفاصيل',
+            icon: 'tabler-eye',
+            color: 'primary',
+        },
         {
             key: 'suspend',
             label: 'إيقاف',
@@ -39,7 +48,11 @@ const actions = {
 
 // Handle actions
 const handleAction = async ({ type, item }) => {
-    if (type === 'suspend') {
+    if (type === 'view') {
+        selectedParent.value = item
+        isDetailDialogVisible.value = true
+    }
+    else if (type === 'suspend') {
         await updateStatus(item.user?.id, 'suspended')
     }
     else if (type === 'activate') {
@@ -144,5 +157,10 @@ const getStatusLabel = status => {
                 {{ formatDate(item.createdAt) }}
             </template>
         </AppListingTable>
+
+        <ParentDetailDialog
+            v-model="isDetailDialogVisible"
+            :parent="selectedParent"
+        />
     </div>
 </template>
