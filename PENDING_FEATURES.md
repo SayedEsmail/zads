@@ -49,7 +49,7 @@ What's left to complete before launch.
   - Click on parent → show full profile modal
   - Include children info for parents
 
-- [ ] **Dashboard Charts/Graphs**
+- [ ] **Dashboard Charts/Graphs** (Skipped)
   - Weekly signups chart
   - Contact requests trend
   - Popular subjects pie chart
@@ -148,7 +148,7 @@ What's left to complete before launch.
 | 9 | Image upload service | API | 6 hrs | <span style="color:green">Done</span> |
 | 10 | Push notifications | API + Mobile | 8 hrs | <span style="color:green">Done</span> |
 
-| 12 | Dashboard charts | Dashboard | 4 hrs |
+| 12 | Dashboard charts | Dashboard | 4 hrs | <span style="color:gray">Skipped</span> |
 
 ### Sprint 4 (Week 4) - Deployment
 | # | Task | App | Effort |
@@ -224,8 +224,8 @@ These can wait until after launch:
 | Tutor Requests | ✅ |
 | Locations | ✅ |
 | Admin Dashboard | ✅ |
-| **Image Upload** | ❌ Missing |
-| **Push Notifications** | ❌ Missing |
+| **Image Upload** | ✅ |
+| **Push Notifications** | ✅ |
 
 ---
 
