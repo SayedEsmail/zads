@@ -33,14 +33,18 @@ Egyptian parents struggle to find qualified home tutors. Current methods (word-o
 - View teacher profiles with ratings and pricing
 - Send contact requests to teachers
 - Save favorite teachers for comparison
+- Save favorite teachers for comparison
 - Post "Looking for Tutor" requests
+- Receive push notifications for updates
 
 ### 4.2 Teacher Features
 - Create professional profile
 - Set subjects, stages, and flexible pricing (hourly/monthly, online/home)
 - Receive contact requests from parents
 - Browse parent tutor requests
+- Browse parent tutor requests
 - View profile statistics (views, contacts)
+- Receive push notifications for new requests
 
 ### 4.3 Admin Features
 - Dashboard with platform statistics
@@ -88,7 +92,7 @@ Egyptian parents struggle to find qualified home tutors. Current methods (word-o
 - **Hosting:** User's existing server
 - **Database:** PostgreSQL
 - **Authentication:** JWT-based
-- **Maps:** Google Maps API
+- **Maps:** Simple Location Selection (Governorate/City)
 
 ---
 
@@ -129,4 +133,4 @@ Egyptian parents struggle to find qualified home tutors. Current methods (word-o
 3. **Payments:** In-app payments and commission system
 4. **Reviews:** Parent reviews and ratings for teachers
 5. **Messaging:** In-app chat between parents and teachers
-6. **Notifications:** Push notifications for contact requests
+6. **Notifications:** Advanced notification preferences

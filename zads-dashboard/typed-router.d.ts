@@ -26,5 +26,6 @@ declare module 'vue-router/auto-routes' {
     'stages': RouteRecordInfo<'stages', '/stages', Record<never, never>, Record<never, never>>,
     'subjects': RouteRecordInfo<'subjects', '/subjects', Record<never, never>, Record<never, never>>,
     'teachers': RouteRecordInfo<'teachers', '/teachers', Record<never, never>, Record<never, never>>,
+    'tutor-requests': RouteRecordInfo<'tutor-requests', '/tutor-requests', Record<never, never>, Record<never, never>>,
   }
 }
