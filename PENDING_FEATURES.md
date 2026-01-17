@@ -145,8 +145,8 @@ What's left to complete before launch.
 ### Sprint 3 (Week 3) - Infrastructure
 | # | Task | App | Effort |
 |---|------|-----|--------|
-| 9 | Image upload service | API | 6 hrs |
-| 10 | Push notifications | API + Mobile | 8 hrs |
+| 9 | Image upload service | API | 6 hrs | <span style="color:green">Done</span> |
+| 10 | Push notifications | API + Mobile | 8 hrs | <span style="color:green">Done</span> |
 
 | 12 | Dashboard charts | Dashboard | 4 hrs |
 

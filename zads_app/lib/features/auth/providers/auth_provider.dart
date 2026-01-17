@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../data/auth_repository.dart';
+import '../../../core/services/notification_service.dart';
 
 // State to hold current user info
 class AuthState {
@@ -89,6 +90,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
       );
 
       print('✅ Login successful!');
+
+      // Register FCM Token
+      final fcmToken = await NotificationService.getToken();
+      if (fcmToken != null) {
+        await _repository.registerFcmToken(fcmToken);
+      }
     } catch (e, stackTrace) {
       print('❌ Login Error: $e');
       print('Stack trace: $stackTrace');
@@ -122,6 +129,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
         user: data['user'],
         userType: 'teacher',
       );
+
+      // Register FCM Token
+      final fcmToken = await NotificationService.getToken();
+      if (fcmToken != null) {
+        await _repository.registerFcmToken(fcmToken);
+      }
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
     }
@@ -153,6 +166,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
         user: data['user'],
         userType: 'parent',
       );
+
+      // Register FCM Token
+      final fcmToken = await NotificationService.getToken();
+      if (fcmToken != null) {
+        await _repository.registerFcmToken(fcmToken);
+      }
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
     }

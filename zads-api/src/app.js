@@ -14,6 +14,8 @@ const contactRequestsRoutes = require('./routes/contactRequests.routes');
 const tutorRequestsRoutes = require('./routes/tutorRequests.routes');
 const adminRoutes = require('./routes/admin.routes');
 const locationsRoutes = require('./routes/locations.routes');
+const uploadRoutes = require('./routes/upload.routes');
+const notificationsRoutes = require('./routes/notifications.routes');
 
 const errorMiddleware = require('./middlewares/error');
 
@@ -43,6 +45,7 @@ if (process.env.NODE_ENV === 'development') {
 // Parse JSON
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use('/uploads', express.static('public/uploads'));
 
 // ==============================================
 // ROUTES
@@ -64,6 +67,8 @@ app.use('/api/contact-requests', contactRequestsRoutes);
 app.use('/api/tutor-requests', tutorRequestsRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/locations', locationsRoutes);
+app.use('/api/upload', uploadRoutes);
+app.use('/api/notifications', notificationsRoutes);
 
 // 404 Handler
 app.use((req, res) => {

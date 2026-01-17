@@ -43,6 +43,8 @@ dependencies:
   flutter_localization: ^0.1.0
   intl: ^0.20.2
   package_info_plus: ^9.0.0
+  firebase_core: ^4.3.0
+  firebase_messaging: ^16.1.0
 
 dev_dependencies:
   flutter_test:
