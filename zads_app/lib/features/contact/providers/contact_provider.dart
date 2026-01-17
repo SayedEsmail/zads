@@ -64,6 +64,16 @@ class ContactNotifier extends StateNotifier<ContactRequestState> {
     }
   }
 
+  Future<void> loadIncomingRequests() async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final requests = await _repository.getIncomingRequests();
+      state = state.copyWith(isLoading: false, requests: requests);
+    } catch (e) {
+      state = state.copyWith(isLoading: false, error: e.toString());
+    }
+  }
+
   void reset() {
     state = ContactRequestState();
   }

@@ -68,7 +68,7 @@ class _ParentRegisterScreenState extends ConsumerState<ParentRegisterScreen> {
     });
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,

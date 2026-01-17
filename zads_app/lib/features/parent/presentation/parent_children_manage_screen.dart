@@ -214,17 +214,19 @@ class _ParentChildrenManageScreenState
     final childrenState = ref.watch(parentChildrenProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: AppColors.primary,
+        backgroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
           onPressed: () => context.pop(),
         ),
         title: const Text(
           'أبنائي',
           style: TextStyle(
-            color: Colors.white,
+            color: Colors.black,
             fontFamily: 'Cairo',
             fontWeight: FontWeight.bold,
           ),
@@ -244,7 +246,7 @@ class _ParentChildrenManageScreenState
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color: AppColors.primary.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(16),
                       border: Border.all(
                         color: AppColors.primary.withOpacity(0.3),
                       ),
@@ -294,7 +296,7 @@ class _ParentChildrenManageScreenState
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primary,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(16),
                           ),
                         ),
                       ),
@@ -362,7 +364,7 @@ class _ParentChildrenManageScreenState
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
                                 color: AppColors.primary.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: BorderRadius.circular(16),
                               ),
                               child: const Icon(
                                 Icons.person,

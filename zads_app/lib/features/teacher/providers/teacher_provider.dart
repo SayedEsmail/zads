@@ -210,3 +210,66 @@ class TeacherSubjectsNotifier extends StateNotifier<TeacherSubjectsState> {
     }
   }
 }
+
+// State for open tutor requests (jobs)
+class TeacherTutorRequestsState {
+  final bool isLoading;
+  final String? error;
+  final List<dynamic> requests;
+
+  TeacherTutorRequestsState({
+    this.isLoading = false,
+    this.error,
+    this.requests = const [],
+  });
+
+  TeacherTutorRequestsState copyWith({
+    bool? isLoading,
+    String? error,
+    List<dynamic>? requests,
+  }) {
+    return TeacherTutorRequestsState(
+      isLoading: isLoading ?? this.isLoading,
+      error: error,
+      requests: requests ?? this.requests,
+    );
+  }
+}
+
+final teacherTutorRequestsProvider =
+    StateNotifierProvider<
+      TeacherTutorRequestsNotifier,
+      TeacherTutorRequestsState
+    >((ref) {
+      return TeacherTutorRequestsNotifier(ref.read(teacherRepositoryProvider));
+    });
+
+class TeacherTutorRequestsNotifier
+    extends StateNotifier<TeacherTutorRequestsState> {
+  final TeacherRepository _repository;
+
+  TeacherTutorRequestsNotifier(this._repository)
+    : super(TeacherTutorRequestsState());
+
+  /// Load open requests
+  Future<void> loadRequests({
+    String? subjectId,
+    String? stageId,
+    double? latitude,
+    double? longitude,
+  }) async {
+    state = state.copyWith(isLoading: true, error: null);
+    try {
+      final requests = await _repository.getTutorRequests(
+        subjectId: subjectId,
+        stageId: stageId,
+        latitude: latitude,
+        longitude: longitude,
+      );
+      state = state.copyWith(isLoading: false, requests: requests);
+    } catch (e) {
+      print('❌ Load Open Requests Error: $e');
+      state = state.copyWith(isLoading: false, error: e.toString());
+    }
+  }
+}

@@ -67,7 +67,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     });
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 40.0),
@@ -164,11 +164,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   keyboardType: TextInputType.phone,
                   textDirection: TextDirection.ltr,
                   style: const TextStyle(fontSize: 16),
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     hintText: 'رقم الهاتف',
                     prefixIcon: Icon(
                       Icons.phone_outlined,
                       color: AppColors.textSecondary,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
                     ),
                   ),
                   validator: (value) {
@@ -189,6 +192,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     prefixIcon: const Icon(
                       Icons.lock_outline_rounded,
                       color: AppColors.textSecondary,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
                     ),
                     suffixIcon: IconButton(
                       icon: Icon(
@@ -232,6 +238,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 // Login Button
                 ElevatedButton(
                   onPressed: authState.isLoading ? null : _handleLogin,
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
                   child: authState.isLoading
                       ? const SizedBox(
                           height: 24,

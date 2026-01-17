@@ -87,17 +87,19 @@ class _RequestDetailsScreenState extends ConsumerState<RequestDetailsScreen> {
     final isActive = status == 'active';
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: AppColors.primary,
+        backgroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
           onPressed: () => context.pop(),
         ),
         title: Text(
           subject?['nameAr'] ?? 'تفاصيل الطلب',
           style: const TextStyle(
-            color: Colors.white,
+            color: Colors.black,
             fontFamily: 'Cairo',
             fontWeight: FontWeight.bold,
           ),
@@ -126,7 +128,7 @@ class _RequestDetailsScreenState extends ConsumerState<RequestDetailsScreen> {
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
                           color: AppColors.primary.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(16),
                         ),
                         child: const Icon(
                           Icons.book,
@@ -185,7 +187,7 @@ class _RequestDetailsScreenState extends ConsumerState<RequestDetailsScreen> {
                   ),
                   decoration: BoxDecoration(
                     color: AppColors.primary.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(16),
                   ),
                   child: Text(
                     '$contactCount معلم',

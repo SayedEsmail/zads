@@ -9,6 +9,7 @@ import '../../features/home/presentation/parent_home_screen.dart';
 import '../../features/teacher/presentation/teacher_profile_edit_screen.dart';
 import '../../features/teacher/presentation/teacher_subjects_screen.dart';
 import '../../features/teacher/presentation/teacher_profile_view_screen.dart';
+import '../../features/teacher/presentation/teacher_requests_screen.dart';
 import '../../features/parent/presentation/parent_profile_edit_screen.dart';
 import '../../features/parent/presentation/parent_location_edit_screen.dart';
 import '../../features/parent/presentation/parent_children_manage_screen.dart';
@@ -75,6 +76,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/teacher/subjects',
         builder: (context, state) => const TeacherSubjectsScreen(),
+      ),
+      GoRoute(
+        path: '/teacher/requests',
+        builder: (context, state) => const TeacherRequestsScreen(),
       ),
       GoRoute(
         path: '/teacher/:id',

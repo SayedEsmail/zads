@@ -108,17 +108,19 @@ class _TeacherSearchScreenState extends ConsumerState<TeacherSearchScreen> {
     final searchState = ref.watch(teacherSearchProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: AppColors.primary,
+        backgroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
           onPressed: () => context.pop(),
         ),
         title: const Text(
           'البحث عن المعلمين',
           style: TextStyle(
-            color: Colors.white,
+            color: Colors.black,
             fontFamily: 'Cairo',
             fontWeight: FontWeight.bold,
           ),
@@ -128,7 +130,7 @@ class _TeacherSearchScreenState extends ConsumerState<TeacherSearchScreen> {
             icon: Stack(
               clipBehavior: Clip.none,
               children: [
-                const Icon(Icons.filter_list, color: Colors.white),
+                const Icon(Icons.filter_list, color: Colors.black),
                 if (_hasActiveFilters)
                   Positioned(
                     top: -2,
