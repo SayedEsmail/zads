@@ -274,7 +274,7 @@ class _SearchFiltersModalState extends ConsumerState<SearchFiltersModal> {
         border: const OutlineInputBorder(),
         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       ),
-      value: safeValue,
+      initialValue: safeValue,
       items: items.map<DropdownMenuItem<String>>((item) {
         return DropdownMenuItem(
           value: item['id'],
