@@ -6,13 +6,21 @@ Educational marketplace platform connecting parents with private tutors in Egypt
 
 ---
 
+## 📱 Development Strategy
+
+> **Phase 1 (Current):** Web-first approach for faster user acquisition.
+> Mobile app development is **paused** until web platform gains traction.
+
+---
+
 ## Projects
 
-| Project | Description | Tech Stack |
-|---------|-------------|------------|
-| [zads-api](./zads-api/) | Backend API | Node.js, Express, Prisma, PostgreSQL |
-| [zads-dashboard](./zads-dashboard/) | Admin Dashboard | Vue 3, Vuetify 3, Vite |
-| [zads_app](./zads_app/) | Mobile App | Flutter, Riverpod, Dio |
+| Project | Description | Tech Stack | Status |
+|---------|-------------|------------|--------|
+| [zads_web](./zads_web/) | Web App (Parents & Teachers) | Nuxt 3, Vuetify 3, Pinia | ⭐ **Active** |
+| [zads-api](./zads-api/) | Backend API | Node.js, Express, Prisma, PostgreSQL | ⭐ **Active** |
+| [zads-dashboard](./zads-dashboard/) | Admin Dashboard | Vue 3, Vuetify 3, Vite | ⭐ **Active** |
+| [zads_app](./zads_app/) | Mobile App | Flutter, Riverpod, Dio | ⏸️ **Paused** |
 
 ---
 
@@ -32,7 +40,18 @@ npm run dev
 
 API: `http://localhost:3000`
 
-### 2. Start the Dashboard
+### 2. Start the Web App (Primary)
+
+```bash
+cd zads_web
+pnpm install
+cp .env.example .env
+pnpm dev
+```
+
+Web App: `http://localhost:3001`
+
+### 3. Start the Dashboard
 
 ```bash
 cd zads-dashboard
@@ -43,8 +62,8 @@ pnpm dev
 
 Dashboard: `http://localhost:5173`
 
-### 3. Run the Mobile App
-
+### 4. (Optional) Run the Mobile App
+> ⏸️ Mobile development is paused for Phase 1
 ```bash
 cd zads_app
 flutter pub get
@@ -55,10 +74,12 @@ flutter run
 
 ## Documentation
 
+- [FULL_DOCUMENTATION.md](./FULL_DOCUMENTATION.md) - Complete Platform Documentation
 - [PRD.md](./PRD.md) - Product Requirements Document
+- [zads_web/TECH_PLAN.md](./zads_web/TECH_PLAN.md) - Web App Technical Plan
 - [zads-api/TECH_PLAN.md](./zads-api/TECH_PLAN.md) - API Technical Plan
 - [zads-dashboard/TECH_PLAN.md](./zads-dashboard/TECH_PLAN.md) - Dashboard Technical Plan
-- [zads_app/TECH_PLAN.md](./zads_app/TECH_PLAN.md) - Mobile App Technical Plan
+- [zads_app/TECH_PLAN.md](./zads_app/TECH_PLAN.md) - Mobile App Technical Plan (Paused)
 
 ---
 
@@ -73,21 +94,22 @@ After seeding the database:
 ## Architecture
 
 ```
-┌─────────────────┐     ┌─────────────────┐
-│   Mobile App    │     │    Dashboard    │
-│   (Flutter)     │     │    (Vue 3)      │
-└────────┬────────┘     └────────┬────────┘
-         │                       │
-         └───────────┬───────────┘
-                     │
-              ┌──────▼──────┐
-              │   REST API  │
-              │  (Express)  │
-              └──────┬──────┘
-                     │
-              ┌──────▼──────┐
-              │  PostgreSQL │
-              └─────────────┘
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│    Web App      │     │    Dashboard    │     │   Mobile App    │
+│   (Nuxt 3)      │     │    (Vue 3)      │     │   (Flutter)     │
+│   ⭐ ACTIVE     │     │   ⭐ ACTIVE     │     │   ⏸️ PAUSED      │
+└────────┬────────┘     └────────┬────────┘     └────────┬────────┘
+         │                       │                       │
+         └───────────────────────┼───────────────────────┘
+                                 │
+                          ┌──────▼──────┐
+                          │   REST API  │
+                          │  (Express)  │
+                          └──────┬──────┘
+                                 │
+                          ┌──────▼──────┐
+                          │  PostgreSQL │
+                          └─────────────┘
 ```
 
 ---

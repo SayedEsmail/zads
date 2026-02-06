@@ -1,35 +1,112 @@
-# vue
+# Zads Web ⭐ ACTIVE
 
-This template should help get you started developing with Vue 3 in Vite.
+> **Primary Focus for Phase 1** - Web-first approach for faster parent & teacher acquisition.
 
-## Recommended IDE Setup
+Web application for the Zads educational marketplace platform.
 
-[VS Code](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=johnsoncodehk.volar) (and disable Vetur).
+## Tech Stack
 
-## Type Support for `.vue` Imports in TS
+- Nuxt 3
+- Vuetify 3
+- **Vuexy Admin Template v10.4.0** (Pre-made components & UI)
+- Pinia (State Management)
+- @sidebase/nuxt-auth (Authentication)
+- @nuxtjs/i18n (Internationalization)
+- ofetch (HTTP Client)
 
-Since TypeScript cannot handle type information for `.vue` imports, they are shimmed to be a generic Vue component type by default. In most cases this is fine if you don't really care about component prop types outside of templates.
+## Prerequisites
 
-However, if you wish to get actual prop types in `.vue` imports (for example to get props validation when using manual `h(...)` calls), you can run `Volar: Switch TS Plugin on/off` from VS Code command palette.
+- Node.js 18+
+- pnpm (recommended)
+- Running Zads API
 
-## Customize configuration
+## Setup
 
-See [Vite Configuration Reference](https://vitejs.dev/config/).
-
-## Project Setup
-
-```sh
-npm install
+1. **Install dependencies:**
+```bash
+cd zads_web
+pnpm install
 ```
 
-### Compile and Hot-Reload for Development
-
-```sh
-npm run dev
+2. **Configure environment:**
+```bash
+cp .env.example .env
 ```
 
-### Type-Check, Compile and Minify for Production
-
-```sh
-npm run build
+Edit `.env`:
+```env
+NUXT_PUBLIC_API_BASE_URL=http://localhost:3000/api
 ```
+
+## Running Locally
+
+```bash
+# Development mode
+pnpm dev
+```
+
+Web App will be available at: `http://localhost:3001`
+
+> **Note:** Make sure the API (`zads-api`) is running first!
+
+## Project Structure
+
+```
+zads_web/
+├── @core/              # Core components & utilities
+├── @layouts/           # Layout system
+├── assets/             # Styles, images
+├── components/         # Reusable Vue components
+├── composables/        # Vue composables
+├── layouts/            # Page layouts
+├── middleware/         # Route middleware
+├── pages/              # File-based routing
+├── plugins/            # Nuxt plugins
+├── server/             # API routes (if needed)
+├── stores/             # Pinia stores
+├── utils/              # Utility functions
+├── nuxt.config.ts      # Nuxt configuration
+└── app.vue             # Root component
+```
+
+## Features to Implement
+
+### Public Pages
+- 🏠 Landing Page
+- ℹ️ About Us
+- 📖 How It Works
+
+### Authentication
+- 🔐 Login
+- 📝 Register (Parent/Teacher)
+- 🔑 Forgot Password
+
+### Parent Features
+- 🔍 Search teachers
+- 👤 View teacher profiles
+- 👶 Manage children
+- 📨 Send contact requests
+- ❤️ Favorites
+
+### Teacher Features
+- 📊 Dashboard with stats
+- ✏️ Edit profile
+- 💰 Manage subjects & pricing
+- 📥 View incoming requests
+
+## Scripts
+
+```bash
+pnpm dev       # Start development server
+pnpm build     # Build for production
+pnpm generate  # Generate static site
+pnpm preview   # Preview production build
+```
+
+## Language
+
+The app is fully in **Arabic (RTL)**.
+
+---
+
+*See [TECH_PLAN.md](./TECH_PLAN.md) for detailed technical documentation.*

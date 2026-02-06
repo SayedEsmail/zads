@@ -163,7 +163,7 @@ class _ParentChildrenManageScreenState
                     await ref
                         .read(parentChildrenProvider.notifier)
                         .updateChild(
-                          childId: child!['id'],
+                          childId: child['id'],
                           name: nameController.text,
                           stageId: selectedStageId,
                           subjectIds: selectedSubjectIds,

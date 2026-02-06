@@ -114,7 +114,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           Icons.notifications_outlined,
                           color: AppColors.primary,
                         ),
-                        activeColor: AppColors.primary,
+                        activeThumbColor: AppColors.primary,
                       ),
                       const Divider(height: 1),
                       ListTile(

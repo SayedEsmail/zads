@@ -4,7 +4,7 @@
 > Egyptian marketplace connecting parents with private tutors
 
 **Domain:** [zads.app](https://zads.app)  
-**Last Updated:** January 17, 2026
+**Last Updated:** February 7, 2026
 
 ---
 
@@ -16,10 +16,11 @@
 4. [Core Features](#4-core-features)
 5. [API Reference](#5-api-reference)
 6. [Database Schema](#6-database-schema)
-7. [Mobile App (Flutter)](#7-mobile-app-flutter)
-8. [Admin Dashboard (Vue)](#8-admin-dashboard-vue)
-9. [Business Model](#9-business-model)
-10. [Deployment](#10-deployment)
+7. [Web App (Nuxt 3)](#7-web-app-nuxt-3--active) ⭐ Active
+8. [Mobile App (Flutter)](#8-mobile-app-flutter--paused) ⏸️ Paused
+9. [Admin Dashboard (Vue)](#9-admin-dashboard-vue)
+10. [Business Model](#10-business-model)
+11. [Deployment](#11-deployment)
 
 ---
 
@@ -40,31 +41,42 @@ Zads is a **marketplace platform** that:
 
 ## 2. Architecture
 
+> **📱 Phase 1 Strategy (Current):** Web-first approach for faster user acquisition. No app installation required.
+> Mobile app development is **paused** until web platform gains traction.
+
 ```
-┌─────────────────┐     ┌─────────────────┐
-│   Mobile App    │     │    Dashboard    │
-│   (Flutter)     │     │    (Vue 3)      │
-└────────┬────────┘     └────────┬────────┘
-         │                       │
-         └───────────┬───────────┘
-                     │
-              ┌──────▼──────┐
-              │   REST API  │
-              │  (Express)  │
-              └──────┬──────┘
-                     │
-              ┌──────▼──────┐
-              │  PostgreSQL │
-              └─────────────┘
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│    Web App      │     │    Dashboard    │     │   Mobile App    │
+│   (Nuxt 3)      │     │    (Vue 3)      │     │   (Flutter)     │
+│   ⭐ ACTIVE     │     │   ⭐ ACTIVE     │     │   ⏸️ PAUSED      │
+└────────┬────────┘     └────────┬────────┘     └────────┬────────┘
+         │                       │                       │
+         └───────────────────────┼───────────────────────┘
+                                 │
+                          ┌──────▼──────┐
+                          │   REST API  │
+                          │  (Express)  │
+                          └──────┬──────┘
+                                 │
+                          ┌──────▼──────┐
+                          │  PostgreSQL │
+                          └─────────────┘
 ```
 
 ### Projects
 
-| Project | Tech Stack | Purpose |
-|---------|-----------|---------|
-| **zads-api** | Node.js, Express, Prisma, PostgreSQL | Backend REST API |
-| **zads-dashboard** | Vue 3, Vuetify 3, Vite, Pinia | Admin Dashboard (Arabic RTL) |
-| **zads_app** | Flutter, Riverpod, Dio, GoRouter | Mobile App (iOS & Android) |
+| Project | Tech Stack | Purpose | Status |
+|---------|-----------|---------|--------|
+| **zads_web** | Nuxt 3, Vuetify 3, Pinia, i18n | Web App for Parents & Teachers | ⭐ **Active** |
+| **zads-api** | Node.js, Express, Prisma, PostgreSQL | Backend REST API | ⭐ **Active** |
+| **zads-dashboard** | Vue 3, Vuetify 3, Vite, Pinia | Admin Dashboard (Arabic RTL) | ⭐ **Active** |
+| **zads_app** | Flutter, Riverpod, Dio, GoRouter | Mobile App (iOS & Android) | ⏸️ **Paused** |
+
+### Why Web-First?
+1. **Faster acquisition** - Users can access immediately without app store downloads
+2. **Lower friction** - Share links easily via WhatsApp/Facebook
+3. **SEO benefits** - Search engine visibility from day one
+4. **Easier iteration** - Update features without app store review process
 
 ---
 
@@ -336,9 +348,69 @@ Governorate → City → Area (Egyptian locations)
 
 ---
 
-## 7. Mobile App (Flutter)
+## 7. Web App (Nuxt 3) ⭐ ACTIVE
+
+> **Primary focus for Phase 1** - Web-first approach for faster parent & teacher acquisition.
 
 ### 7.1 Tech Stack
+
+| Component | Technology |
+|-----------|------------|
+| Framework | Nuxt 3 |
+| UI Library | Vuetify 3 |
+| Template | Vuexy Admin v10.4.0 |
+| State | Pinia |
+| HTTP | ofetch |
+| i18n | @nuxtjs/i18n |
+| Auth | @sidebase/nuxt-auth |
+| Build | Vite |
+
+### 7.2 Pages to Implement
+
+#### Public Pages
+- Landing Page (زاد الرئيسية)
+- About Us (من نحن)
+- How It Works (كيف يعمل)
+
+#### Authentication
+- Login (تسجيل الدخول)
+- Register - User Type Selection
+- Register - Parent Form
+- Register - Teacher Form
+- Forgot Password
+
+#### Parent Features
+- Parent Home (search, nearby teachers)
+- Teacher Search Results
+- Teacher Profile View
+- Children Management
+- My Requests (tutor + contact)
+- Favorites List
+
+#### Teacher Features
+- Teacher Dashboard (stats)
+- Profile Edit
+- Subjects & Pricing Management
+- Incoming Requests
+- Browse Tutor Requests
+
+### 7.3 Development Status
+
+| Feature | Status |
+|---------|--------|
+| Project Setup | ✅ Done |
+| Authentication | 🔄 In Progress |
+| Parent Features | ⏳ Pending |
+| Teacher Features | ⏳ Pending |
+| Public Pages | ⏳ Pending |
+
+---
+
+## 8. Mobile App (Flutter) ⏸️ PAUSED
+
+> **Development paused** until web platform gains traction. The codebase is ~70% complete and can be resumed for Phase 2.
+
+### 8.1 Tech Stack
 
 | Component | Technology |
 |-----------|------------|
@@ -349,49 +421,25 @@ Governorate → City → Area (Egyptian locations)
 | Storage | SharedPreferences |
 | Fonts | Cairo (Google Fonts) |
 
-### 7.2 App Screens
+### 8.2 Completed Screens (14 screens)
+- ✅ Login, User Type Selection, Parent/Teacher Registration
+- ✅ Parent Home, Teacher Home
+- ✅ Teacher Profile View/Edit, Subjects Management
+- ✅ Parent Profile Edit, Location Edit, Children Management
+- ✅ Parent Requests Screen, Request Details
 
-#### Authentication (4 screens)
-- Login Screen
-- User Type Selection (Parent/Teacher)
-- Parent Registration
-- Teacher Registration
-
-#### Home Screens (2 screens)
-- Parent Home (search, nearby teachers, categories)
-- Teacher Home (dashboard with stats)
-
-#### Teacher Features (3 screens)
-- Profile View (for parents viewing)
-- Profile Edit
-- Subjects Management
-
-#### Parent Features (5 screens)
-- Profile Edit
-- Location Edit
-- Children Management
-- My Requests (tutor + contact requests)
-- Request Details
-
-### 7.3 Design System
-
-```dart
-// Colors
-primary: #4873F7    // Royal Blue
-secondary: #FF9900  // Orange
-background: #F9FAFC
-textPrimary: #1F2937
-textSecondary: #9CA3AF
-
-// Typography
-Font: Cairo (Arabic RTL support)
-```
+### 8.3 Pending Features (for Phase 2)
+- Onboarding screens
+- Favorites UI
+- Settings & Notifications
+- Push notifications
+- App store deployment
 
 ---
 
-## 8. Admin Dashboard (Vue)
+## 9. Admin Dashboard (Vue)
 
-### 8.1 Tech Stack
+### 9.1 Tech Stack
 
 | Component | Technology |
 |-----------|------------|
@@ -402,7 +450,7 @@ Font: Cairo (Arabic RTL support)
 | Build | Vite |
 | Template | Vuexy Starter Kit |
 
-### 8.2 Pages
+### 9.2 Pages
 
 | Page | Route | Features |
 |------|-------|----------|
@@ -414,7 +462,7 @@ Font: Cairo (Arabic RTL support)
 | Stages | `/stages` | CRUD operations |
 | Contact Requests | `/contact-requests` | List all requests |
 
-### 8.3 Navigation (Sidebar)
+### 9.3 Navigation (Sidebar)
 
 ```
 ├── لوحة التحكم (Dashboard)
@@ -429,7 +477,7 @@ Font: Cairo (Arabic RTL support)
 
 ---
 
-## 9. Business Model
+## 10. Business Model
 
 ### Revenue Streams (Future)
 
@@ -444,9 +492,9 @@ Font: Cairo (Arabic RTL support)
 
 ---
 
-## 10. Deployment
+## 11. Deployment
 
-### 10.1 Server Requirements
+### 11.1 Server Requirements
 
 **API Server:**
 - Node.js 18+
@@ -459,7 +507,7 @@ Font: Cairo (Arabic RTL support)
 - Nginx (static files)
 - SSL certificates
 
-### 10.2 DNS Configuration
+### 11.2 DNS Configuration
 
 | Subdomain | Purpose |
 |-----------|---------|
@@ -467,7 +515,7 @@ Font: Cairo (Arabic RTL support)
 | `api.zads.app` | API Server |
 | `admin.zads.app` | Admin Dashboard (optional) |
 
-### 10.3 Environment Variables
+### 11.3 Environment Variables
 
 **API (.env):**
 ```env
@@ -484,7 +532,7 @@ CORS_ORIGIN=https://zads.app
 VITE_API_BASE_URL=https://api.zads.app/api
 ```
 
-### 10.4 Default Credentials (After Seeding)
+### 11.4 Default Credentials (After Seeding)
 
 | Role | Phone | Password |
 |------|-------|----------|
@@ -506,7 +554,15 @@ npx prisma db seed
 npm run dev
 ```
 
-### 2. Start the Dashboard
+### 2. Start the Web App (Primary)
+```bash
+cd zads_web
+pnpm install
+cp .env.example .env
+pnpm dev
+```
+
+### 3. Start the Dashboard
 ```bash
 cd zads-dashboard
 pnpm install
@@ -514,7 +570,8 @@ cp .env.example .env
 pnpm dev
 ```
 
-### 3. Run the Mobile App
+### 4. (Optional) Run the Mobile App
+> ⏸️ Mobile development is paused for Phase 1
 ```bash
 cd zads_app
 flutter pub get
@@ -530,7 +587,7 @@ flutter run
 | Registered Teachers | 20 |
 | Registered Parents | 50 |
 | Contact Requests | 30 |
-| App Downloads | 100 |
+| Website Visits | 500 |
 
 ---
 

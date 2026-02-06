@@ -1,4 +1,7 @@
-# Zads App - Technical Plan
+# Zads App - Technical Plan ⏸️ PAUSED
+
+> **Development Status:** Paused for Phase 1. Web-first approach prioritized.
+> The codebase is ~70% complete and will resume in Phase 2.
 
 ## Overview
 Mobile application for the Zads platform (iOS & Android). Built with Flutter using Riverpod for state management.
@@ -357,4 +360,4 @@ Or create separate `main_dev.dart` and `main_prod.dart` entry points.
 
 ---
 
-*Last Updated: January 4, 2026*
+*Development paused: February 7, 2026*

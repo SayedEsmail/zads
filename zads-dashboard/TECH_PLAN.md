@@ -224,4 +224,4 @@ pnpm preview
 
 ---
 
-*Last Updated: January 4, 2026*
+*Last Updated: February 7, 2026*

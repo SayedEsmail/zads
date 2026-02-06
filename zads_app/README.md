@@ -1,4 +1,7 @@
-# Zads App
+# Zads App ⏸️ PAUSED
+
+> **Development Status:** Paused for Phase 1. Web-first approach prioritized.  
+> The codebase is ~70% complete and will resume in Phase 2.
 
 Mobile application for the Zads educational marketplace (iOS & Android).
 
@@ -9,6 +12,26 @@ Mobile application for the Zads educational marketplace (iOS & Android).
 - Dio (HTTP Client)
 - GoRouter (Navigation)
 - Google Maps Flutter
+
+## Current Completion
+
+### ✅ Completed Features
+- Authentication (Login, Registration)
+- Parent Home Screen with search
+- Teacher Home Screen with dashboard
+- Teacher Profile View/Edit
+- Teacher Subjects Management
+- Parent Profile Edit
+- Parent Location Edit
+- Parent Children Management
+- Parent Requests Screen
+
+### ⏳ Pending (for Phase 2)
+- Onboarding screens
+- Favorites UI
+- Settings & Notifications
+- Push notifications
+- App store deployment
 
 ## Prerequisites
 
@@ -62,19 +85,6 @@ lib/
 └── main.dart       # Entry point
 ```
 
-## Features
-
-### Parent Flow
-- 🔍 Search teachers by location/subject
-- 👤 View teacher profiles
-- ❤️ Save favorites
-- 📨 Send contact requests
-
-### Teacher Flow
-- 📊 Dashboard with stats
-- ✏️ Edit profile & pricing
-- 📥 Receive contact requests
-
 ## Build
 
 ```bash
@@ -92,17 +102,8 @@ flutter build ios --release
 
 The app is fully in **Arabic (RTL)** using the Cairo font.
 
-## Troubleshooting
+---
 
-### API Connection on Android Emulator
-Use `10.0.2.2` instead of `localhost` to connect to host machine.
+*See [TECH_PLAN.md](./TECH_PLAN.md) for detailed technical documentation.*
 
-### iOS Simulator Network
-Add to `Info.plist` for non-HTTPS connections:
-```xml
-<key>NSAppTransportSecurity</key>
-<dict>
-    <key>NSAllowsArbitraryLoads</key>
-    <true/>
-</dict>
-```
+*Development paused: February 7, 2026*
