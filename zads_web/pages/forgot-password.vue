@@ -10,6 +10,7 @@ import authV2MaskLight from '@images/pages/misc-mask-light.png'
 const email = ref('')
 const authThemeImg = useGenerateImageVariant(authV2ForgotPasswordIllustrationLight, authV2ForgotPasswordIllustrationDark)
 const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
+const { t } = useI18n()
 
 definePageMeta({
   layout: 'blank',
@@ -70,10 +71,10 @@ definePageMeta({
       >
         <VCardText>
           <h4 class="text-h4 mb-1">
-            Forgot Password? 🔒
+            {{ $t('ForgotPassword.ForgotPassword?🔒') }}
           </h4>
           <p class="mb-0">
-            Enter your email and we'll send you instructions to reset your password
+            {{ $t('ForgotPassword.ForgotPasswordDesc') }}
           </p>
         </VCardText>
 
@@ -85,7 +86,7 @@ definePageMeta({
                 <AppTextField
                   v-model="email"
                   autofocus
-                  label="Email"
+                  :label="$t('ForgotPassword.Email')"
                   type="email"
                   placeholder="johndoe@email.com"
                 />
@@ -97,7 +98,7 @@ definePageMeta({
                   block
                   type="submit"
                 >
-                  Send Reset Link
+                  {{ $t('ForgotPassword.SendResetLink') }}
                 </VBtn>
               </VCol>
 
@@ -112,12 +113,13 @@ definePageMeta({
                     size="20"
                     class="me-1 flip-in-rtl"
                   />
-                  <span>Back to login</span>
+                  <span>{{ $t('Auth.BackToLogin') }}</span>
                 </NuxtLink>
               </VCol>
             </VRow>
           </VForm>
         </VCardText>
+
       </VCard>
     </VCol>
   </VRow>
