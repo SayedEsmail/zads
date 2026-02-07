@@ -13,22 +13,16 @@ import { VerticalNavLayout } from '@layouts'
 </script>
 
 <template>
-  <VerticalNavLayout :nav-items="navItems">
+  <VerticalNavLayout :nav-items="[]">
     <!-- 👉 navbar -->
-    <template #navbar="{ toggleVerticalOverlayNavActive }">
-      <div class="d-flex h-100 align-center">
-        <IconBtn
-          id="vertical-nav-toggle-btn"
-          class="ms-n3 d-lg-none"
-          @click="toggleVerticalOverlayNavActive(true)"
+    <template #navbar>
+      <div class="d-flex h-100 align-center gap-x-2">
+        <NuxtLink
+          to="/"
+          class="app-logo d-flex align-center gap-x-3"
         >
-          <VIcon
-            size="26"
-            icon="tabler-menu-2"
-          />
-        </IconBtn>
-
-        <NavbarThemeSwitcher />
+          <VNodeRenderer :nodes="themeConfig.app.logo" />
+        </NuxtLink>
 
         <VSpacer />
 
