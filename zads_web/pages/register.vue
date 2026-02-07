@@ -1,196 +1,98 @@
 <script setup>
-import { VForm } from 'vuetify/components/VForm'
-import AuthProvider from '@/views/pages/authentication/AuthProvider.vue'
 import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
 import { themeConfig } from '@themeConfig'
-import authV2RegisterIllustrationBorderedDark from '@images/pages/auth-v2-register-illustration-bordered-dark.png'
-import authV2RegisterIllustrationBorderedLight from '@images/pages/auth-v2-register-illustration-bordered-light.png'
-import authV2RegisterIllustrationDark from '@images/pages/auth-v2-register-illustration-dark.png'
-import authV2RegisterIllustrationLight from '@images/pages/auth-v2-register-illustration-light.png'
-import authV2MaskDark from '@images/pages/misc-mask-dark.png'
-import authV2MaskLight from '@images/pages/misc-mask-light.png'
-
-const imageVariant = useGenerateImageVariant(authV2RegisterIllustrationLight, authV2RegisterIllustrationDark, authV2RegisterIllustrationBorderedLight, authV2RegisterIllustrationBorderedDark, true)
-const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
 
 definePageMeta({
   layout: 'blank',
-  unauthenticatedOnly: true,
-
+  auth: {
+    unauthenticatedOnly: true,
+  },
 })
-
-const form = ref({
-  username: '',
-  email: '',
-  password: '',
-  privacyPolicies: false,
-})
-
-const isPasswordVisible = ref(false)
 </script>
 
 <template>
-  <NuxtLink to="/">
-    <div class="auth-logo d-flex align-center gap-x-3">
-      <VNodeRenderer :nodes="themeConfig.app.logo" />
-      <h1 class="auth-title">
-        {{ themeConfig.app.title }}
-      </h1>
-    </div>
-  </NuxtLink>
-
-  <VRow
-    no-gutters
-    class="auth-wrapper bg-surface"
-  >
-    <VCol
-      md="8"
-      class="d-none d-md-flex"
+  <div class="auth-wrapper d-flex align-center justify-center pa-4">
+    <VCard
+      class="auth-card pa-4 pt-7"
+      max-width="448"
     >
-      <div class="position-relative bg-background w-100 me-0">
-        <div
-          class="d-flex align-center justify-center w-100 h-100"
-          style="padding-inline: 100px;"
-        >
-          <VImg
-            max-width="500"
-            :src="imageVariant"
-            class="auth-illustration mt-16 mb-2"
-          />
-        </div>
+      <VCardItem class="justify-center">
+        <template #prepend>
+          <div class="d-flex">
+            <VNodeRenderer :nodes="themeConfig.app.logo" />
+          </div>
+        </template>
 
-        <img
-          class="auth-footer-mask"
-          :src="authThemeMask"
-          alt="auth-footer-mask"
-          height="280"
-          width="100"
-        >
-      </div>
-    </VCol>
+        <VCardTitle class="font-weight-bold text-2xl text-capitalize">
+          {{ themeConfig.app.title }}
+        </VCardTitle>
+      </VCardItem>
 
-    <VCol
-      cols="12"
-      md="4"
-      class="auth-card-v2 d-flex align-center justify-center"
-      style="background-color: rgb(var(--v-theme-surface));"
-    >
-      <VCard
-        flat
-        :max-width="500"
-        class="mt-12 mt-sm-0 pa-4"
-      >
-        <VCardText>
-          <h4 class="text-h4 mb-1">
-            Adventure starts here 🚀
-          </h4>
-          <p class="mb-0">
-            Make your app management easy and fun!
-          </p>
-        </VCardText>
+      <VCardText class="pt-2 text-center">
+        <h5 class="text-h5 mb-1">
+          Join Zads Community 🚀
+        </h5>
+        <p class="mb-0">
+          Select your account type to get started
+        </p>
+      </VCardText>
 
-        <VCardText>
-          <VForm @submit.prevent="() => {}">
-            <VRow>
-              <!-- Username -->
-              <VCol cols="12">
-                <AppTextField
-                  v-model="form.username"
-                  :rules="[requiredValidator]"
-                  autofocus
-                  label="Username"
-                  placeholder="Johndoe"
-                />
-              </VCol>
+      <VCardText>
+        <VRow>
+          <!-- Parent Option -->
+          <VCol cols="12" md="6">
+            <VCard
+              variant="outlined"
+              class="text-center pa-4 cursor-pointer hover-card"
+              @click="navigateTo('/register/parent')"
+            >
+              <VIcon icon="tabler-user-heart" size="42" color="primary" class="mb-2" />
+              <h6 class="text-h6 text-primary">Parent</h6>
+              <p class="text-xs mb-0">Find best teachers</p>
+            </VCard>
+          </VCol>
 
-              <!-- email -->
-              <VCol cols="12">
-                <AppTextField
-                  v-model="form.email"
-                  :rules="[requiredValidator, emailValidator]"
-                  label="Email"
-                  type="email"
-                  placeholder="johndoe@email.com"
-                />
-              </VCol>
+          <!-- Teacher Option -->
+          <VCol cols="12" md="6">
+            <VCard
+              variant="outlined"
+              class="text-center pa-4 cursor-pointer hover-card"
+              @click="navigateTo('/register/teacher')"
+            >
+              <VIcon icon="tabler-school" size="42" color="secondary" class="mb-2" />
+              <h6 class="text-h6 text-secondary">Teacher</h6>
+              <p class="text-xs mb-0">Grow your career</p>
+            </VCard>
+          </VCol>
 
-              <!-- password -->
-              <VCol cols="12">
-                <AppTextField
-                  v-model="form.password"
-                  :rules="[requiredValidator]"
-                  label="Password"
-                  placeholder="············"
-                  :type="isPasswordVisible ? 'text' : 'password'"
-                  autocomplete="password"
-                  :append-inner-icon="isPasswordVisible ? 'tabler-eye-off' : 'tabler-eye'"
-                  @click:append-inner="isPasswordVisible = !isPasswordVisible"
-                />
-
-                <div class="d-flex align-center my-6">
-                  <VCheckbox
-                    id="privacy-policy"
-                    v-model="form.privacyPolicies"
-                    inline
-                  />
-                  <VLabel
-                    for="privacy-policy"
-                    style="opacity: 1;"
-                  >
-                    <span class="me-1 text-high-emphasis">I agree to</span>
-                    <a
-                      href="javascript:void(0)"
-                      class="text-primary"
-                    >privacy policy & terms</a>
-                  </VLabel>
-                </div>
-
-                <VBtn
-                  block
-                  type="submit"
-                >
-                  Sign up
-                </VBtn>
-              </VCol>
-
-              <!-- create account -->
-              <VCol
-                cols="12"
-                class="text-center text-base"
-              >
-                <span class="d-inline-block">Already have an account?</span>
-                <NuxtLink
-                  class="text-primary ms-1 d-inline-block"
-                  :to="{ name: 'login' }"
-                >
-                  Sign in instead
-                </NuxtLink>
-              </VCol>
-
-              <VCol
-                cols="12"
-                class="d-flex align-center"
-              >
-                <VDivider />
-                <span class="mx-4">or</span>
-                <VDivider />
-              </VCol>
-
-              <!-- auth providers -->
-              <VCol
-                cols="12"
-                class="text-center"
-              >
-                <AuthProvider />
-              </VCol>
-            </VRow>
-          </VForm>
-        </VCardText>
-      </VCard>
-    </VCol>
-  </VRow>
+          <!-- Login Link -->
+          <VCol
+            cols="12"
+            class="text-center text-base mt-4"
+          >
+            <span>Already have an account?</span>
+            <NuxtLink
+              class="text-primary ms-2"
+              to="/login"
+            >
+              Sign in instead
+            </NuxtLink>
+          </VCol>
+        </VRow>
+      </VCardText>
+    </VCard>
+  </div>
 </template>
 
 <style lang="scss">
-@use "@core/scss/template/pages/page-auth";
+@use "@core/scss/template/pages/page-auth.scss";
+
+.hover-card {
+  transition: all 0.3s ease;
+  &:hover {
+    border-color: rgb(var(--v-theme-primary));
+    background: rgba(var(--v-theme-primary), 0.05);
+    transform: translateY(-2px);
+  }
+}
 </style>

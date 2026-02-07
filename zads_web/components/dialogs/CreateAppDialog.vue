@@ -243,10 +243,7 @@ const onSubmit = () => {
                       </VListItemSubtitle>
 
                       <template #append>
-                        <VRadio
-                          :id="useId()"
-                          :value="category.slug"
-                        />
+                        <VRadio :value="category.slug" />
                       </template>
                     </VListItem>
                   </VList>
@@ -287,10 +284,7 @@ const onSubmit = () => {
                         {{ framework.subtitle }}
                       </VListItemSubtitle>
                       <template #append>
-                        <VRadio
-                          :id="useId()"
-                          :value="framework.slug"
-                        />
+                        <VRadio :value="framework.slug" />
                       </template>
                     </VListItem>
                   </VList>
@@ -336,10 +330,7 @@ const onSubmit = () => {
                         {{ database.subtitle }}
                       </VListItemSubtitle>
                       <template #append>
-                        <VRadio
-                          :id="useId()"
-                          :value="database.slug"
-                        />
+                        <VRadio :value="database.slug" />
                       </template>
                     </VListItem>
                   </VList>
@@ -398,7 +389,6 @@ const onSubmit = () => {
 
                     <VCol cols="12">
                       <VSwitch
-                        :id="useId()"
                         v-model="createAppData.isSave"
                         label="Save Card for future billing?"
                       />

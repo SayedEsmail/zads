@@ -11,24 +11,24 @@ const footerBg = useGenerateImageVariant(footerLightBg, footerDarkBg)
 const pagesList = [
   {
     name: 'Pricing',
-    to: { name: 'front-pages-pricing' },
+    to: { name: 'index' },
   },
   {
     name: 'Payment',
-    to: { name: 'front-pages-payment' },
+    to: { name: 'index' },
     isNew: true,
   },
   {
     name: 'Checkout',
-    to: { name: 'front-pages-checkout' },
+    to: { name: 'index' },
   },
   {
     name: 'Help Center',
-    to: { name: 'front-pages-help-center' },
+    to: { name: 'index' },
   },
   {
     name: 'Login/Register',
-    to: { name: 'pages-authentication-login-v2' },
+    to: { name: 'login' },
   },
 ]
 

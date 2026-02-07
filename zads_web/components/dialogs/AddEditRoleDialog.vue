@@ -193,7 +193,6 @@ const onReset = () => {
               <td colspan="3">
                 <div class="d-flex justify-end">
                   <VCheckbox
-                    :id="useId()"
                     v-model="isSelectAll"
                     v-model:indeterminate="isIndeterminate"
                     label="Select All"
@@ -216,7 +215,6 @@ const onReset = () => {
                 <td>
                   <div class="d-flex justify-end">
                     <VCheckbox
-                      :id="useId()"
                       v-model="permission.read"
                       label="Read"
                     />
@@ -225,7 +223,6 @@ const onReset = () => {
                 <td>
                   <div class="d-flex justify-end">
                     <VCheckbox
-                      :id="useId()"
                       v-model="permission.write"
                       label="Write"
                     />
@@ -234,7 +231,6 @@ const onReset = () => {
                 <td>
                   <div class="d-flex justify-end">
                     <VCheckbox
-                      :id="useId()"
                       v-model="permission.create"
                       label="Create"
                     />

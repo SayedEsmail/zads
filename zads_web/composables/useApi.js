@@ -1,17 +1,23 @@
 import { defu } from 'defu'
 
-
-export const useApi= (url, options = {}) => {
+export const useApi = (url, options = {}) => {
+  const { data: sessionData } = useAuth()
   const config = useRuntimeConfig()
-  const accessToken = useCookie('accessToken')
 
   const defaults = {
     baseURL: config.public.apiBaseUrl,
-    key: toValue(url),
-    headers: accessToken.value ? { Authorization: `Bearer ${accessToken.value}` } : {},
+    key: url,
+    headers: sessionData.value?.accessToken
+      ? { Authorization: `Bearer ${sessionData.value.accessToken}` }
+      : {},
+    onResponseError(_ctx) {
+      // Handle 401 errors
+      if (_ctx.response.status === 401) {
+        // navigateTo('/login')
+      }
+    },
   }
 
-  // for nice deep defaults, please use unjs/defu
   const params = defu(options, defaults)
 
   return useFetch(url, params)

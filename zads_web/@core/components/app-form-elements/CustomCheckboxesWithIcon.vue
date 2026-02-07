@@ -53,7 +53,6 @@ const updateSelectedOption = value => {
         </slot>
         <div>
           <VCheckbox
-            :id="useId()"
             :model-value="props.selectedCheckbox"
             :value="item.value"
             @update:model-value="updateSelectedOption"

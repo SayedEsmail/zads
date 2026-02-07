@@ -57,7 +57,7 @@ const translateMouse = computed(() => {
 
               <VBtn
                 :size="$vuetify.display.smAndUp ? 'large' : 'default' "
-                :to="{ name: 'front-pages-landing-page', hash: `#pricing-plan` }"
+                :to="{ name: 'index', hash: `#pricing-plan` }"
                 :active="false"
               >
                 Get early Access
@@ -73,7 +73,7 @@ const translateMouse = computed(() => {
         <div class="blank-section" />
         <div class="hero-animation-img position-absolute">
           <NuxtLink
-            :to="{ name: 'dashboards-ecommerce' }"
+            :to="{ name: 'index' }"
             target="_blank"
           >
             <div
