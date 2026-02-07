@@ -68,15 +68,15 @@ export const useLayoutConfigStore = defineStore('layoutConfig', () => {
   // 👉 Layout Classes
   const _layoutClasses = computed(() => {
     const { y: windowScrollY } = useWindowScroll()
-    
+
     return [
       `layout-nav-type-${appContentLayoutNav.value}`,
       `layout-navbar-${navbarType.value}`,
       `layout-footer-${footerType.value}`,
       {
         'layout-vertical-nav-collapsed': isVerticalNavCollapsed.value
-                    && appContentLayoutNav.value === 'vertical'
-                    && !isLessThanOverlayNavBreakpoint.value,
+          && appContentLayoutNav.value === 'vertical'
+          && !isLessThanOverlayNavBreakpoint.value,
       },
       { [`horizontal-nav-${horizontalNavType.value}`]: appContentLayoutNav.value === 'horizontal' },
       `layout-content-width-${appContentWidth.value}`,
@@ -88,8 +88,8 @@ export const useLayoutConfigStore = defineStore('layoutConfig', () => {
 
 
   // 👉 RTL
-  // const isAppRTL = ref(layoutConfig.app.isRTL)
-  const isAppRTL = ref(false)
+  const isAppRTL = ref(layoutConfig.app.isRTL)
+  // const isAppRTL = ref(false)
 
   watch(isAppRTL, val => {
     _setDirAttr(val ? 'rtl' : 'ltr')
@@ -109,7 +109,7 @@ export const useLayoutConfigStore = defineStore('layoutConfig', () => {
     */
   const isVerticalNavMini = (isVerticalNavHovered = null) => {
     const isVerticalNavHoveredLocal = isVerticalNavHovered || inject(injectionKeyIsVerticalNavHovered) || ref(false)
-    
+
     return computed(() => isVerticalNavCollapsed.value && !isVerticalNavHoveredLocal.value && !isLessThanOverlayNavBreakpoint.value)
   }
 

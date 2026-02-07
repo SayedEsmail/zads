@@ -11,9 +11,10 @@ export const { themeConfig, layoutConfig } = defineThemeConfig({
   app: {
     title: 'Zads',
     logo: h('img', { src: logo, alt: 'Zads', style: 'max-height: 34px; max-width: 100%;' }),
+    isRTL: true,
     contentWidth: ContentWidth.Boxed,
-    contentLayoutNav: AppContentLayoutNav.Vertical,
-    overlayNavFromBreakpoint: breakpointsVuetifyV3.lg - 1, // 1 for matching with vuetify breakpoint. Docs: https://next.vuetifyjs.com/en/features/display-and-platform/
+    contentLayoutNav: AppContentLayoutNav.Horizontal,
+    overlayNavFromBreakpoint: breakpointsVuetifyV3.md - 1, // 1 for matching with vuetify breakpoint. Docs: https://next.vuetifyjs.com/en/features/display-and-platform/
     i18n: {
       enable: false,
       defaultLocale: 'en',

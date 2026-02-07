@@ -22,6 +22,10 @@ export default defineNuxtConfig({
     enabled: true,
   },
 
+  devServer: {
+    port: 4000,
+  },
+
   css: [
     '@core/scss/template/index.scss',
     '@styles/styles.scss',
