@@ -28,6 +28,7 @@ export const useSearchStore = defineStore('search', {
         cities: [],
         areas: [],
         isFilterDrawerOpen: false,
+        isSubjectsDialogOpen: false,
     }),
 
     getters: {
@@ -55,12 +56,12 @@ export const useSearchStore = defineStore('search', {
 
                 const response = await api.get('/teachers/search', { params })
 
-                this.teachers = response.data?.teachers || []
+                this.teachers = response.data || []
                 this.pagination = {
-                    page: response.data?.page || page,
-                    limit: response.data?.limit || 20,
-                    total: response.data?.total || 0,
-                    totalPages: response.data?.totalPages || 0,
+                    page: response.pagination?.page || page,
+                    limit: response.pagination?.limit || 20,
+                    total: response.pagination?.total || 0,
+                    totalPages: response.pagination?.totalPages || 0,
                 }
             } catch (error) {
                 this.error = error.message
@@ -164,6 +165,14 @@ export const useSearchStore = defineStore('search', {
 
         toggleFilterDrawer() {
             this.isFilterDrawerOpen = !this.isFilterDrawerOpen
+        },
+
+        openSubjectsDialog() {
+            this.isSubjectsDialogOpen = true
+        },
+
+        closeSubjectsDialog() {
+            this.isSubjectsDialogOpen = false
         },
     },
 })

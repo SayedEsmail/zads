@@ -1,7 +1,10 @@
 <script setup>
 import { useSearchStore } from '~/stores/search'
 import { useFavoritesStore } from '~/stores/favorites'
+import { useAuthStore } from '~/stores/auth'
+import { useParentStore } from '~/stores/parent'
 import TeacherCard from '~/components/TeacherCard.vue'
+import SubjectsDialog from '~/components/SubjectsDialog.vue'
 
 definePageMeta({
     layout: 'default',
@@ -9,6 +12,8 @@ definePageMeta({
 
 const searchStore = useSearchStore()
 const favoritesStore = useFavoritesStore()
+const authStore = useAuthStore()
+const parentStore = useParentStore()
 
 const lessonTypeOptions = [
     { title: 'الكل', value: null },
@@ -17,10 +22,37 @@ const lessonTypeOptions = [
     { title: 'كلاهما', value: 'both' },
 ]
 
+const quickActions = [
+    { label: 'أبنائي', icon: 'tabler-users', color: '#E3F2FD', iconColor: '#2196F3', to: '/parent/children' },
+    { label: 'المفضلة', icon: 'tabler-heart', color: '#FFEBEE', iconColor: '#F44336', to: '/parent/favorites' },
+    { label: 'طلباتي', icon: 'tabler-clipboard-list', color: '#E0F2F1', iconColor: '#009688', to: '/parent/requests' },
+]
+
 // Initialize reference data on mount
 onMounted(async () => {
-    await searchStore.initReferenceData()
+    await Promise.all([
+        searchStore.initReferenceData(),
+        parentStore.fetchProfile()
+    ])
+    
+    // Auto-search nearby teachers if profile has location
+    if (parentStore.profile?.areaId) {
+        searchStore.filters.areaId = parentStore.profile.areaId
+        searchStore.filters.cityId = parentStore.profile.area?.cityId
+        searchStore.filters.governorateId = parentStore.profile.area?.city?.governorateId
+    }
+    
     await searchStore.searchTeachers()
+})
+
+const userFirstName = computed(() => {
+    return authStore.user?.name?.split(' ')[0] || 'يا زائر'
+})
+
+const hasLocation = computed(() => !!parentStore.profile?.areaId)
+const locationName = computed(() => {
+    if (!hasLocation.value) return 'لم يتم تحديد الموقع'
+    return parentStore.profile.area?.nameAr || parentStore.profile.area?.city?.nameAr || 'الموقع المحدد'
 })
 
 // Watch governorate changes
@@ -50,6 +82,11 @@ const handleClearFilters = () => {
     searchStore.searchTeachers(1)
 }
 
+const handleSubjectClick = (subjectId) => {
+    searchStore.filters.subjectId = subjectId
+    handleSearch()
+}
+
 const handleFavorite = teacher => {
     // Will integrate with favorites store
     console.log('Toggle favorite:', teacher.id)
@@ -63,23 +100,37 @@ const handleContact = teacher => {
 
 <template>
     <div class="parent-home">
-        <!-- Unified Hero Header -->
-        <div class="hero-section bg-surface pa-6 pa-md-10 mb-8 border-b">
+        <!-- Dashboard Style Header (Mobile Parity) -->
+        <div class="hero-section bg-surface-variant pa-6 pa-md-10 mb-8 border-b">
             <VContainer>
                 <VRow align="center">
-                    <VCol cols="12" md="8">
-                        <div class="d-flex align-center gap-2 mb-2">
-                            <VIcon icon="tabler-school" color="primary" size="24" />
-                            <span class="text-overline font-weight-bold text-primary">تطبيق زادس التعليمي</span>
+                    <VCol cols="12" md="7">
+                        <!-- Greeting Banner -->
+                        <div class="greeting-banner pa-6 rounded-xl mb-6" style="background-color: #FFF4E6;">
+                            <VRow align="center">
+                                <VCol cols="12" sm="8">
+                                    <h2 class="text-h4 font-weight-bold mb-2" style="color: #2D2D2D;">
+                                        مرحباً {{ userFirstName }}
+                                    </h2>
+                                    <p class="text-body-1 mb-0" style="color: #666666;">
+                                        اعثر على أفضل المعلمين لأبنائك بسهولة
+                                    </p>
+                                </VCol>
+                                <VCol cols="12" sm="4" class="text-center d-none d-sm-block">
+                                    <VIcon icon="tabler-school" size="80" color="primary" style="opacity: 0.8;" />
+                                </VCol>
+                            </VRow>
                         </div>
-                        <h1 class="text-h3 font-weight-bold mb-4">
-                            نخبة من <span class="text-primary text-decoration-underline">أفضل المعلمين</span> بين يديك
-                        </h1>
-                        <p class="text-body-1 text-secondary mb-6 max-width-600">
-                             اكتشف معلمين مؤهلين في جميع المواد الدراسية. نوفر لك تجربة تعليمية متميزة لأبنائك سواء أونلاين أو حضورياً.
-                        </p>
+
+                        <!-- Location & Search -->
+                        <div class="location-header d-flex align-center gap-2 mb-4">
+                            <VIcon icon="tabler-map-pin" color="primary" />
+                            <span class="text-body-1 font-weight-bold">{{ locationName }}</span>
+                            <VBtn variant="text" color="primary" size="small" to="/parent/profile/edit" class="ms-auto">
+                                تغيير الموقع
+                            </VBtn>
+                        </div>
                         
-                        <!-- Search Bar -->
                         <VTextField
                             v-model="searchStore.filters.search"
                             placeholder="ابحث عن معلم أو مادة..."
@@ -93,26 +144,55 @@ const handleContact = teacher => {
                                 <VIcon icon="tabler-search" class="text-secondary" />
                             </template>
                             <template #append-inner>
-                                <VBtn color="primary" @click="handleSearch" class="d-none d-sm-flex">
+                                <VBtn color="primary" @click="handleSearch">
                                     بحث الآن
-                                </VBtn>
-                                <VBtn icon color="primary" @click="searchStore.toggleFilterDrawer" class="d-flex d-md-none ms-2" variant="tonal">
-                                    <VIcon icon="tabler-adjustments-horizontal" />
                                 </VBtn>
                             </template>
                         </VTextField>
                     </VCol>
                     
-                    <VCol cols="12" md="4" class="d-none d-md-flex justify-center">
-                        <VIcon icon="tabler-layout-dashboard" size="200" color="primary" style="opacity: 0.1;" />
+                    <VCol cols="12" md="5" class="d-none d-md-block">
+                        <!-- Quick Actions Grid -->
+                        <div class="text-overline font-weight-bold mb-4 px-2">وصول سريع</div>
+                        <VRow dense>
+                            <VCol v-for="action in quickActions" :key="action.label" cols="4">
+                                <VCard :href="action.to" flat border class="quick-action-card text-center pa-4 rounded-xl d-flex flex-column align-center gap-2" :ripple="false">
+                                    <div class="icon-wrapper pa-3 rounded-xl mb-1" :style="{ backgroundColor: action.color }">
+                                        <VIcon :icon="action.icon" :color="action.iconColor" size="32" />
+                                    </div>
+                                    <span class="text-caption font-weight-bold">{{ action.label }}</span>
+                                </VCard>
+                            </VCol>
+                        </VRow>
                     </VCol>
                 </VRow>
             </VContainer>
         </div>
 
         <VContainer>
+            <!-- Categories (Subjects) Horizontal Scroll -->
+            <div class="mb-10">
+                <div class="d-flex align-center justify-space-between mb-4">
+                    <h3 class="text-h5 font-weight-bold">المواد الدراسية</h3>
+                    <VBtn variant="text" color="primary" @click="searchStore.openSubjectsDialog">عرض الكل</VBtn>
+                </div>
+                <div class="subjects-scroll d-flex gap-4 overflow-x-auto pb-4 no-scrollbar">
+                    <VCard
+                        v-for="subject in searchStore.subjects.slice(0, 8)"
+                        :key="subject.id"
+                        flat border
+                        class="subject-chip-card px-6 py-3 rounded-pill cursor-pointer flex-shrink-0"
+                        :class="{ 'border-primary bg-primary-lighten-5': searchStore.filters.subjectId === subject.id }"
+                        @click="handleSubjectClick(subject.id)"
+                    >
+                        <span class="text-body-2 font-weight-medium">{{ subject.nameAr }}</span>
+                    </VCard>
+                </div>
+            </div>
+
             <VRow>
-                <!-- Desktop Sidebar Filters -->
+                <!-- Desktop Sidebar Filters (Moved or Kept? Mobile uses bottom sheet, web uses sidebar) -->
+                <!-- Let's keep the sidebar for web results refinement -->
                 <VCol cols="12" md="3" class="d-none d-md-block">
                     <div class="position-sticky" style="top: 100px;">
                         <VCard border flat>
@@ -325,5 +405,96 @@ const handleContact = teacher => {
                 </div>
             </div>
         </VNavigationDrawer>
+
+        <!-- Subjects View All Dialog -->
+        <SubjectsDialog />
     </div>
 </template>
+
+<style lang="scss" scoped>
+.parent-home {
+    .bg-surface-variant {
+        background-color: #f8f9fa !important;
+    }
+
+    .hero-section {
+        position: relative;
+        overflow: hidden;
+        
+        &::before {
+            content: '';
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(var(--v-theme-primary), 0.05) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+    }
+
+    .greeting-banner {
+        transition: transform 0.3s ease;
+        &:hover {
+            transform: scale(1.01);
+        }
+    }
+
+    .quick-action-card {
+        transition: all 0.2s ease;
+        cursor: pointer;
+        
+        &:hover {
+            transform: translateY(-4px);
+            border-color: rgba(var(--v-theme-primary), 0.5) !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+
+            .icon-wrapper {
+                transform: scale(1.1);
+            }
+        }
+
+        .icon-wrapper {
+            transition: transform 0.2s ease;
+        }
+    }
+
+    .subject-chip-card {
+        transition: all 0.2s ease;
+        
+        &:hover {
+            border-color: rgba(var(--v-theme-primary), 0.4) !important;
+            background-color: rgba(var(--v-theme-primary), 0.02) !important;
+        }
+    }
+
+    .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+        &::-webkit-scrollbar {
+            display: none;
+        }
+    }
+
+    .subjects-scroll {
+        cursor: grab;
+        &:active {
+            cursor: grabbing;
+        }
+    }
+
+    .search-hero-bar {
+        :deep(.v-field__outline) {
+            display: none;
+        }
+        :deep(.v-field) {
+            border-radius: 12px !important;
+            padding: 4px;
+        }
+    }
+}
+
+.primary-lighten-5 {
+    background-color: rgba(var(--v-theme-primary), 0.05) !important;
+}
+</style>
