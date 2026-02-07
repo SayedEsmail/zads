@@ -41,7 +41,6 @@ const updateSelectedOption = value => {
         >
           <div>
             <VRadio
-              :id="useId()"
               :name="item.value"
               :value="item.value"
             />

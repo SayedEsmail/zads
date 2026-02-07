@@ -7,13 +7,13 @@ import { fileURLToPath } from 'node:url'
 export default defineNuxtConfig({
   app: {
     head: {
-      titleTemplate: '%s - زاد',
-      title: 'زاد - معلمين خصوصيين',
+      titleTemplate: '%s - Zads',
+      title: 'زادس - سوق المعلمين',
 
       link: [{
         rel: 'icon',
         type: 'image/x-icon',
-        href: '/favicon.ico',
+        href: process.env.NUXT_APP_BASE_URL + '/favicon.ico',
       }],
     },
   },
@@ -28,28 +28,9 @@ export default defineNuxtConfig({
     '@/plugins/iconify/icons.css',
   ],
 
-  /*
-    ❗ Please read the docs before updating runtimeConfig
-    https://nuxt.com/docs/guide/going-further/runtime-config
-  */
-  runtimeConfig: {
-    // Private keys are only available on the server
-    AUTH_ORIGIN: process.env.AUTH_ORIGIN,
-    AUTH_SECRET: process.env.AUTH_SECRET,
-
-    // Public keys that are exposed to the client.
-    public: {
-      apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || '/api',
-      mapboxAccessToken: process.env.MAPBOX_ACCESS_TOKEN,
-    },
-  },
-
   components: {
     dirs: [{
       path: '@/@core/components',
-      pathPrefix: false,
-    }, {
-      path: '@/views/demos',
       pathPrefix: false,
     }, {
       path: '~/components/global',
@@ -60,19 +41,10 @@ export default defineNuxtConfig({
     }],
   },
 
-  auth: {
-    baseURL: process.env.AUTH_ORIGIN,
-    globalAppMiddleware: false,
-
-    provider: {
-      type: 'authjs',
-    },
-  },
-
   plugins: [
-    '@/plugins/casl/index.js',
     '@/plugins/vuetify/index.js',
     '@/plugins/iconify/index.js',
+    '@/plugins/casl/index.js',
   ],
 
   imports: {
@@ -159,10 +131,6 @@ export default defineNuxtConfig({
     transpile: ['vuetify'],
   },
 
-  i18n: {
-    vueI18n: './i18n.config.js',
-  },
-
   modules: [
     '@vueuse/nuxt',
     '@nuxtjs/i18n',
@@ -170,6 +138,22 @@ export default defineNuxtConfig({
     '@sidebase/nuxt-auth',
     '@pinia/nuxt',
   ],
+
+  runtimeConfig: {
+    AUTH_ORIGIN: process.env.AUTH_ORIGIN,
+    AUTH_SECRET: process.env.AUTH_SECRET,
+    public: {
+      apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || '/api',
+    },
+  },
+
+  auth: {
+    baseURL: process.env.AUTH_ORIGIN ? `${process.env.AUTH_ORIGIN}/api/auth` : undefined,
+    globalAppMiddleware: false,
+    provider: {
+      type: 'authjs',
+    },
+  },
 
   compatibilityDate: '2026-02-07',
 })

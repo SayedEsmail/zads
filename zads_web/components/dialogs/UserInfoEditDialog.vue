@@ -193,7 +193,6 @@ const dialogModelValueUpdate = val => {
             <!-- 👉 Switch -->
             <VCol cols="12">
               <VSwitch
-                :id="useId()"
                 v-model="isUseAsBillingAddress"
                 density="compact"
                 label="Use as a billing address?"

@@ -77,10 +77,7 @@ watch(() => props, () => {
             </VBtn>
           </div>
 
-          <VCheckbox
-            :id="useId()"
-            label="Set as core permission"
-          />
+          <VCheckbox label="Set as core permission" />
         </VForm>
       </VCardText>
     </VCard>

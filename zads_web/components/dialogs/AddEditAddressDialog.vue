@@ -202,10 +202,7 @@ const addressTypes = [
             </VCol>
 
             <VCol cols="12">
-              <VSwitch
-                :id="useId()"
-                label="Use as a billing address?"
-              />
+              <VSwitch label="Use as a billing address?" />
             </VCol>
 
             <!-- 👉 Submit and Cancel button -->

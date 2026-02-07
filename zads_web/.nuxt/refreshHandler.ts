@@ -1,0 +1,2 @@
+import { DefaultRefreshHandler } from '/Users/sayed/Devs/Zads/zads_web/node_modules/.pnpm/@sidebase+nuxt-auth@0.10.0_next-auth@4.21.1/node_modules/@sidebase/nuxt-auth/dist/runtime/utils/refreshHandler'
+export const _refreshHandler = new DefaultRefreshHandler({"enablePeriodically":false,"enableOnWindowFocus":true})

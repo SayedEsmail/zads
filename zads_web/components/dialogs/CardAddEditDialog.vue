@@ -113,7 +113,6 @@ const dialogModelValueUpdate = val => {
             <!-- 👉 Card Primary Set -->
             <VCol cols="12">
               <VSwitch
-                :id="useId()"
                 v-model="cardDetails.isPrimary"
                 label="Save Card for future billing?"
               />

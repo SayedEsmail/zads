@@ -56,10 +56,7 @@ const updateSelectedOption = value => {
           </slot>
 
           <div>
-            <VRadio
-              :id="useId()"
-              :value="item.value"
-            />
+            <VRadio :value="item.value" />
           </div>
         </VLabel>
       </VCol>
