@@ -53,8 +53,8 @@ const message = ref('')
                   <div class="d-flex justify-space-between flex-wrap gap-y-4">
                     <div
                       v-for="(item, index) in [
-                        { title: 'Email', icon: 'tabler-mail', color: 'primary', value: 'example@gmail.com' },
-                        { title: 'Phone', icon: 'tabler-phone-call', color: 'success', value: '+1234 568 963' },
+                        { title: 'Email', icon: 'tabler-mail', color: 'primary', value: 'support@zads.app' },
+                        { title: 'Phone', icon: 'tabler-phone-call', color: 'success', value: '+20 100 000 0000' },
                       ]"
                       :key="index"
                       class="d-flex gap-x-3 align-center"
@@ -101,7 +101,7 @@ const message = ref('')
 
               <VCardText>
                 <p class="mb-6">
-                  If you would like to discuss anything related to payment, account, licensing, partnerships, or have pre-sales questions, you’re at the right place.
+                  Have questions about finding a tutor or becoming one? We're here to help.
                 </p>
                 <VForm @submit.prevent="() => {}">
                   <VRow>

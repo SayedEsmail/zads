@@ -52,33 +52,33 @@ useIntersectionObserver([
     </div>
 
     <!-- 👉 Customer Review -->
-    <div :style="{ 'background-color': 'rgb(var(--v-theme-surface))' }">
+    <!-- <div :style="{ 'background-color': 'rgb(var(--v-theme-surface))' }">
       <CustomersReview />
-    </div>
+    </div> -->
 
     <!-- 👉 Our Team -->
-    <div :style="{ 'background-color': 'rgb(var(--v-theme-surface))' }">
+    <!-- <div :style="{ 'background-color': 'rgb(var(--v-theme-surface))' }">
       <OurTeam ref="refTeam" />
-    </div>
+    </div> -->
 
     <!-- 👉 Pricing Plans -->
-    <div :style="{ 'background-color': 'rgb(var(--v-theme-surface))' }">
+    <!-- <div :style="{ 'background-color': 'rgb(var(--v-theme-surface))' }">
       <PricingPlans />
-    </div>
+    </div> -->
 
     <!-- 👉 Product stats -->
-    <ProductStats />
+    <!-- <ProductStats /> -->
 
     <!-- 👉 FAQ Section -->
-    <div :style="{ 'background-color': 'rgb(var(--v-theme-surface))' }">
+    <!-- <div :style="{ 'background-color': 'rgb(var(--v-theme-surface))' }">
       <FaqSection ref="refFaq" />
-    </div>
+    </div> -->
 
     <!-- 👉 Banner  -->
-    <Banner />
+    <!-- <Banner /> -->
 
     <!-- 👉 Contact Us  -->
-    <ContactUs ref="refContact" />
+    <!-- <ContactUs ref="refContact" /> -->
 
     <!-- 👉 Footer -->
     <Footer />

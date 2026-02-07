@@ -38,14 +38,13 @@ const translateMouse = computed(() => {
         <VContainer>
           <div class="hero-text-box text-center px-6">
             <h1 class="hero-title mb-4">
-              One dashboard to manage all your business
+              Find the Perfect Tutor <br> for Your Child
             </h1>
             <h6 class="mb-6 text-h6">
-              Production-ready & easy to use Admin Template
-              for Reliability and Customizability.
+              Connect with qualified teachers in Egypt. <br> The easiest way to discover, compare, and contact private tutors.
             </h6>
             <div class="position-relative">
-              <h6 class="position-absolute hero-btn-item d-md-flex d-none text-h6 text-medium-emphasis">
+              <!-- <h6 class="position-absolute hero-btn-item d-md-flex d-none text-h6 text-medium-emphasis">
                 Join Community
                 <VImg
                   :src="joinArrow"
@@ -53,14 +52,14 @@ const translateMouse = computed(() => {
                   width="54"
                   height="31"
                 />
-              </h6>
+              </h6> -->
 
               <VBtn
                 :size="$vuetify.display.smAndUp ? 'large' : 'default' "
                 :to="{ name: 'index', hash: `#pricing-plan` }"
                 :active="false"
               >
-                Get early Access
+                Find a Tutor
               </VBtn>
             </div>
           </div>

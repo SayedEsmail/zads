@@ -2079,19 +2079,32 @@ const _____ = NuxtAuthHandler({
     CredentialsProvider.default({
       name: "Credentials",
       credentials: {},
-      // Object is required but can be left empty.
       async authorize(credentials) {
-        var _a;
-        const { user } = await $fetch(`${(_a = process.env.NUXT_PUBLIC_API_BASE_URL) != null ? _a : "/api"}/login/`, {
-          method: "POST",
-          body: JSON.stringify(credentials)
-        }).catch((err) => {
-          throw createError({
-            statusCode: err.statusCode || 403,
-            statusMessage: JSON.stringify(err.data)
+        try {
+          const apiBaseUrl = process.env.NUXT_PUBLIC_API_BASE_URL || "http://localhost:3000";
+          const response = await $fetch(`${apiBaseUrl}/auth/login`, {
+            method: "POST",
+            body: credentials
           });
-        });
-        return user || null;
+          if (response.success && response.data) {
+            const { user, token } = response.data;
+            return {
+              id: user.id,
+              name: user.name,
+              email: user.email,
+              phone: user.phone,
+              userType: user.userType,
+              accessToken: token
+              // Map other fields as needed
+            };
+          }
+          return null;
+        } catch (error) {
+          throw createError({
+            statusCode: 403,
+            statusMessage: "Invalid phone or password"
+          });
+        }
       }
     })
   ],
@@ -2099,25 +2112,23 @@ const _____ = NuxtAuthHandler({
     signIn: "/login"
   },
   callbacks: {
-    // @ts-ignore tsc cli gives error due to unknown reason even with correct types
     jwt: async ({ token, user }) => {
       if (user) {
-        token.username = user.username;
-        token.fullName = user.fullName;
-        token.avatar = user.avatar;
-        token.abilityRules = user.abilityRules;
-        token.role = user.role;
+        token.id = user.id;
+        token.phone = user.phone;
+        token.userType = user.userType;
+        token.accessToken = user.accessToken;
+        token.name = user.name;
       }
       return token;
     },
-    // @ts-ignore tsc cli gives error due to unknown reason even with correct types
-    async session({ session, token }) {
+    session: async ({ session, token }) => {
       if (session.user) {
-        session.user.username = token.username;
-        session.user.fullName = token.fullName;
-        session.user.avatar = token.avatar;
-        session.user.abilityRules = token.abilityRules;
-        session.user.role = token.role;
+        session.user.id = token.id;
+        session.user.phone = token.phone;
+        session.user.userType = token.userType;
+        session.user.accessToken = token.accessToken;
+        session.user.name = token.name;
       }
       return session;
     }

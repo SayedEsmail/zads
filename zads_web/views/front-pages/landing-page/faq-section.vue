@@ -3,24 +3,24 @@ import boyWithLogo from '@images/front-pages/landing-page/faq-boy-with-logos.png
 
 const faqData = [
   {
-    question: 'Do you charge for each upgrade?',
-    answer: 'Lemon drops chocolate cake gummies carrot cake chupa chups muffin topping. Sesame snaps icing marzipan gummi bears macaroon dragée danish caramels powder. Bear claw dragée pastry topping soufflé. Wafer gummi bears marshmallow pastry pie.',
+    question: 'How do I find a tutor?',
+    answer: 'Simply browse our list of qualified teachers, filter by subject, educational stage, and location to find the perfect match for your child.',
   },
   {
-    question: 'Do I need to purchase a license for each website?',
-    answer: 'Dessert ice cream donut oat cake jelly-o pie sugar plum cheesecake. Bear claw dragée oat cake dragée ice cream halvah tootsie roll. Danish cake oat cake pie macaroon tart donut gummies. Jelly beans candy canes carrot cake. Fruitcake chocolate chupa chups.',
+    question: 'Is Zads free for parents?',
+    answer: 'Yes, registration and searching for tutors is completely free for parents. You deal directly with the teachers.',
   },
   {
-    question: 'What is regular license?',
-    answer: 'Regular license can be used for end products that do not charge users for access or service(access is free and there will be no monthly subscription fee). Single regular license can be used for single end product and end product can be used by you or your client. If you want to sell end product to multiple clients then you will need to purchase separate license for each client. The same rule applies if you want to use the same end product on multiple domains(unique setup). For more info on regular license you can check official description.',
+    question: 'How can I become a tutor?',
+    answer: 'Register as a teacher, complete your profile with your qualifications and subjects, and start receiving requests from parents immediately.',
   },
   {
-    question: 'What is extended license?',
-    answer: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Nobis et aliquid quaerat possimus maxime! Mollitia reprehenderit neque repellat deleniti delectus architecto dolorum maxime, blanditiis earum ea, incidunt quam possimus cumque.',
+    question: 'Are the teachers verified?',
+    answer: 'We review every teacher profile to ensure quality and safety for our community giving you peace of mind.',
   },
   {
-    question: 'Which license is applicable for SASS application?',
-    answer: 'Lorem ipsum dolor sit amet consectetur, adipisicing elit. Sequi molestias exercitationem ab cum nemo facere voluptates veritatis quia, eveniet veniam at et repudiandae mollitia ipsam quasi labore enim architecto non!',
+    question: 'Can I teach online?',
+    answer: 'Yes, teachers can offer both online and in-home tutoring sessions based on their preference and agreement with parents.',
   },
 ]
 </script>

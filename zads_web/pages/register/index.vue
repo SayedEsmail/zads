@@ -4,6 +4,8 @@ import { themeConfig } from '@themeConfig'
 
 definePageMeta({
   layout: 'blank',
+  public: true,
+  unauthenticatedOnly: true,
   auth: {
     unauthenticatedOnly: true,
   },
@@ -22,10 +24,6 @@ definePageMeta({
             <VNodeRenderer :nodes="themeConfig.app.logo" />
           </div>
         </template>
-
-        <VCardTitle class="font-weight-bold text-2xl text-capitalize">
-          {{ themeConfig.app.title }}
-        </VCardTitle>
       </VCardItem>
 
       <VCardText class="pt-2 text-center">
@@ -41,34 +39,32 @@ definePageMeta({
         <VRow>
           <!-- Parent Option -->
           <VCol cols="12" md="6">
-            <VCard
-              variant="outlined"
-              class="text-center pa-4 cursor-pointer hover-card"
+            <div
+              class="d-flex flex-column align-center justify-center pa-4 border rounded cursor-pointer hover-card"
               @click="navigateTo('/register/parent')"
             >
               <VIcon icon="tabler-user-heart" size="42" color="primary" class="mb-2" />
               <h6 class="text-h6 text-primary">Parent</h6>
               <p class="text-xs mb-0">Find best teachers</p>
-            </VCard>
+            </div>
           </VCol>
 
           <!-- Teacher Option -->
           <VCol cols="12" md="6">
-            <VCard
-              variant="outlined"
-              class="text-center pa-4 cursor-pointer hover-card"
+            <div
+              class="d-flex flex-column align-center justify-center pa-4 border rounded cursor-pointer hover-card"
               @click="navigateTo('/register/teacher')"
             >
               <VIcon icon="tabler-school" size="42" color="secondary" class="mb-2" />
               <h6 class="text-h6 text-secondary">Teacher</h6>
               <p class="text-xs mb-0">Grow your career</p>
-            </VCard>
+            </div>
           </VCol>
 
           <!-- Login Link -->
           <VCol
             cols="12"
-            class="text-center text-base mt-4"
+            class="text-center text-base"
           >
             <span>Already have an account?</span>
             <NuxtLink
