@@ -18,7 +18,7 @@ const handleSubjectClick = (subjectId) => {
     >
         <VCard rounded="xl">
             <VCardItem class="pb-2">
-                <VCardTitle class="text-h6 font-weight-bold">المواد الدراسية</VCardTitle>
+                <VCardTitle class="text-h6 font-weight-bold">{{ $t('Subjects') }}</VCardTitle>
                 <template #append>
                     <VBtn icon="tabler-x" variant="text" @click="searchStore.closeSubjectsDialog()" />
                 </template>

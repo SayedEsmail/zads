@@ -16,8 +16,8 @@ export const { themeConfig, layoutConfig } = defineThemeConfig({
     contentLayoutNav: AppContentLayoutNav.Horizontal,
     overlayNavFromBreakpoint: breakpointsVuetifyV3.md - 1, // 1 for matching with vuetify breakpoint. Docs: https://next.vuetifyjs.com/en/features/display-and-platform/
     i18n: {
-      enable: false,
-      defaultLocale: 'en',
+      enable: true,
+      defaultLocale: 'ar',
       langConfig: [
         {
           label: 'English',
