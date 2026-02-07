@@ -10,6 +10,7 @@ import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const { t } = useI18n()
 
 definePageMeta({
     layout: 'blank',
@@ -38,7 +39,7 @@ const onSubmit = async () => {
         // Navigate based on user type
         router.push('/parent')
     } catch (err) {
-        error.value = err.message || 'Registration failed'
+        error.value = err.message || t('Register.RegistrationFailed')
     } finally {
         loading.value = false
     }
@@ -61,10 +62,10 @@ const onSubmit = async () => {
 
             <VCardText class="pt-2">
                 <h5 class="text-h5 mb-1">
-                    Parent Registration 👨‍👩‍👧‍👦
+                    {{ $t('Register.ParentRegistration👨‍👩‍👧‍👦') }}
                 </h5>
                 <p class="mb-0">
-                    Create an account to find the best teachers for your children
+                    {{ $t('Register.FindBestTeachers') }}
                 </p>
             </VCardText>
 
@@ -84,7 +85,7 @@ const onSubmit = async () => {
                         <VCol cols="12">
                             <AppTextField
                                 v-model="form.name"
-                                label="Full Name"
+                                :label="$t('Register.FullName')"
                                 placeholder="John Doe"
                                 :rules="[requiredValidator]"
                             />
@@ -94,8 +95,8 @@ const onSubmit = async () => {
                         <VCol cols="12">
                             <AppTextField
                                 v-model="form.phone"
-                                label="Phone Number"
-                                placeholder="01xxxxxxxxx"
+                                :label="$t('Auth.PhoneNumber')"
+                                :placeholder="$t('Auth.PhoneNumber')"
                                 :rules="[requiredValidator, phoneValidator]"
                             />
                         </VCol>
@@ -104,7 +105,7 @@ const onSubmit = async () => {
                         <VCol cols="12">
                             <AppTextField
                                 v-model="form.password"
-                                label="Password"
+                                :label="$t('Auth.Password')"
                                 :type="isPasswordVisible ? 'text' : 'password'"
                                 :append-inner-icon="isPasswordVisible ? 'tabler-eye-off' : 'tabler-eye'"
                                 :rules="[requiredValidator]"
@@ -116,7 +117,7 @@ const onSubmit = async () => {
                         <VCol cols="12">
                             <AppTextField
                                 v-model="form.confirmPassword"
-                                label="Confirm Password"
+                                :label="$t('Register.ConfirmPassword')"
                                 :type="isConfirmPasswordVisible ? 'text' : 'password'"
                                 :append-inner-icon="isConfirmPasswordVisible ? 'tabler-eye-off' : 'tabler-eye'"
                                 :rules="[requiredValidator, confirmedValidator(form.confirmPassword, form.password)]"
@@ -130,7 +131,7 @@ const onSubmit = async () => {
                                 type="submit"
                                 :loading="loading"
                             >
-                                Sign up
+                                {{ $t('Register.SignUp') }}
                             </VBtn>
                         </VCol>
 
@@ -139,7 +140,7 @@ const onSubmit = async () => {
                             class="d-flex align-center"
                         >
                             <VDivider />
-                            <span class="mx-4">or</span>
+                            <span class="mx-4">{{ $t('Auth.Or') }}</span>
                             <VDivider />
                         </VCol>
 
@@ -148,12 +149,12 @@ const onSubmit = async () => {
                             cols="12"
                             class="text-center text-base"
                         >
-                            <span>Already have an account?</span>
+                            <span>{{ $t('Register.AlreadyHaveAccount?') }}</span>
                             <NuxtLink
                                 class="text-primary ms-2"
                                 to="/login"
                             >
-                                Sign in instead
+                                {{ $t('Register.SignInInstead') }}
                             </NuxtLink>
                         </VCol>
                     </VRow>
@@ -166,3 +167,4 @@ const onSubmit = async () => {
 <style lang="scss">
 @use "@core/scss/template/pages/page-auth.scss";
 </style>
+

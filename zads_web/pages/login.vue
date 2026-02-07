@@ -10,6 +10,7 @@ import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const { t } = useI18n()
 
 definePageMeta({
     layout: 'blank',
@@ -44,7 +45,7 @@ const login = async () => {
             router.push('/')
         }
     } catch (err) {
-        error.value = err.message || 'Invalid phone or password'
+        error.value = err.message || t('Auth.InvalidCredentials')
     } finally {
         loading.value = false
     }
@@ -74,10 +75,10 @@ const onSubmit = () => {
 
             <VCardText class="pt-2 text-center">
                 <h5 class="text-h5 mb-1">
-                    Welcome to <span class="text-capitalize"> {{ themeConfig.app.title }} </span>! 👋🏻
+                    {{ t('Welcome') }} <span class="text-capitalize"> {{ themeConfig.app.title }} </span>! 👋🏻
                 </h5>
                 <p class="mb-0">
-                    Please sign-in to your account and start the adventure
+                    {{ $t('Auth.LoginAccount') }}
                 </p>
             </VCardText>
 
@@ -97,10 +98,10 @@ const onSubmit = () => {
                     class="mb-6"
                 >
                     <p class="text-sm mb-2">
-                        Parent Phone: <strong>01222222222</strong> / Pass: <strong>parent123</strong>
+                        {{ $t('Register.Parent') }} {{ $t('Auth.PhoneNumber') }}: <strong>01222222222</strong> / {{ $t('Auth.Password') }}: <strong>parent123</strong>
                     </p>
                     <p class="text-sm mb-0">
-                        Teacher Phone: <strong>01111111111</strong> / Pass: <strong>teacher123</strong>
+                        {{ $t('Register.Teacher') }} {{ $t('Auth.PhoneNumber') }}: <strong>01111111111</strong> / {{ $t('Auth.Password') }}: <strong>teacher123</strong>
                     </p>
                 </VAlert>
 
@@ -113,8 +114,8 @@ const onSubmit = () => {
                         <VCol cols="12">
                             <AppTextField
                                 v-model="form.phone"
-                                label="Phone Number"
-                                placeholder="01xxxxxxxxx"
+                                :label="$t('Auth.PhoneNumber')"
+                                :placeholder="$t('Auth.PhoneNumber')"
                                 type="tel"
                                 autofocus
                                 :rules="[requiredValidator, phoneValidator]"
@@ -125,7 +126,7 @@ const onSubmit = () => {
                         <VCol cols="12">
                             <AppTextField
                                 v-model="form.password"
-                                label="Password"
+                                :label="$t('Auth.Password')"
                                 placeholder="············"
                                 :rules="[requiredValidator]"
                                 :type="isPasswordVisible ? 'text' : 'password'"
@@ -138,13 +139,13 @@ const onSubmit = () => {
                                 <VCheckbox
                                     :id="useId()"
                                     v-model="rememberMe"
-                                    label="Remember me"
+                                    :label="$t('Auth.RememberMe')"
                                 />
                                 <NuxtLink
                                     class="text-primary ms-2 mb-1"
                                     :to="{ name: 'forgot-password' }"
                                 >
-                                    Forgot Password?
+                                    {{ $t('Auth.ForgotPassword?') }}
                                 </NuxtLink>
                             </div>
 
@@ -153,7 +154,7 @@ const onSubmit = () => {
                                 type="submit"
                                 :loading="loading"
                             >
-                                Login
+                                {{ $t('Auth.Login') }}
                             </VBtn>
                         </VCol>
 
@@ -162,12 +163,12 @@ const onSubmit = () => {
                             cols="12"
                             class="text-center"
                         >
-                            <span>New on our platform?</span>
+                            <span>{{ $t('Auth.NewOnPlatform?') }}</span>
                             <NuxtLink
                                 class="text-primary ms-1"
                                 :to="{ name: 'register' }"
                             >
-                                Create an account
+                                {{ $t('Auth.CreateAccount') }}
                             </NuxtLink>
                         </VCol>
 
@@ -176,7 +177,7 @@ const onSubmit = () => {
                             class="d-flex align-center"
                         >
                             <VDivider />
-                            <span class="mx-4">or</span>
+                            <span class="mx-4">{{ $t('Auth.Or') }}</span>
                             <VDivider />
                         </VCol>
 
@@ -190,6 +191,7 @@ const onSubmit = () => {
                     </VRow>
                 </VForm>
             </VCardText>
+
         </VCard>
     </div>
 </template>

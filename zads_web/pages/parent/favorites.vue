@@ -28,10 +28,10 @@ const handleContact = teacher => {
         <VRow class="mb-6">
             <VCol cols="12">
                 <h1 class="text-h4 mb-2">
-                    المفضلة ❤️
+                    {{ $t('FavoritesPage.MyFavorites❤️') }}
                 </h1>
                 <p class="text-body-1 text-secondary">
-                    المعلمون الذين قمت بحفظهم للوصول السريع
+                    {{ $t('FavoritesPage.FavoritesDesc') }}
                 </p>
             </VCol>
         </VRow>
@@ -55,7 +55,7 @@ const handleContact = teacher => {
                     size="small"
                     @click="store.fetchFavorites"
                 >
-                    إعادة المحاولة
+                    {{ $t('FavoritesPage.Retry') }}
                 </VBtn>
             </template>
         </VAlert>
@@ -71,17 +71,17 @@ const handleContact = teacher => {
                 color="secondary"
             />
             <h4 class="text-h6 mt-4">
-                لا توجد مفضلة
+                {{ $t('FavoritesPage.NoFavorites') }}
             </h4>
             <p class="text-body-2 text-secondary">
-                لم تقم بإضافة أي معلمين للمفضلة بعد
+                {{ $t('FavoritesPage.NoFavoritesDesc') }}
             </p>
             <VBtn
                 to="/parent"
                 color="primary"
                 class="mt-4"
             >
-                تصفح المعلمين
+                {{ $t('FavoritesPage.BrowseTeachers') }}
             </VBtn>
         </VCard>
 

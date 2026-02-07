@@ -28,10 +28,10 @@ definePageMeta({
 
       <VCardText class="pt-2 text-center">
         <h5 class="text-h5 mb-1">
-          Join Zads Community 🚀
+          {{ $t('Register.JoinZads🚀') }}
         </h5>
         <p class="mb-0">
-          Select your account type to get started
+          {{ $t('Register.SelectAccountType') }}
         </p>
       </VCardText>
 
@@ -44,8 +44,8 @@ definePageMeta({
               @click="navigateTo('/register/parent')"
             >
               <VIcon icon="tabler-user-heart" size="42" color="primary" class="mb-2" />
-              <h6 class="text-h6 text-primary">Parent</h6>
-              <p class="text-xs mb-0">Find best teachers</p>
+              <h6 class="text-h6 text-primary">{{ $t('Register.Parent') }}</h6>
+              <p class="text-xs mb-0">{{ $t('Register.FindBestTeachers') }}</p>
             </div>
           </VCol>
 
@@ -56,8 +56,8 @@ definePageMeta({
               @click="navigateTo('/register/teacher')"
             >
               <VIcon icon="tabler-school" size="42" color="secondary" class="mb-2" />
-              <h6 class="text-h6 text-secondary">Teacher</h6>
-              <p class="text-xs mb-0">Grow your career</p>
+              <h6 class="text-h6 text-secondary">{{ $t('Register.Teacher') }}</h6>
+              <p class="text-xs mb-0">{{ $t('Register.GrowYourCareer') }}</p>
             </div>
           </VCol>
 
@@ -66,12 +66,12 @@ definePageMeta({
             cols="12"
             class="text-center text-base"
           >
-            <span>Already have an account?</span>
+            <span>{{ $t('Register.AlreadyHaveAccount?') }}</span>
             <NuxtLink
               class="text-primary ms-2"
               to="/login"
             >
-              Sign in instead
+              {{ $t('Register.SignInInstead') }}
             </NuxtLink>
           </VCol>
         </VRow>

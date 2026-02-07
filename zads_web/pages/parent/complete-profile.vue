@@ -11,6 +11,7 @@ const router = useRouter()
 const parentStore = useParentStore()
 const childrenStore = useChildrenStore()
 const searchStore = useSearchStore()
+const { t } = useI18n()
 
 const step = ref(1)
 const loading = ref(false)
@@ -108,7 +109,7 @@ const addChild = async () => {
 }
 
 const removeChild = async childId => {
-    if (!confirm('هل أنت متأكد من حذف هذا الطفل؟')) return
+    if (!confirm(t('CompleteProfile.ConfirmDeleteChild'))) return
 
     loading.value = true
     try {
@@ -123,7 +124,7 @@ const removeChild = async childId => {
 
 const goToStep3 = () => {
     if (childrenStore.children.length === 0) {
-        alert('أضف طفل واحد على الأقل')
+        alert(t('CompleteProfile.AddAtLeastOneChild'))
         return
     }
     step.value = 3
@@ -160,7 +161,7 @@ const skipToHome = () => {
     <div class="complete-profile-wrapper d-flex flex-column">
         <!-- Sticky Header (Mobile) -->
         <div class="d-md-none bg-surface elevation-2 position-sticky top-0 z-index-100 pa-4 text-center">
-            <h1 class="text-h5 font-weight-bold mb-1">أكمل ملفك الشخصي</h1>
+            <h1 class="text-h5 font-weight-bold mb-1">{{ $t('CompleteProfile.CompleteProfile') }}</h1>
             <div class="d-flex align-center justify-center gap-2">
                 <template v-for="i in 3" :key="i">
                      <div 
@@ -183,10 +184,10 @@ const skipToHome = () => {
                 <!-- Desktop Header -->
                 <VCardTitle class="text-center mb-6 d-none d-md-block">
                     <h2 class="text-h3 font-weight-bold text-primary mb-2">
-                        أكمل ملفك الشخصي
+                        {{ $t('CompleteProfile.CompleteProfile') }}
                     </h2>
                     <p class="text-body-1 text-secondary">
-                        خطوات بسيطة لنقدم لك تجربة مخصصة
+                        {{ $t('CompleteProfile.ProfileStepsDesc') }}
                     </p>
                     
                     <!-- Desktop Stepper -->
@@ -201,7 +202,7 @@ const skipToHome = () => {
                                 class="px-6"
                             >
                                 <span class="font-weight-bold">{{ s }}</span>
-                                <span class="mx-2">{{ s === 1 ? 'العنوان' : s === 2 ? 'الأبناء' : 'المواد' }}</span>
+                                <span class="mx-2">{{ s === 1 ? $t('CompleteProfile.Location') : s === 2 ? $t('CompleteProfile.Children') : $t('CompleteProfile.PreferredSubjects') }}</span>
                             </VChip>
                         </VChipGroup>
                     </div>
@@ -215,8 +216,8 @@ const skipToHome = () => {
                                 <VAvatar color="primary-lighten-5" size="80" class="mb-4">
                                     <VIcon icon="tabler-map-pin" size="40" color="primary" />
                                 </VAvatar>
-                                <h3 class="text-h5 font-weight-bold">أين تسكن؟</h3>
-                                <p class="text-body-2 text-secondary">يساعدنا هذا في العثور على معلمين قريبين منك</p>
+                                <h3 class="text-h5 font-weight-bold">{{ $t('CompleteProfile.WhereDoYouLive?') }}</h3>
+                                <p class="text-body-2 text-secondary">{{ $t('CompleteProfile.LocationDesc') }}</p>
                             </div>
 
                             <VRow>
@@ -226,8 +227,8 @@ const skipToHome = () => {
                                         :items="parentStore.governorates"
                                         item-title="nameAr"
                                         item-value="id"
-                                        label="المحافظة"
-                                        placeholder="اختر المحافظة"
+                                        :label="$t('CompleteProfile.Governorate')"
+                                        :placeholder="$t('CompleteProfile.SelectGovernorate')"
                                         prepend-inner-icon="tabler-map"
                                         variant="outlined"
                                         color="primary"
@@ -239,8 +240,8 @@ const skipToHome = () => {
                                         :items="parentStore.cities"
                                         item-title="nameAr"
                                         item-value="id"
-                                        label="المدينة"
-                                        placeholder="اختر المدينة"
+                                        :label="$t('CompleteProfile.City')"
+                                        :placeholder="$t('CompleteProfile.SelectCity')"
                                         :disabled="!location.governorateId"
                                         prepend-inner-icon="tabler-building"
                                         variant="outlined"
@@ -253,8 +254,8 @@ const skipToHome = () => {
                                         :items="parentStore.areas"
                                         item-title="nameAr"
                                         item-value="id"
-                                        label="المنطقة"
-                                        placeholder="اختر المنطقة"
+                                        :label="$t('CompleteProfile.Area')"
+                                        :placeholder="$t('CompleteProfile.SelectArea')"
                                         :disabled="!location.cityId"
                                         prepend-inner-icon="tabler-point"
                                         variant="outlined"
@@ -270,13 +271,13 @@ const skipToHome = () => {
                                 <VAvatar color="primary-lighten-5" size="80" class="mb-4">
                                     <VIcon icon="tabler-users" size="40" color="primary" />
                                 </VAvatar>
-                                <h3 class="text-h5 font-weight-bold">أضف أبناءك</h3>
-                                <p class="text-body-2 text-secondary">سنقوم بترشيح المعلمين المناسبين لمراحلهم الدراسية</p>
+                                <h3 class="text-h5 font-weight-bold">{{ $t('CompleteProfile.AddChildren') }}</h3>
+                                <p class="text-body-2 text-secondary">{{ $t('CompleteProfile.ChildrenDesc') }}</p>
                             </div>
 
                             <!-- Existing children List -->
                             <div v-if="childrenStore.children.length" class="mb-6">
-                                <VLabel class="mb-2 font-weight-bold">الأبناء المضافين</VLabel>
+                                <VLabel class="mb-2 font-weight-bold">{{ $t('CompleteProfile.AddedChildren') }}</VLabel>
                                 <VRow>
                                     <VCol v-for="child in childrenStore.children" :key="child.id" cols="12" sm="6">
                                         <VCard border flat class="d-flex align-center pa-3">
@@ -297,14 +298,14 @@ const skipToHome = () => {
                             <VCard border flat class="bg-grey-50 pa-4 rounded-lg">
                                 <h4 class="text-subtitle-1 font-weight-bold mb-4 d-flex align-center">
                                     <VIcon icon="tabler-plus" size="20" class="me-2" color="primary"/>
-                                    إضافة طفل جديد
+                                    {{ $t('CompleteProfile.AddNewChild') }}
                                 </h4>
                                 <VRow>
                                     <VCol cols="12" sm="6">
                                         <VTextField
                                             v-model="newChild.name"
-                                            label="الاسم"
-                                            placeholder="أدخل اسم الطفل"
+                                            :label="$t('CompleteProfile.Name')"
+                                            :placeholder="$t('CompleteProfile.EnterChildName')"
                                             variant="outlined"
                                             bg-color="surface"
                                             hide-details="auto"
@@ -316,8 +317,8 @@ const skipToHome = () => {
                                             :items="searchStore.stages"
                                             item-title="nameAr"
                                             item-value="id"
-                                            label="المرحلة الدراسية"
-                                            placeholder="اختر المرحلة"
+                                            :label="$t('CompleteProfile.EducationalStage')"
+                                            :placeholder="$t('CompleteProfile.SelectStage')"
                                             variant="outlined"
                                             bg-color="surface"
                                             hide-details="auto"
@@ -333,7 +334,7 @@ const skipToHome = () => {
                                             @click="addChild"
                                             height="48"
                                         >
-                                            إضافة للقائمة
+                                            {{ $t('CompleteProfile.AddToList') }}
                                         </VBtn>
                                     </VCol>
                                 </VRow>
@@ -346,8 +347,8 @@ const skipToHome = () => {
                                 <VAvatar color="primary-lighten-5" size="80" class="mb-4">
                                     <VIcon icon="tabler-books" size="40" color="primary" />
                                 </VAvatar>
-                                <h3 class="text-h5 font-weight-bold">المواد المفضلة</h3>
-                                <p class="text-body-2 text-secondary">اختر المواد التي يحتاج أبناؤك مساعدة فيها</p>
+                                <h3 class="text-h5 font-weight-bold">{{ $t('CompleteProfile.PreferredSubjects') }}</h3>
+                                <p class="text-body-2 text-secondary">{{ $t('CompleteProfile.SubjectsDesc') }}</p>
                             </div>
 
                             <div v-for="child in childrenStore.children" :key="child.id" class="mb-6">
@@ -366,7 +367,7 @@ const skipToHome = () => {
                                     :items="searchStore.subjects"
                                     item-title="nameAr"
                                     item-value="id"
-                                    label="ابحث واختر المواد..."
+                                    :label="$t('CompleteProfile.SearchSelectSubjects')"
                                     multiple
                                     chips
                                     closable-chips
@@ -396,7 +397,7 @@ const skipToHome = () => {
                         @click="step--"
                         class="px-6"
                     >
-                        السابق
+                        {{ $t('CompleteProfile.Previous') }}
                     </VBtn>
                     
                     <VSpacer />
@@ -411,8 +412,8 @@ const skipToHome = () => {
                         :disabled="step === 1 ? !location.areaId : childrenStore.children.length === 0"
                         @click="step === 1 ? saveLocation() : goToStep3()"
                     >
-                        التالي
-                        <VIcon end icon="tabler-arrow-left" />
+                        {{ $t('CompleteProfile.Next') }}
+                        <VIcon end icon="tabler-arrow-left" class="flip-in-rtl" />
                     </VBtn>
 
                     <VBtn
@@ -424,7 +425,7 @@ const skipToHome = () => {
                         :loading="loading"
                         @click="saveSubjects"
                     >
-                        إنهاء وبدء الاستخدام
+                        {{ $t('CompleteProfile.FinishAndStart') }}
                         <VIcon end icon="tabler-check" />
                     </VBtn>
                 </VCardActions>
@@ -438,7 +439,7 @@ const skipToHome = () => {
                     color="secondary"
                     @click="skipToHome"
                 >
-                    تخطي وإكمال لاحقاً
+                    {{ $t('CompleteProfile.SkipAndCompleteLater') }}
                 </VBtn>
             </div>
         </VContainer>

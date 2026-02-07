@@ -6,6 +6,7 @@ definePageMeta({
 })
 
 const store = useContactRequestsStore()
+const { t } = useI18n()
 
 const statusColors = {
     pending: 'warning',
@@ -14,9 +15,9 @@ const statusColors = {
 }
 
 const statusLabels = {
-    pending: 'انتظار',
-    accepted: 'مقبول',
-    rejected: 'مرفوض',
+    pending: t('RequestsPage.Pending'),
+    accepted: t('RequestsPage.Accepted'),
+    rejected: t('RequestsPage.Rejected'),
 }
 
 onMounted(() => {
@@ -29,10 +30,10 @@ onMounted(() => {
         <VRow class="mb-6">
             <VCol cols="12">
                 <h1 class="text-h4 mb-2">
-                    طلبات التواصل 📨
+                    {{ $t('RequestsPage.ContactRequests📨') }}
                 </h1>
                 <p class="text-body-1 text-secondary">
-                    تابع حالة طلبات التواصل مع المعلمين
+                    {{ $t('RequestsPage.RequestsDesc') }}
                 </p>
             </VCol>
         </VRow>
@@ -54,23 +55,23 @@ onMounted(() => {
                     size="small"
                     @click="store.fetchMyRequests"
                 >
-                    إعادة المحاولة
+                    {{ $t('FavoritesPage.Retry') }}
                 </VBtn>
             </template>
         </VAlert>
 
         <VCard v-else-if="!store.requests.length" class="text-center py-12">
             <VIcon size="64" icon="tabler-mail-off" color="secondary" />
-            <h4 class="text-h6 mt-4">لا توجد طلبات</h4>
+            <h4 class="text-h6 mt-4">{{ $t('RequestsPage.NoRequests') }}</h4>
             <p class="text-body-2 text-secondary">
-                لم تقم بإرسال أي طلبات تواصل بعد
+                {{ $t('RequestsPage.NoRequestsDesc') }}
             </p>
             <VBtn
                 to="/parent"
                 color="primary"
                 class="mt-4"
             >
-                ابحث عن معلمين
+                {{ $t('RequestsPage.FindTeachersBtn') }}
             </VBtn>
         </VCard>
 
@@ -122,7 +123,7 @@ onMounted(() => {
                                 color="secondary"
                             />
                             <span class="text-body-2">
-                                الطالب: {{ request.child?.name }}
+                                {{ $t('RequestsPage.Student') }}: {{ request.child?.name }}
                             </span>
                             <VChip
                                 size="x-small"
@@ -135,7 +136,7 @@ onMounted(() => {
 
                         <div v-if="request.message" class="bg-grey-100 pa-3 rounded mb-3">
                             <p class="text-caption text-secondary mb-1">
-                                رسالتك:
+                                {{ $t('RequestsPage.YourMessage') }}
                             </p>
                             <p class="text-body-2 mb-0">
                                 {{ request.message }}
@@ -159,7 +160,7 @@ onMounted(() => {
                                 </span>
                             </div>
                             <p class="text-caption text-success mb-0">
-                                يمكنك الآن التواصل مع المعلم مباشرة
+                                {{ $t('RequestsPage.DirectContactMessage') }}
                             </p>
                         </div>
                     </VCardText>
