@@ -1,4 +1,5 @@
 import { canNavigate } from '@layouts/plugins/casl'
+import { useAuthStore } from '~/stores/auth'
 
 export default defineNuxtRouteMiddleware(to => {
   /*
@@ -8,8 +9,8 @@ export default defineNuxtRouteMiddleware(to => {
   if (to.meta.public)
     return
 
-  const { status } = useAuth()
-  const isLoggedIn = status.value === 'authenticated'
+  const authStore = useAuthStore()
+  const isLoggedIn = authStore.isAuthenticated
 
   /*
           If user is logged in and is trying to access login like page, redirect to home
@@ -24,15 +25,15 @@ export default defineNuxtRouteMiddleware(to => {
   }
   if (!canNavigate(to) && to.matched.length) {
     /* eslint-disable indent */
-            return navigateTo(isLoggedIn
-                ? { name: 'not-authorized' }
-                : {
-                    name: 'login',
-                    query: {
-                        ...to.query,
-                        to: to.fullPath !== '/' ? to.path : undefined,
-                    },
-                })
-            /* eslint-enable indent */
+    return navigateTo(isLoggedIn
+      ? { name: 'not-authorized' }
+      : {
+        name: 'login',
+        query: {
+          ...to.query,
+          to: to.fullPath !== '/' ? to.path : undefined,
+        },
+      })
+    /* eslint-enable indent */
   }
 })
