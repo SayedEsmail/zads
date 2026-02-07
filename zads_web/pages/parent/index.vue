@@ -14,18 +14,19 @@ const searchStore = useSearchStore()
 const favoritesStore = useFavoritesStore()
 const authStore = useAuthStore()
 const parentStore = useParentStore()
+const { t } = useI18n()
 
 const lessonTypeOptions = [
-    { title: 'الكل', value: null },
-    { title: 'أونلاين', value: 'online' },
-    { title: 'حضوري', value: 'offline' },
-    { title: 'كلاهما', value: 'both' },
+    { title: t('ViewAll'), value: null },
+    { title: t('Online'), value: 'online' },
+    { title: t('InPerson'), value: 'offline' },
+    { title: t('OnlineInPerson'), value: 'both' },
 ]
 
 const quickActions = [
-    { label: 'أبنائي', icon: 'tabler-users', color: '#E3F2FD', iconColor: '#2196F3', to: '/parent/children' },
-    { label: 'المفضلة', icon: 'tabler-heart', color: '#FFEBEE', iconColor: '#F44336', to: '/parent/favorites' },
-    { label: 'طلباتي', icon: 'tabler-clipboard-list', color: '#E0F2F1', iconColor: '#009688', to: '/parent/requests' },
+    { label: t('MyChildren'), icon: 'tabler-users', color: '#E3F2FD', iconColor: '#2196F3', to: '/parent/children' },
+    { label: t('Favorites'), icon: 'tabler-heart', color: '#FFEBEE', iconColor: '#F44336', to: '/parent/favorites' },
+    { label: t('MyRequests'), icon: 'tabler-clipboard-list', color: '#E0F2F1', iconColor: '#009688', to: '/parent/requests' },
 ]
 
 // Initialize reference data on mount
@@ -46,13 +47,13 @@ onMounted(async () => {
 })
 
 const userFirstName = computed(() => {
-    return authStore.user?.name?.split(' ')[0] || 'يا زائر'
+    return authStore.user?.name?.split(' ')[0] || t('Visitor')
 })
 
 const hasLocation = computed(() => !!parentStore.profile?.areaId)
 const locationName = computed(() => {
-    if (!hasLocation.value) return 'لم يتم تحديد الموقع'
-    return parentStore.profile.area?.nameAr || parentStore.profile.area?.city?.nameAr || 'الموقع المحدد'
+    if (!hasLocation.value) return t('NoLocation')
+    return parentStore.profile.area?.nameAr || parentStore.profile.area?.city?.nameAr || t('CustomLocation')
 })
 
 // Watch governorate changes
@@ -110,10 +111,10 @@ const handleContact = teacher => {
                             <VRow align="center">
                                 <VCol cols="12" sm="8">
                                     <h2 class="text-h4 font-weight-bold mb-2" style="color: #2D2D2D;">
-                                        مرحباً {{ userFirstName }}
+                                        {{ $t('Welcome') }} {{ userFirstName }}
                                     </h2>
                                     <p class="text-body-1 mb-0" style="color: #666666;">
-                                        اعثر على أفضل المعلمين لأبنائك بسهولة
+                                        {{ $t('FindTeachers') }}
                                     </p>
                                 </VCol>
                                 <VCol cols="12" sm="4" class="text-center d-none d-sm-block">
@@ -127,13 +128,13 @@ const handleContact = teacher => {
                             <VIcon icon="tabler-map-pin" color="primary" />
                             <span class="text-body-1 font-weight-bold">{{ locationName }}</span>
                             <VBtn variant="text" color="primary" size="small" to="/parent/profile/edit" class="ms-auto">
-                                تغيير الموقع
+                                {{ $t('ChangeLocation') }}
                             </VBtn>
                         </div>
                         
                         <VTextField
                             v-model="searchStore.filters.search"
-                            placeholder="ابحث عن معلم أو مادة..."
+                            :placeholder="$t('SearchByTeacher')"
                             variant="solo"
                             elevation="2"
                             class="search-hero-bar"
@@ -145,7 +146,7 @@ const handleContact = teacher => {
                             </template>
                             <template #append-inner>
                                 <VBtn color="primary" @click="handleSearch">
-                                    بحث الآن
+                                    {{ $t('SearchNow') }}
                                 </VBtn>
                             </template>
                         </VTextField>
@@ -153,7 +154,7 @@ const handleContact = teacher => {
                     
                     <VCol cols="12" md="5" class="d-none d-md-block">
                         <!-- Quick Actions Grid -->
-                        <div class="text-overline font-weight-bold mb-4 px-2">وصول سريع</div>
+                        <div class="text-overline font-weight-bold mb-4 px-2">{{ $t('QuickAccess') }}</div>
                         <VRow dense>
                             <VCol v-for="action in quickActions" :key="action.label" cols="4">
                                 <VCard :href="action.to" flat border class="quick-action-card text-center pa-4 rounded-xl d-flex flex-column align-center gap-2" :ripple="false">
@@ -173,8 +174,8 @@ const handleContact = teacher => {
             <!-- Categories (Subjects) Horizontal Scroll -->
             <div class="mb-10">
                 <div class="d-flex align-center justify-space-between mb-4">
-                    <h3 class="text-h5 font-weight-bold">المواد الدراسية</h3>
-                    <VBtn variant="text" color="primary" @click="searchStore.openSubjectsDialog">عرض الكل</VBtn>
+                    <h3 class="text-h5 font-weight-bold">{{ $t('Categories') }}</h3>
+                    <VBtn variant="text" color="primary" @click="searchStore.openSubjectsDialog">{{ $t('ViewAll') }}</VBtn>
                 </div>
                 <div class="subjects-scroll d-flex gap-4 overflow-x-auto pb-4 no-scrollbar">
                     <VCard
@@ -209,7 +210,7 @@ const handleContact = teacher => {
                                         color="error"
                                         @click="handleClearFilters"
                                     >
-                                        إعادة ضبط
+                                        {{ $t('Reset') }}
                                     </VBtn>
                                 </template>
                             </VCardItem>
@@ -219,7 +220,7 @@ const handleContact = teacher => {
                             <VCardText class="pa-4 d-flex flex-column gap-6">
                                 <!-- Same filter components as before but polished -->
                                 <div>
-                                    <VLabel class="mb-2 text-caption font-weight-bold text-uppercase">المادة الدراسية</VLabel>
+                                    <VLabel class="mb-2 text-caption font-weight-bold text-uppercase">{{ $t('Subjects') }}</VLabel>
                                     <VAutocomplete
                                         v-model="searchStore.filters.subjectId"
                                         :items="searchStore.subjects"
@@ -285,7 +286,7 @@ const handleContact = teacher => {
                                 </div>
 
                                 <VBtn block color="primary" @click="handleSearch" :loading="searchStore.loading">
-                                    تحديث النتائج
+                                    {{ $t('UpdateResults') }}
                                 </VBtn>
                             </VCardText>
                         </VCard>
@@ -296,7 +297,7 @@ const handleContact = teacher => {
                 <VCol cols="12" md="9">
                     <div class="d-flex align-center justify-space-between mb-6">
                         <div class="text-body-2 text-secondary">
-                            تم العثور على <span class="font-weight-bold text-primary">{{ searchStore.pagination.total }}</span> معلم متميز
+                            {{ $t('FoundTeachers', { count: searchStore.pagination.total }) }}
                         </div>
                         <!-- Optional: Sort dropdown could go here -->
                     </div>
@@ -312,8 +313,8 @@ const handleContact = teacher => {
 
                      <div v-else-if="!searchStore.teachers.length" class="text-center py-12">
                          <VIcon icon="tabler-mood-sad" size="80" color="secondary" class="mb-4" />
-                         <h3 class="text-h5">لا توجد نتائج مطابقة</h3>
-                         <p class="text-secondary">جرب تغيير الفلاتر أو البحث بكلمات أخرى</p>
+                         <h3 class="text-h5">{{ $t('NoResults') }}</h3>
+                         <p class="text-secondary">{{ $t('TryFilters') }}</p>
                      </div>
 
                      <template v-else>

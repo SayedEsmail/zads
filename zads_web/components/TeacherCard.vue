@@ -29,10 +29,10 @@ const lessonTypeLabel = computed(() => {
     if (props.teacher.lessonTypes?.length) {
         const types = props.teacher.lessonTypes
         if (types.includes('online') && (types.includes('at_teacher') || types.includes('at_student'))) {
-            return t('Online & In-Person')
+            return t('OnlineInPerson')
         }
         if (types.includes('online')) return t('Online')
-        if (types.includes('at_teacher') || types.includes('at_student')) return t('In-Person')
+        if (types.includes('at_teacher') || types.includes('at_student')) return t('InPerson')
     }
     return t('Unknown')
 })
@@ -62,8 +62,8 @@ const getLessonTypeIcon = type => {
 const getLessonTypeLabel = type => {
     switch (type) {
         case 'online': return t('Online')
-        case 'offline': return t('In-Person')
-        case 'both': return t('Online & In-Person')
+        case 'offline': return t('InPerson')
+        case 'both': return t('OnlineInPerson')
         default: return t('Unknown')
     }
 }
@@ -124,7 +124,7 @@ const formatPrice = price => {
                         class="nearby-badge position-absolute"
                         style="top: -8px; left: -8px; z-index: 1;"
                     >
-                        قريب
+                        {{ $t('Nearby') }}
                     </VChip>
                 </div>
             </template>
@@ -144,7 +144,7 @@ const formatPrice = price => {
                     class="me-1 text-secondary"
                 />
                 <span class="text-body-2 text-secondary">
-                    {{ teacher.area?.city?.nameAr || t('Not Specified') }}
+                    {{ teacher.area?.city?.nameAr || $t('NotSpecified') }}
                 </span>
             </VCardSubtitle>
 
@@ -211,7 +211,7 @@ const formatPrice = price => {
                         {{ formatPrice(computedMinPrice) }}
                     </span>
                     <span class="text-caption text-secondary d-block" style="line-height: 1;">
-                        / {{ t('Lesson') }}
+                        / {{ $t('Lesson') }}
                     </span>
                 </div>
             </div>
@@ -224,7 +224,7 @@ const formatPrice = price => {
                 variant="flat"
                 @click.prevent.stop="showContactDialog = true"
             >
-                {{ t('Contact Now') }}
+                {{ $t('ContactNow') }}
             </VBtn>
         </VCardActions>
 

@@ -136,6 +136,23 @@ export default defineNuxtConfig({
     transpile: ['vuetify'],
   },
 
+  i18n: {
+    locales: [
+      {
+        code: 'en',
+        file: 'en.json',
+      },
+      {
+        code: 'ar',
+        file: 'ar.json',
+      },
+    ],
+    lazy: true,
+    langDir: 'locales',
+    defaultLocale: 'ar',
+    strategy: 'no_prefix',
+  },
+
   modules: [
     '@vueuse/nuxt',
     '@nuxtjs/i18n',

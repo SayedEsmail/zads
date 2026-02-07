@@ -12,7 +12,7 @@ declare module 'vue-i18n' {
 declare module '@intlify/core-base' {
   // generated based on configured locales
   interface GeneratedTypeConfig { 
-    locale: string
+    locale: "en" | "ar"
   }
 }
 

@@ -901,17 +901,30 @@ const _inlineRuntimeConfig = {
     "apiBaseUrl": "http://localhost:3000/api",
     "i18n": {
       "baseUrl": "",
-      "defaultLocale": "",
+      "defaultLocale": "ar",
       "defaultDirection": "ltr",
-      "strategy": "prefix_except_default",
-      "lazy": false,
+      "strategy": "no_prefix",
+      "lazy": true,
       "rootRedirect": "",
       "routesNameSeparator": "___",
       "defaultLocaleRouteNameSuffix": "default",
       "skipSettingLocaleOnNavigate": false,
       "differentDomains": false,
       "trailingSlash": false,
-      "locales": [],
+      "locales": [
+        {
+          "code": "en",
+          "files": [
+            "/Users/sayed/Devs/Zads/zads_web/i18n/locales/en.json"
+          ]
+        },
+        {
+          "code": "ar",
+          "files": [
+            "/Users/sayed/Devs/Zads/zads_web/i18n/locales/ar.json"
+          ]
+        }
+      ],
       "detectBrowserLanguage": {
         "alwaysRedirect": false,
         "cookieCrossOrigin": false,
