@@ -45,41 +45,52 @@ const formatPrice = price => {
 
 <template>
     <VCard
-        class="teacher-card"
+        class="teacher-card h-100"
         :to="`/parent/teacher/${teacher.id}`"
+        border
+        flat
     >
-        <VCardItem>
+        <VCardItem class="pb-2">
             <template #prepend>
                 <VAvatar
-                    size="64"
+                    size="56"
                     :image="teacher.user?.avatarUrl"
-                    color="primary"
+                    class="border-1"
                 >
+                    <VImg
+                        v-if="teacher.user?.avatarUrl"
+                        :src="teacher.user?.avatarUrl"
+                        cover
+                    />
                     <span
-                        v-if="!teacher.user?.avatarUrl"
-                        class="text-h5"
+                        v-else
+                        class="text-h6 text-primary"
                     >
                         {{ teacher.user?.name?.charAt(0) }}
                     </span>
                 </VAvatar>
             </template>
 
-            <VCardTitle>{{ teacher.user?.name }}</VCardTitle>
+            <VCardTitle class="text-h6 font-weight-bold mb-1">
+                {{ teacher.user?.name }}
+            </VCardTitle>
 
-            <VCardSubtitle>
+            <VCardSubtitle class="d-flex align-center">
                 <VIcon
-                    size="14"
+                    size="16"
                     icon="tabler-map-pin"
-                    class="me-1"
+                    class="me-1 text-secondary"
                 />
-                {{ teacher.area?.city?.nameAr || 'غير محدد' }}
+                <span class="text-body-2 text-secondary">
+                    {{ teacher.area?.city?.nameAr || 'غير محدد' }}
+                </span>
             </VCardSubtitle>
 
             <template #append>
                 <VBtn
-                    v-if="showFavorite"
                     icon
                     variant="text"
+                    density="comfortable"
                     :color="teacher.isFavorite ? 'error' : 'default'"
                     @click.prevent="$emit('favorite', teacher)"
                 >
@@ -88,96 +99,69 @@ const formatPrice = price => {
             </template>
         </VCardItem>
 
-        <VCardText>
-            <p
-                v-if="teacher.bio"
-                class="text-body-2 mb-3 text-truncate-2"
-            >
-                {{ teacher.bio }}
-            </p>
-
-            <div
-                v-if="teacher.subjects?.length"
-                class="mb-3"
-            >
+        <VCardText class="flex-grow-1 pt-2">
+            <div class="d-flex gap-2 flex-wrap mb-4">
                 <VChip
-                    v-for="subject in teacher.subjects.slice(0, 3)"
+                    v-for="subject in teacher.subjects?.slice(0, 3)"
                     :key="subject.id"
                     size="small"
-                    class="me-1 mb-1"
                     color="primary"
                     variant="tonal"
+                    label
                 >
                     {{ subject.subject?.nameAr }}
                 </VChip>
-                <VChip
-                    v-if="teacher.subjects.length > 3"
+                 <VChip
+                    v-if="teacher.subjects?.length > 3"
                     size="small"
-                    variant="text"
+                    variant="tonal"
+                    color="secondary"
+                    label
                 >
                     +{{ teacher.subjects.length - 3 }}
                 </VChip>
             </div>
 
-            <div class="d-flex align-center flex-wrap gap-3">
-                <div class="d-flex align-center">
+            <p
+                v-if="teacher.bio"
+                class="text-body-2 mb-4 text-truncate-2 text-secondary"
+                style="min-height: 40px;"
+            >
+                {{ teacher.bio }}
+            </p>
+            
+            <VDivider class="mb-4" />
+
+            <div class="d-flex align-center justify-space-between">
+                <div class="d-flex align-center gap-1">
                     <VIcon
                         size="18"
                         :icon="getLessonTypeIcon(teacher.lessonType)"
-                        color="secondary"
-                        class="me-1"
+                        color="primary"
                     />
-                    <span class="text-body-2 text-secondary">
+                    <span class="text-caption font-weight-medium">
                         {{ getLessonTypeLabel(teacher.lessonType) }}
                     </span>
                 </div>
 
-                <div
-                    v-if="teacher.yearsOfExperience"
-                    class="d-flex align-center"
-                >
-                    <VIcon
-                        size="18"
-                        icon="tabler-briefcase"
-                        color="secondary"
-                        class="me-1"
-                    />
-                    <span class="text-body-2 text-secondary">
-                        {{ teacher.yearsOfExperience }} سنة
-                    </span>
-                </div>
-
-                <div
-                    v-if="teacher.minPrice"
-                    class="d-flex align-center"
-                >
-                    <VIcon
-                        size="18"
-                        icon="tabler-currency-pound"
-                        color="success"
-                        class="me-1"
-                    />
-                    <span class="text-body-2 text-success font-weight-medium">
+                <div v-if="teacher.minPrice" class="text-end">
+                    <span class="text-body-2 font-weight-bold text-success">
                         {{ formatPrice(teacher.minPrice) }}
-                        <span v-if="teacher.maxPrice && teacher.maxPrice !== teacher.minPrice">
-                            - {{ formatPrice(teacher.maxPrice) }}
-                        </span>
+                    </span>
+                    <span class="text-caption text-secondary d-block" style="line-height: 1;">
+                        / حصة
                     </span>
                 </div>
             </div>
         </VCardText>
 
-        <VCardActions>
+        <VCardActions class="p-4 pt-0">
             <VBtn
-                color="primary"
-                variant="tonal"
                 block
+                color="primary"
+                variant="flat"
                 @click.prevent.stop="showContactDialog = true"
             >
-                <VIcon
-                    start
-                    icon="tabler-message"
-                />
                 تواصل الآن
             </VBtn>
         </VCardActions>

@@ -27,6 +27,7 @@ export const useSearchStore = defineStore('search', {
         governorates: [],
         cities: [],
         areas: [],
+        isFilterDrawerOpen: false,
     }),
 
     getters: {
@@ -159,6 +160,10 @@ export const useSearchStore = defineStore('search', {
                 this.fetchStages(),
                 this.fetchGovernorates(),
             ])
+        },
+
+        toggleFilterDrawer() {
+            this.isFilterDrawerOpen = !this.isFilterDrawerOpen
         },
     },
 })
