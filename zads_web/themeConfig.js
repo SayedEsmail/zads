@@ -10,7 +10,7 @@ import { AppContentLayoutNav, ContentWidth, FooterType, NavbarType } from '@layo
 export const { themeConfig, layoutConfig } = defineThemeConfig({
   app: {
     title: 'Zads',
-    logo: h('img', { src: logo, alt: 'Zads', style: 'max-height: 34px; max-width: 100%;' }),
+    logo: h('img', { src: logo, alt: 'Zads', style: 'height: 80px; max-width: 100%;' }),
     isRTL: true,
     contentWidth: ContentWidth.Boxed,
     contentLayoutNav: AppContentLayoutNav.Horizontal,

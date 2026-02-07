@@ -43,7 +43,11 @@
         "CreateAccount": "Create an account",
         "Or": "or",
         "InvalidCredentials": "Invalid phone or password",
-        "BackToLogin": "Back to login"
+        "BackToLogin": "Back to login",
+        "Profile": "Profile",
+        "Logout": "Logout",
+        "Parent": "Parent",
+        "Teacher": "Teacher"
     },
     "Register": {
         "JoinZads🚀": "Join Zads Community 🚀",

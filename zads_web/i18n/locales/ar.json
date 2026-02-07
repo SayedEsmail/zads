@@ -43,7 +43,11 @@
         "CreateAccount": "أنشئ حساباً",
         "Or": "أو",
         "InvalidCredentials": "رقم الهاتف أو كلمة المرور غير صحيحة",
-        "BackToLogin": "العودة لتسجيل الدخول"
+        "BackToLogin": "العودة لتسجيل الدخول",
+        "Profile": "الملف الشخصي",
+        "Logout": "تسجيل الخروج",
+        "Parent": "ولي أمر",
+        "Teacher": "معلم"
     },
     "Register": {
         "JoinZads🚀": "انضم إلى مجتمع زادس 🚀",

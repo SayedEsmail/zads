@@ -58,6 +58,7 @@ const verticalNavAttrs = computed(() => {
     :class="configStore._layoutClasses"
   >
     <component
+      v-if="props.navItems.length"
       :is="verticalNavAttrs.verticalNavWrapper ? verticalNavAttrs.verticalNavWrapper : 'div'"
       v-bind="verticalNavAttrs.verticalNavWrapperProps"
       class="vertical-nav-wrapper"
@@ -76,7 +77,10 @@ const verticalNavAttrs = computed(() => {
         </template>
       </VerticalNav>
     </component>
-    <div class="layout-content-wrapper">
+    <div
+      class="layout-content-wrapper"
+      :class="{ 'ms-0': !props.navItems.length }"
+    >
       <header
         class="layout-navbar"
         :class="[{ 'navbar-blur': configStore.isNavbarBlurEnabled }]"

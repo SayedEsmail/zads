@@ -1,5 +1,13 @@
 <script setup>
+import { useAuthStore } from '~/stores/auth'
 import avatar1 from '@images/avatars/avatar-1.png'
+
+const authStore = useAuthStore()
+const { t } = useI18n()
+
+const userDisplayName = computed(() => authStore.user?.name || 'John Doe')
+const userRole = computed(() => authStore.user?.userType === 'teacher' ? t('Auth.Teacher') : t('Auth.Parent'))
+const userAvatar = computed(() => authStore.user?.avatarUrl || avatar1)
 </script>
 
 <template>
@@ -16,7 +24,7 @@ import avatar1 from '@images/avatars/avatar-1.png'
       color="primary"
       variant="tonal"
     >
-      <VImg :src="avatar1" />
+      <VImg :src="userAvatar" />
 
       <!-- SECTION Menu -->
       <VMenu
@@ -41,22 +49,22 @@ import avatar1 from '@images/avatars/avatar-1.png'
                     color="primary"
                     variant="tonal"
                   >
-                    <VImg :src="avatar1" />
+                    <VImg :src="userAvatar" />
                   </VAvatar>
                 </VBadge>
               </VListItemAction>
             </template>
 
             <VListItemTitle class="font-weight-semibold">
-              John Doe
+              {{ userDisplayName }}
             </VListItemTitle>
-            <VListItemSubtitle>Admin</VListItemSubtitle>
+            <VListItemSubtitle>{{ userRole }}</VListItemSubtitle>
           </VListItem>
 
           <VDivider class="my-2" />
 
           <!-- 👉 Profile -->
-          <VListItem link>
+          <VListItem link to="/parent/complete-profile">
             <template #prepend>
               <VIcon
                 class="me-2"
@@ -65,53 +73,14 @@ import avatar1 from '@images/avatars/avatar-1.png'
               />
             </template>
 
-            <VListItemTitle>Profile</VListItemTitle>
-          </VListItem>
-
-          <!-- 👉 Settings -->
-          <VListItem link>
-            <template #prepend>
-              <VIcon
-                class="me-2"
-                icon="tabler-settings"
-                size="22"
-              />
-            </template>
-
-            <VListItemTitle>Settings</VListItemTitle>
-          </VListItem>
-
-          <!-- 👉 Pricing -->
-          <VListItem link>
-            <template #prepend>
-              <VIcon
-                class="me-2"
-                icon="tabler-currency-dollar"
-                size="22"
-              />
-            </template>
-
-            <VListItemTitle>Pricing</VListItemTitle>
-          </VListItem>
-
-          <!-- 👉 FAQ -->
-          <VListItem link>
-            <template #prepend>
-              <VIcon
-                class="me-2"
-                icon="tabler-help"
-                size="22"
-              />
-            </template>
-
-            <VListItemTitle>FAQ</VListItemTitle>
+            <VListItemTitle>{{ $t('Auth.Profile') }}</VListItemTitle>
           </VListItem>
 
           <!-- Divider -->
           <VDivider class="my-2" />
 
           <!-- 👉 Logout -->
-          <VListItem to="/login">
+          <VListItem @click="authStore.logout(); $router.push('/login')">
             <template #prepend>
               <VIcon
                 class="me-2"
@@ -120,7 +89,7 @@ import avatar1 from '@images/avatars/avatar-1.png'
               />
             </template>
 
-            <VListItemTitle>Logout</VListItemTitle>
+            <VListItemTitle>{{ $t('Auth.Logout') }}</VListItemTitle>
           </VListItem>
         </VList>
       </VMenu>
