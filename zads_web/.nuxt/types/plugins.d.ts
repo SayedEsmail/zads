@@ -28,6 +28,7 @@ type NuxtAppInjections =
   InjectionType<typeof import("../../plugins/vuetify/index.js")> &
   InjectionType<typeof import("../../plugins/iconify/index.js")> &
   InjectionType<typeof import("../../plugins/casl/index.js")> &
+  InjectionType<typeof import("../../plugins/auth.js")> &
   InjectionType<typeof import("../../plugins/layouts.js")> &
   InjectionType<typeof import("../../plugins/webfontloader.client.js")>
 

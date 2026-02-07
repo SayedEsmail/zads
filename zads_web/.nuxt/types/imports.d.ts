@@ -225,12 +225,14 @@ declare global {
   const useBrowserLocation: typeof import('@vueuse/core')['useBrowserLocation']
   const useCached: typeof import('@vueuse/core')['useCached']
   const useCeil: typeof import('@vueuse/math')['useCeil']
+  const useChildrenStore: typeof import('../../stores/children')['useChildrenStore']
   const useClamp: typeof import('@vueuse/math')['useClamp']
   const useClipboard: typeof import('@vueuse/core')['useClipboard']
   const useClipboardItems: typeof import('@vueuse/core')['useClipboardItems']
   const useCloned: typeof import('@vueuse/core')['useCloned']
   const useColorMode: typeof import('@vueuse/core')['useColorMode']
   const useConfirmDialog: typeof import('@vueuse/core')['useConfirmDialog']
+  const useContactRequestsStore: typeof import('../../stores/contactRequests')['useContactRequestsStore']
   const useCookie: typeof import('../../node_modules/.pnpm/nuxt@3.14.1592_eslint@8.57.1_rollup@4.57.1_sass@1.76.0_stylelint@16.8.0_typescript@5.9.3_vite@5.4.11/node_modules/nuxt/dist/app/composables/cookie')['useCookie']
   const useCookieLocale: typeof import('../../node_modules/.pnpm/@nuxtjs+i18n@9.1.1_eslint@8.57.1_rollup@4.57.1_typescript@5.9.3_vue@3.5.27/node_modules/@nuxtjs/i18n/dist/runtime/composables/index')['useCookieLocale']
   const useCounter: typeof import('@vueuse/core')['useCounter']
@@ -264,6 +266,7 @@ declare global {
   const useEventSource: typeof import('@vueuse/core')['useEventSource']
   const useEyeDropper: typeof import('@vueuse/core')['useEyeDropper']
   const useFavicon: typeof import('@vueuse/core')['useFavicon']
+  const useFavoritesStore: typeof import('../../stores/favorites')['useFavoritesStore']
   const useFetch: typeof import('../../node_modules/.pnpm/nuxt@3.14.1592_eslint@8.57.1_rollup@4.57.1_sass@1.76.0_stylelint@16.8.0_typescript@5.9.3_vite@5.4.11/node_modules/nuxt/dist/app/composables/fetch')['useFetch']
   const useFileDialog: typeof import('@vueuse/core')['useFileDialog']
   const useFileSystemAccess: typeof import('@vueuse/core')['useFileSystemAccess']
@@ -322,6 +325,7 @@ declare global {
   const usePageLeave: typeof import('@vueuse/core')['usePageLeave']
   const useParallax: typeof import('@vueuse/core')['useParallax']
   const useParentElement: typeof import('@vueuse/core')['useParentElement']
+  const useParentStore: typeof import('../../stores/parent')['useParentStore']
   const usePerformanceObserver: typeof import('@vueuse/core')['usePerformanceObserver']
   const usePermission: typeof import('@vueuse/core')['usePermission']
   const usePinia: typeof import('../../node_modules/.pnpm/@pinia+nuxt@0.9.0_pinia@2.3.0/node_modules/@pinia/nuxt/dist/runtime/composables')['usePinia']
@@ -383,6 +387,7 @@ declare global {
   const useScriptYouTubePlayer: typeof import('../../node_modules/.pnpm/nuxt@3.14.1592_eslint@8.57.1_rollup@4.57.1_sass@1.76.0_stylelint@16.8.0_typescript@5.9.3_vite@5.4.11/node_modules/nuxt/dist/app/composables/script-stubs')['useScriptYouTubePlayer']
   const useScroll: typeof import('@vueuse/core')['useScroll']
   const useScrollLock: typeof import('@vueuse/core')['useScrollLock']
+  const useSearchStore: typeof import('../../stores/search')['useSearchStore']
   const useSeoMeta: typeof import('../../node_modules/.pnpm/@unhead+vue@1.11.20_vue@3.5.27/node_modules/@unhead/vue')['useSeoMeta']
   const useServerHead: typeof import('../../node_modules/.pnpm/@unhead+vue@1.11.20_vue@3.5.27/node_modules/@unhead/vue')['useServerHead']
   const useServerHeadSafe: typeof import('../../node_modules/.pnpm/@unhead+vue@1.11.20_vue@3.5.27/node_modules/@unhead/vue')['useServerHeadSafe']
@@ -694,12 +699,14 @@ declare module 'vue' {
     readonly useBrowserLocation: UnwrapRef<typeof import('@vueuse/core')['useBrowserLocation']>
     readonly useCached: UnwrapRef<typeof import('@vueuse/core')['useCached']>
     readonly useCeil: UnwrapRef<typeof import('@vueuse/math')['useCeil']>
+    readonly useChildrenStore: UnwrapRef<typeof import('../../stores/children')['useChildrenStore']>
     readonly useClamp: UnwrapRef<typeof import('@vueuse/math')['useClamp']>
     readonly useClipboard: UnwrapRef<typeof import('@vueuse/core')['useClipboard']>
     readonly useClipboardItems: UnwrapRef<typeof import('@vueuse/core')['useClipboardItems']>
     readonly useCloned: UnwrapRef<typeof import('@vueuse/core')['useCloned']>
     readonly useColorMode: UnwrapRef<typeof import('@vueuse/core')['useColorMode']>
     readonly useConfirmDialog: UnwrapRef<typeof import('@vueuse/core')['useConfirmDialog']>
+    readonly useContactRequestsStore: UnwrapRef<typeof import('../../stores/contactRequests')['useContactRequestsStore']>
     readonly useCookie: UnwrapRef<typeof import('../../node_modules/.pnpm/nuxt@3.14.1592_eslint@8.57.1_rollup@4.57.1_sass@1.76.0_stylelint@16.8.0_typescript@5.9.3_vite@5.4.11/node_modules/nuxt/dist/app/composables/cookie')['useCookie']>
     readonly useCookieLocale: UnwrapRef<typeof import('../../node_modules/.pnpm/@nuxtjs+i18n@9.1.1_eslint@8.57.1_rollup@4.57.1_typescript@5.9.3_vue@3.5.27/node_modules/@nuxtjs/i18n/dist/runtime/composables/index')['useCookieLocale']>
     readonly useCounter: UnwrapRef<typeof import('@vueuse/core')['useCounter']>
@@ -733,6 +740,7 @@ declare module 'vue' {
     readonly useEventSource: UnwrapRef<typeof import('@vueuse/core')['useEventSource']>
     readonly useEyeDropper: UnwrapRef<typeof import('@vueuse/core')['useEyeDropper']>
     readonly useFavicon: UnwrapRef<typeof import('@vueuse/core')['useFavicon']>
+    readonly useFavoritesStore: UnwrapRef<typeof import('../../stores/favorites')['useFavoritesStore']>
     readonly useFetch: UnwrapRef<typeof import('../../node_modules/.pnpm/nuxt@3.14.1592_eslint@8.57.1_rollup@4.57.1_sass@1.76.0_stylelint@16.8.0_typescript@5.9.3_vite@5.4.11/node_modules/nuxt/dist/app/composables/fetch')['useFetch']>
     readonly useFileDialog: UnwrapRef<typeof import('@vueuse/core')['useFileDialog']>
     readonly useFileSystemAccess: UnwrapRef<typeof import('@vueuse/core')['useFileSystemAccess']>
@@ -791,6 +799,7 @@ declare module 'vue' {
     readonly usePageLeave: UnwrapRef<typeof import('@vueuse/core')['usePageLeave']>
     readonly useParallax: UnwrapRef<typeof import('@vueuse/core')['useParallax']>
     readonly useParentElement: UnwrapRef<typeof import('@vueuse/core')['useParentElement']>
+    readonly useParentStore: UnwrapRef<typeof import('../../stores/parent')['useParentStore']>
     readonly usePerformanceObserver: UnwrapRef<typeof import('@vueuse/core')['usePerformanceObserver']>
     readonly usePermission: UnwrapRef<typeof import('@vueuse/core')['usePermission']>
     readonly usePinia: UnwrapRef<typeof import('../../node_modules/.pnpm/@pinia+nuxt@0.9.0_pinia@2.3.0/node_modules/@pinia/nuxt/dist/runtime/composables')['usePinia']>
@@ -852,6 +861,7 @@ declare module 'vue' {
     readonly useScriptYouTubePlayer: UnwrapRef<typeof import('../../node_modules/.pnpm/nuxt@3.14.1592_eslint@8.57.1_rollup@4.57.1_sass@1.76.0_stylelint@16.8.0_typescript@5.9.3_vite@5.4.11/node_modules/nuxt/dist/app/composables/script-stubs')['useScriptYouTubePlayer']>
     readonly useScroll: UnwrapRef<typeof import('@vueuse/core')['useScroll']>
     readonly useScrollLock: UnwrapRef<typeof import('@vueuse/core')['useScrollLock']>
+    readonly useSearchStore: UnwrapRef<typeof import('../../stores/search')['useSearchStore']>
     readonly useSeoMeta: UnwrapRef<typeof import('../../node_modules/.pnpm/@unhead+vue@1.11.20_vue@3.5.27/node_modules/@unhead/vue')['useSeoMeta']>
     readonly useServerHead: UnwrapRef<typeof import('../../node_modules/.pnpm/@unhead+vue@1.11.20_vue@3.5.27/node_modules/@unhead/vue')['useServerHead']>
     readonly useServerHeadSafe: UnwrapRef<typeof import('../../node_modules/.pnpm/@unhead+vue@1.11.20_vue@3.5.27/node_modules/@unhead/vue')['useServerHeadSafe']>
