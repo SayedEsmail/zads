@@ -188,4 +188,8 @@ export default {
   VNavigationDrawer: {
     touchless: true,
   },
+  VCard: {
+    rounded: 'lg',
+    variant: 'outlined',
+  },
 }

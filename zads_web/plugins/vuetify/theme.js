@@ -1,15 +1,15 @@
-export const staticPrimaryColor = '#7367F0'
-export const staticPrimaryDarkenColor = '#675DD8'
+export const staticPrimaryColor = '#06358d'
+export const staticPrimaryDarkenColor = '#06358d'
 export const themes = {
   light: {
     dark: false,
     colors: {
       'primary': staticPrimaryColor,
       'on-primary': '#fff',
-      'primary-darken-1': '#675DD8',
-      'secondary': '#808390',
+      'primary-darken-1': '#06358d',
+      'secondary': '#f68023',
       'on-secondary': '#fff',
-      'secondary-darken-1': '#737682',
+      'secondary-darken-1': '#f68023',
       'success': '#28C76F',
       'on-success': '#fff',
       'success-darken-1': '#24B364',
@@ -22,7 +22,7 @@ export const themes = {
       'error': '#FF4C51',
       'on-error': '#fff',
       'error-darken-1': '#E64449',
-      'background': '#F8F7FA',
+      'background': '#FFFFFF',
       'on-background': '#2F2B3D',
       'surface': '#fff',
       'on-surface': '#2F2B3D',
@@ -79,10 +79,10 @@ export const themes = {
     colors: {
       'primary': staticPrimaryColor,
       'on-primary': '#fff',
-      'primary-darken-1': '#675DD8',
-      'secondary': '#808390',
+      'primary-darken-1': '#06358d',
+      'secondary': '#f68023',
       'on-secondary': '#fff',
-      'secondary-darken-1': '#737682',
+      'secondary-darken-1': '#f68023',
       'success': '#28C76F',
       'on-success': '#fff',
       'success-darken-1': '#24B364',

@@ -125,6 +125,7 @@ declare global {
   const paginationMeta: typeof import('../../utils/paginationMeta')['paginationMeta']
   const passwordValidator: typeof import('../../@core/utils/validators')['passwordValidator']
   const pausableWatch: typeof import('@vueuse/core')['pausableWatch']
+  const phoneValidator: typeof import('../../@core/utils/validators')['phoneValidator']
   const prefetchComponents: typeof import('../../node_modules/.pnpm/nuxt@3.14.1592_eslint@8.57.1_rollup@4.57.1_sass@1.76.0_stylelint@16.8.0_typescript@5.9.3_vite@5.4.11/node_modules/nuxt/dist/app/composables/preload')['prefetchComponents']
   const prefixWithPlus: typeof import('../../@core/utils/formatters')['prefixWithPlus']
   const preloadComponents: typeof import('../../node_modules/.pnpm/nuxt@3.14.1592_eslint@8.57.1_rollup@4.57.1_sass@1.76.0_stylelint@16.8.0_typescript@5.9.3_vite@5.4.11/node_modules/nuxt/dist/app/composables/preload')['preloadComponents']
@@ -593,6 +594,7 @@ declare module 'vue' {
     readonly paginationMeta: UnwrapRef<typeof import('../../utils/paginationMeta')['paginationMeta']>
     readonly passwordValidator: UnwrapRef<typeof import('../../@core/utils/validators')['passwordValidator']>
     readonly pausableWatch: UnwrapRef<typeof import('@vueuse/core')['pausableWatch']>
+    readonly phoneValidator: UnwrapRef<typeof import('../../@core/utils/validators')['phoneValidator']>
     readonly prefetchComponents: UnwrapRef<typeof import('../../node_modules/.pnpm/nuxt@3.14.1592_eslint@8.57.1_rollup@4.57.1_sass@1.76.0_stylelint@16.8.0_typescript@5.9.3_vite@5.4.11/node_modules/nuxt/dist/app/composables/preload')['prefetchComponents']>
     readonly prefixWithPlus: UnwrapRef<typeof import('../../@core/utils/formatters')['prefixWithPlus']>
     readonly preloadComponents: UnwrapRef<typeof import('../../node_modules/.pnpm/nuxt@3.14.1592_eslint@8.57.1_rollup@4.57.1_sass@1.76.0_stylelint@16.8.0_typescript@5.9.3_vite@5.4.11/node_modules/nuxt/dist/app/composables/preload')['preloadComponents']>

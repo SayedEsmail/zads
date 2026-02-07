@@ -1,41 +1,41 @@
 <script setup>
 import check from '@images/svg/Check.svg'
-import keyboard from '@images/svg/keyboard.svg'
+import diamond from '@images/svg/Diamond.svg'
 import laptop from '@images/svg/laptop.svg'
 import paper from '@images/svg/paper-send.svg'
 import rocket from '@images/svg/rocket.svg'
-import user from '@images/svg/user.svg'
+import wallet from '@images/svg/Wallet.svg'
 
 const featuresData = [
   {
-    title: 'Quality Code',
-    desc: 'Code structure that all developers will easily understand and fall in love with.',
-    icon: laptop,
-  },
-  {
-    title: 'Continuous Updates',
-    desc: 'Free updates for the next 12 months, including new demos and features.',
-    icon: rocket,
-  },
-  {
-    title: 'Starter Kit',
-    desc: 'Start your project quickly without having to remove unnecessary features.',
-    icon: paper,
-  },
-  {
-    title: 'API Ready',
-    desc: 'Just change the endpoint and see your own data loaded within seconds.',
+    title: 'Verified Tutors',
+    desc: 'Every teacher profile is carefully reviewed to ensure qualifications and safety for your peace of mind.',
     icon: check,
   },
   {
-    title: 'Excellent Support',
-    desc: 'An easy-to-follow doc with lots of references and code examples.',
-    icon: user,
+    title: 'Smart Matching',
+    desc: 'Find the perfect tutor based on subject, educational stage, and location instantly.',
+    icon: rocket,
   },
   {
-    title: 'Well Documented',
-    desc: 'An easy-to-follow doc with lots of references and code examples.',
-    icon: keyboard,
+    title: 'Direct Communication',
+    desc: 'Connect directly with teachers to discuss your child\'s needs before committing to lessons.',
+    icon: paper,
+  },
+  {
+    title: 'Transparent Pricing',
+    desc: 'Clear hourly or monthly rates set by teachers. compare options to fit your budget.',
+    icon: wallet,
+  },
+  {
+    title: 'Top Quality',
+    desc: 'Access a network of highly rated educators dedicated to student success and excellence.',
+    icon: diamond,
+  },
+  {
+    title: 'All Subjects',
+    desc: 'From Mathematics and Science to Languages and Arts, find tutors for every educational need.',
+    icon: laptop,
   },
 ]
 </script>
@@ -50,7 +50,7 @@ const featuresData = [
           class="mb-4"
           size="small"
         >
-          Useful Features
+          Why Choose Zads
         </VChip>
         <div class="d-flex text-h4 mb-1 align-center flex-wrap justify-center">
           <div class="position-relative me-2">
@@ -58,10 +58,10 @@ const featuresData = [
               Everything you need
             </div>
           </div>
-          to start your next project
+          to support your child's education
         </div>
         <p class="text-body-1 mb-0">
-          Not just a set of tools, the package includes ready-to-deploy conceptual application.
+          Zads connects you with the best private tutors in Egypt through a simple, safe, and effective platform.
         </p>
       </div>
       <VRow>

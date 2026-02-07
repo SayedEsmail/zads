@@ -103,6 +103,7 @@ export default defineNuxtConfig({
         '@configured-variables': fileURLToPath(new URL('./assets/styles/variables/_template.scss', import.meta.url)),
         '@db': fileURLToPath(new URL('./server/fake-db/', import.meta.url)),
         '@api-utils': fileURLToPath(new URL('./server/utils/', import.meta.url)),
+        '@validators': fileURLToPath(new URL('./@core/utils/validators', import.meta.url)),
       },
     },
 

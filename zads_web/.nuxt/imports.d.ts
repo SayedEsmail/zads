@@ -38,7 +38,7 @@ export { hexToRgb, rgbaToHex } from '../@core/utils/colorConverter';
 export { avatarText, kFormatter, formatDate, formatDateToMonthShort, prefixWithPlus } from '../@core/utils/formatters';
 export { isEmpty, isNullOrUndefined, isEmptyArray, isObject, isToday } from '../@core/utils/helpers';
 export { registerPlugins } from '../@core/utils/plugins';
-export { requiredValidator, emailValidator, passwordValidator, confirmedValidator, betweenValidator, integerValidator, regexValidator, alphaValidator, urlValidator, lengthValidator, alphaDashValidator } from '../@core/utils/validators';
+export { requiredValidator, phoneValidator, emailValidator, passwordValidator, confirmedValidator, betweenValidator, integerValidator, regexValidator, alphaValidator, urlValidator, lengthValidator, alphaDashValidator } from '../@core/utils/validators';
 export { resolveVuetifyTheme } from '../@core/utils/vuetify';
 export { createUrl } from '../@core/composable/createUrl';
 export { useGenerateImageVariant } from '../@core/composable/useGenerateImageVariant';

@@ -13,19 +13,38 @@ export default NuxtAuthHandler({
     // @ts-expect-error You need to use .default here for it to work during SSR. May be fixed via Vite at some point
     CredentialsProvider.default({
       name: 'Credentials',
-      credentials: {}, // Object is required but can be left empty.
+      credentials: {},
       async authorize(credentials) {
-        const { user } = await $fetch(`${process.env.NUXT_PUBLIC_API_BASE_URL ?? '/api'}/login/`, {
-          method: 'POST',
-          body: JSON.stringify(credentials),
-        }).catch(err => {
-          throw createError({
-            statusCode: err.statusCode || 403,
-            statusMessage: JSON.stringify(err.data),
-          })
-        })
+        try {
+          const apiBaseUrl = process.env.NUXT_PUBLIC_API_BASE_URL || 'http://localhost:3000'
 
-        return user || null
+          // Use NUXT_PUBLIC_API_BASE_URL which should point to the backend API (e.g. http://localhost:3000/api)
+          const response = await $fetch(`${apiBaseUrl}/auth/login`, {
+            method: 'POST',
+            body: credentials,
+          })
+
+          if (response.success && response.data) {
+            const { user, token } = response.data
+
+            // Return user object with token to be saved in session
+            return {
+              id: user.id,
+              name: user.name,
+              email: user.email,
+              phone: user.phone,
+              userType: user.userType,
+              accessToken: token,
+              // Map other fields as needed
+            }
+          }
+          return null
+        } catch (error) {
+          throw createError({
+            statusCode: 403,
+            statusMessage: 'Invalid phone or password',
+          })
+        }
       },
     }),
   ],
@@ -33,35 +52,26 @@ export default NuxtAuthHandler({
     signIn: '/login',
   },
   callbacks: {
-        
-    // @ts-ignore tsc cli gives error due to unknown reason even with correct types
     jwt: async ({ token, user }) => {
-      /*
-             * For adding custom parameters to user in session, we first need to add those parameters
-             * in token which then will be available in the `session()` callback
-             */
+      // Initial sign in
       if (user) {
-        token.username = user.username
-        token.fullName = user.fullName
-        token.avatar = user.avatar
-        token.abilityRules = user.abilityRules
-        token.role = user.role
+        token.id = user.id
+        token.phone = user.phone
+        token.userType = user.userType
+        token.accessToken = user.accessToken
+        token.name = user.name
       }
-      
       return token
     },
-        
-    // @ts-ignore tsc cli gives error due to unknown reason even with correct types
-    async session({ session, token }) {
-      // Add custom params to user in session which are added in `jwt()` callback via `token` parameter
+
+    session: async ({ session, token }) => {
       if (session.user) {
-        session.user.username = token.username
-        session.user.fullName = token.fullName
-        session.user.avatar = token.avatar
-        session.user.abilityRules = token.abilityRules
-        session.user.role = token.role
+        session.user.id = token.id
+        session.user.phone = token.phone
+        session.user.userType = token.userType
+        session.user.accessToken = token.accessToken
+        session.user.name = token.name
       }
-      
       return session
     },
   },
