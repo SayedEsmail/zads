@@ -12,6 +12,8 @@ export default defineNuxtRouteMiddleware(to => {
   const authStore = useAuthStore()
   const isLoggedIn = authStore.isAuthenticated
 
+  console.log('ACL Middleware:', { to: to.fullPath, isLoggedIn, canNavigate: canNavigate(to) })
+
   /*
           If user is logged in and is trying to access login like page, redirect to home
           else allow visiting the page

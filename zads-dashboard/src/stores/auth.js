@@ -30,6 +30,9 @@ export const useAuthStore = defineStore('auth', {
                 this.user = response.data.user
                 this.token = response.data.token
 
+                console.log('user', this.user);
+
+
                 // Persist to localStorage
                 localStorage.setItem('user', JSON.stringify(this.user))
                 localStorage.setItem('token', this.token)

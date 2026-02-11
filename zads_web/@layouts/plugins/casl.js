@@ -15,7 +15,7 @@ export const can = (action, subject) => {
   if (!vm)
     return false
   const localCan = vm.proxy && '$can' in vm.proxy
-    
+
   return localCan ? vm.proxy?.$can(action, subject) : true
 }
 
@@ -31,20 +31,18 @@ export const canViewNavMenuGroup = item => {
   // Else check for ability using provided subject and action along with checking if has any visible child
   if (!(item.action && item.subject))
     return hasAnyVisibleChild
-  
+
   return can(item.action, item.subject) && hasAnyVisibleChild
 }
 export const canNavigate = to => {
   const ability = useAbility()
 
-  // Get the most specific route (last one in the matched array)
-  const targetRoute = to.matched[to.matched.length - 1]
+  return to.matched.every(route => {
+    const { action, subject } = route.meta
 
-  // If the target route has specific permissions, check those first
-  if (targetRoute?.meta?.action && targetRoute?.meta?.subject)
-    return ability.can(targetRoute.meta.action, targetRoute.meta.subject)
+    if (!action || !subject)
+      return true
 
-  // If no specific permissions, fall back to checking if any parent route allows access
-    
-  return to.matched.some(route => ability.can(route.meta.action, route.meta.subject))
+    return ability.can(action, subject)
+  })
 }
