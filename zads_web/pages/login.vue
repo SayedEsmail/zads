@@ -37,12 +37,17 @@ const login = async () => {
 
         // Navigate based on user type
         const userType = authStore.userType
+        console.log('Login successful. userType:', userType);
+
         if (userType === 'teacher') {
-            router.push('/teacher')
+            console.log('Redirecting to /teacher');
+            return navigateTo('/teacher')
         } else if (userType === 'parent') {
-            router.push('/parent')
+            console.log('Redirecting to /parent');
+            return navigateTo('/parent')
         } else {
-            router.push('/')
+            console.log('Redirecting to /');
+            return navigateTo('/')
         }
     } catch (err) {
         error.value = err.message || t('Auth.InvalidCredentials')
