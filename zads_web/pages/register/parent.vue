@@ -1,4 +1,5 @@
 <script setup>
+import loginIllustration from '@images/login.png'
 import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
 import { themeConfig } from '@themeConfig'
 import {
@@ -14,7 +15,7 @@ const { signIn } = useAuth()
 const { t } = useI18n()
 
 definePageMeta({
-    layout: 'public',
+    layout: 'blank',
     public: true,
 })
 
@@ -60,125 +61,217 @@ const onSubmit = async () => {
 </script>
 
 <template>
-    <div class="auth-wrapper d-flex align-center justify-center pa-4">
+    <div class="auth-page-wrapper d-flex align-center justify-center pa-4">
         <VCard
-            class="auth-card pa-4 pt-7"
-            max-width="448"
+            class="auth-card-premium overflow-hidden elevation-24"
+            max-width="1050"
+            width="100%"
         >
-            <VCardItem class="justify-center">
-                <template #prepend>
-                    <div class="d-flex">
-                        <VNodeRenderer :nodes="themeConfig.app.logo" />
-                    </div>
-                </template>
-            </VCardItem>
-
-            <VCardText class="pt-2">
-                <h5 class="text-h5 mb-1 d-flex align-center gap-2">
-                    {{ $t('Register.ParentRegistration👨‍👩‍👧‍👦') }}
-                    <VIcon icon="tabler-users" size="24" color="primary" />
-                </h5>
-                <p class="mb-0">
-                    {{ $t('Register.FindBestTeachers') }}
-                </p>
-            </VCardText>
-
-            <VCardText>
-                <VAlert
-                    v-if="error"
-                    color="error"
-                    variant="tonal"
-                    class="mb-6"
+            <VRow no-gutters>
+                <!-- Form Section -->
+                <VCol
+                    cols="12"
+                    md="6"
+                    class="auth-form-section pa-8 pa-sm-12 d-flex flex-column"
                 >
-                    {{ error }}
-                </VAlert>
+                    <!-- Logo -->
+                    <div class="mb-10">
+                        <NuxtLink to="/">
+                            <VNodeRenderer :nodes="themeConfig.app.logo" />
+                        </NuxtLink>
+                    </div>
 
-                <VForm @submit.prevent="onSubmit">
-                    <VRow>
-                        <!-- Name -->
-                        <VCol cols="12">
-                            <AppTextField
-                                v-model="form.name"
-                                :label="$t('Register.FullName')"
-                                placeholder="John Doe"
-                                :rules="[requiredValidator]"
-                            />
-                        </VCol>
+                    <div class="flex-grow-1">
+                        <h4 class="text-h4 font-weight-bold mb-2">
+                            {{ $t('Register.ParentRegistration👨‍👩‍👧‍👦') }}
+                        </h4>
+                        <p class="text-body-1 text-secondary mb-8">
+                            {{ $t('Register.FindBestTeachers') }}
+                        </p>
 
-                        <!-- Phone -->
-                        <VCol cols="12">
-                            <AppTextField
-                                v-model="form.phone"
-                                :label="$t('Auth.PhoneNumber')"
-                                :placeholder="$t('Auth.PhoneNumber')"
-                                :rules="[requiredValidator, phoneValidator]"
-                            />
-                        </VCol>
-
-                        <!-- Password -->
-                        <VCol cols="12">
-                            <AppTextField
-                                v-model="form.password"
-                                :label="$t('Auth.Password')"
-                                :type="isPasswordVisible ? 'text' : 'password'"
-                                :append-inner-icon="isPasswordVisible ? 'tabler-eye-off' : 'tabler-eye'"
-                                :rules="[requiredValidator]"
-                                @click:append-inner="isPasswordVisible = !isPasswordVisible"
-                            />
-                        </VCol>
-
-                        <!-- Confirm Password -->
-                        <VCol cols="12">
-                            <AppTextField
-                                v-model="form.confirmPassword"
-                                :label="$t('Register.ConfirmPassword')"
-                                :type="isConfirmPasswordVisible ? 'text' : 'password'"
-                                :append-inner-icon="isConfirmPasswordVisible ? 'tabler-eye-off' : 'tabler-eye'"
-                                :rules="[requiredValidator, confirmedValidator(form.confirmPassword, form.password)]"
-                                @click:append-inner="isConfirmPasswordVisible = !isConfirmPasswordVisible"
-                            />
-                        </VCol>
-
-                        <VCol cols="12">
-                            <VBtn
-                                block
-                                type="submit"
-                                :loading="loading"
-                            >
-                                {{ $t('Register.SignUp') }}
-                            </VBtn>
-                        </VCol>
-
-                        <VCol
-                            cols="12"
-                            class="d-flex align-center"
+                        <VAlert
+                            v-if="error"
+                            color="error"
+                            variant="tonal"
+                            class="mb-6 rounded-xl"
                         >
-                            <VDivider />
-                            <span class="mx-4">{{ $t('Auth.Or') }}</span>
-                            <VDivider />
-                        </VCol>
+                            {{ error }}
+                        </VAlert>
 
-                        <!-- login instead -->
-                        <VCol
-                            cols="12"
-                            class="text-center text-base"
-                        >
-                            <span>{{ $t('Register.AlreadyHaveAccount?') }}</span>
-                            <NuxtLink
-                                class="text-primary ms-2"
-                                to="/login"
-                            >
-                                {{ $t('Register.SignInInstead') }}
-                            </NuxtLink>
-                        </VCol>
-                    </VRow>
-                </VForm>
-            </VCardText>
+                        <VForm ref="refVForm" @submit.prevent="onSubmit">
+                            <VRow>
+                                <!-- Name -->
+                                <VCol cols="12">
+                                    <label class="text-subtitle-2 font-weight-bold mb-1 d-block text-high-emphasis">
+                                        {{ $t('Register.FullName') }}
+                                    </label>
+                                    <AppTextField
+                                        v-model="form.name"
+                                        placeholder="John Doe"
+                                        variant="outlined"
+                                        :rules="[requiredValidator]"
+                                        class="auth-input"
+                                    />
+                                </VCol>
+
+                                <!-- Phone -->
+                                <VCol cols="12">
+                                    <label class="text-subtitle-2 font-weight-bold mb-1 d-block text-high-emphasis">
+                                        {{ $t('Auth.PhoneNumber') }}
+                                    </label>
+                                    <AppTextField
+                                        v-model="form.phone"
+                                        :placeholder="$t('Auth.PhoneNumber')"
+                                        variant="outlined"
+                                        :rules="[requiredValidator, phoneValidator]"
+                                        class="auth-input"
+                                    />
+                                </VCol>
+
+                                <!-- Password -->
+                                <VCol cols="12">
+                                    <label class="text-subtitle-2 font-weight-bold mb-1 d-block text-high-emphasis">
+                                        {{ $t('Auth.Password') }}
+                                    </label>
+                                    <AppTextField
+                                        v-model="form.password"
+                                        placeholder="············"
+                                        :type="isPasswordVisible ? 'text' : 'password'"
+                                        variant="outlined"
+                                        :append-inner-icon="isPasswordVisible ? 'tabler-eye-off' : 'tabler-eye'"
+                                        :rules="[requiredValidator]"
+                                        @click:append-inner="isPasswordVisible = !isPasswordVisible"
+                                        class="auth-input"
+                                    />
+                                </VCol>
+
+                                <!-- Confirm Password -->
+                                <VCol cols="12">
+                                    <label class="text-subtitle-2 font-weight-bold mb-1 d-block text-high-emphasis">
+                                        {{ $t('Register.ConfirmPassword') }}
+                                    </label>
+                                    <AppTextField
+                                        v-model="form.confirmPassword"
+                                        placeholder="············"
+                                        :type="isConfirmPasswordVisible ? 'text' : 'password'"
+                                        variant="outlined"
+                                        :append-inner-icon="isConfirmPasswordVisible ? 'tabler-eye-off' : 'tabler-eye'"
+                                        :rules="[requiredValidator, confirmedValidator(form.confirmPassword, form.password)]"
+                                        @click:append-inner="isConfirmPasswordVisible = !isConfirmPasswordVisible"
+                                        class="auth-input"
+                                    />
+                                </VCol>
+
+                                <VCol cols="12" class="pt-6">
+                                    <VBtn
+                                        block
+                                        type="submit"
+                                        size="large"
+                                        :loading="loading"
+                                        color="primary"
+                                        class="rounded-xl font-weight-bold"
+                                        height="52"
+                                    >
+                                        {{ $t('Register.SignUp') }}
+                                    </VBtn>
+                                </VCol>
+
+                                <VCol cols="12" class="text-center pt-6">
+                                    <span class="text-secondary">{{ $t('Register.AlreadyHaveAccount?') }}</span>
+                                    <NuxtLink
+                                        class="text-primary font-weight-bold ms-2"
+                                        to="/login"
+                                    >
+                                        {{ $t('Register.SignInInstead') }}
+                                    </NuxtLink>
+                                </VCol>
+                            </VRow>
+                        </VForm>
+                    </div>
+                </VCol>
+
+                <!-- Illustration Section -->
+                <VCol
+                    cols="12"
+                    md="6"
+                    class="d-none d-md-flex align-center justify-center bg-light-primary position-relative pa-0"
+                >
+                    <VImg
+                        :src="loginIllustration"
+                        width="100%"
+                        height="100%"
+                        cover
+                        class="illustration-hover"
+                    />
+                    
+                    <!-- Decorative Elements -->
+                    <div class="decorative-circle-1"></div>
+                    <div class="decorative-circle-2"></div>
+                </VCol>
+            </VRow>
         </VCard>
     </div>
 </template>
 
 <style lang="scss">
-@use "@core/scss/template/pages/page-auth.scss";
+.auth-page-wrapper {
+    min-height: 100vh;
+    background: #fff !important;
+    
+    .auth-card-premium {
+        border-radius: 24px !important;
+        background: rgb(var(--v-theme-surface));
+    }
+
+    .auth-form-section {
+        background: rgb(var(--v-theme-surface));
+    }
+
+    .bg-light-primary {
+        background-color: rgba(var(--v-theme-primary), 0.03);
+    }
+
+    .auth-input {
+        .v-field {
+            border-radius: 12px !important;
+            background-color: rgb(var(--v-theme-surface));
+            
+            &.v-field--focused {
+                background-color: rgb(var(--v-theme-surface));
+            }
+        }
+    }
+
+    .decorative-circle-1 {
+        position: absolute;
+        top: -50px;
+        right: -50px;
+        width: 200px;
+        height: 200px;
+        background: rgba(var(--v-theme-primary), 0.05);
+        border-radius: 50%;
+    }
+
+    .decorative-circle-2 {
+        position: absolute;
+        bottom: 20px;
+        left: -30px;
+        width: 120px;
+        height: 120px;
+        background: rgba(var(--v-theme-secondary), 0.05);
+        border-radius: 50%;
+    }
+
+    .illustration-hover {
+        transition: transform 0.4s ease-out;
+        &:hover {
+            transform: translateY(-8px) scale(1.02);
+        }
+    }
+
+    .max-w-400 {
+        max-width: 400px;
+    }
+}
 </style>
 

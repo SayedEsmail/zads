@@ -107,13 +107,9 @@ const isPageActive = computed(() => menuItems.some(item => item.navItems.some(li
             <NuxtLink
               to="/"
               class="d-flex gap-x-4"
-              :class="$vuetify.display.mdAndUp ? 'd-none' : 'd-block'"
             >
               <div class="app-logo">
                 <VNodeRenderer :nodes="themeConfig.app.logo" />
-                <h1 class="app-logo-title">
-                  {{ themeConfig.app.title }}
-                </h1>
               </div>
             </NuxtLink>
           </VAppBarTitle>
@@ -241,24 +237,27 @@ const isPageActive = computed(() => menuItems.some(item => item.navItems.some(li
 }
 
 .app-bar-light {
-  border: 2px solid rgba(var(--v-theme-surface), 68%);
-  border-radius: 0.5rem;
-  background-color: rgba(var(--v-theme-surface), 38%);
-  transition: all 0.1s ease-in-out;
+  border: 1px solid rgba(var(--v-border-color), 0.08);
+  border-radius: 12px;
+  background-color: rgba(var(--v-theme-surface), 0.7) !important;
+  backdrop-filter: blur(12px) saturate(180%);
+  transition: all 0.3s ease-in-out;
 }
 
 .app-bar-dark {
-  border: 2px solid rgba(var(--v-theme-surface), 68%);
-  border-radius: 0.5rem;
-  background-color: rgba(255, 255, 255, 4%);
-  transition: all 0.1s ease-in-out;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  background-color: rgba(var(--v-theme-surface), 0.7) !important;
+  backdrop-filter: blur(12px) saturate(180%);
+  transition: all 0.3s ease-in-out;
 }
 
 .app-bar-scrolled {
-  border: 2px solid rgb(var(--v-theme-surface));
-  border-radius: 0.5rem;
+  border: 1px solid rgba(var(--v-border-color), 0.08);
+  border-radius: 12px;
   background-color: rgb(var(--v-theme-surface)) !important;
-  transition: all 0.1s ease-in-out;
+  box-shadow: 0 4px 25px -5px rgba(0,0,0,0.1);
+  transition: all 0.3s ease-in-out;
 }
 
 .front-page-navbar::after {
