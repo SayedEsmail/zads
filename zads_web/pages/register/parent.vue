@@ -61,8 +61,9 @@ const onSubmit = async () => {
             </VCardItem>
 
             <VCardText class="pt-2">
-                <h5 class="text-h5 mb-1">
+                <h5 class="text-h5 mb-1 d-flex align-center gap-2">
                     {{ $t('Register.ParentRegistration👨‍👩‍👧‍👦') }}
+                    <VIcon icon="tabler-users" size="24" color="primary" />
                 </h5>
                 <p class="mb-0">
                     {{ $t('Register.FindBestTeachers') }}

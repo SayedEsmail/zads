@@ -54,13 +54,35 @@ const translateMouse = computed(() => {
                 />
               </h6> -->
 
+            <div class="d-flex justify-center gap-4 flex-wrap mt-8">
               <VBtn
-                :size="$vuetify.display.smAndUp ? 'large' : 'default' "
-                :to="{ name: 'index', hash: `#pricing-plan` }"
-                :active="false"
+                size="x-large"
+                color="primary"
+                :to="{ name: 'register-parent' }"
+                prepend-icon="tabler-users"
+                class="px-8"
               >
-                Find a Tutor
+                {{ $t('Auth.Parent') }}
               </VBtn>
+              
+              <VBtn
+                size="x-large"
+                color="secondary"
+                variant="elevated"
+                :to="{ name: 'register-teacher' }"
+                prepend-icon="tabler-school"
+                class="px-8"
+              >
+                {{ $t('Auth.Teacher') }}
+              </VBtn>
+            </div>
+            
+            <div class="mt-6 text-body-1">
+              {{ $t('Auth.AlreadyHaveAccount') }}
+              <NuxtLink :to="{ name: 'login' }" class="text-primary font-weight-bold ml-1">
+                {{ $t('Auth.Login') }}
+              </NuxtLink>
+            </div>
             </div>
           </div>
         </VContainer>

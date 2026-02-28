@@ -19,9 +19,12 @@ declare module 'vue-router/auto-routes' {
    */
   export interface RouteNamedMapI18n {
     'index': RouteRecordInfo<'index', '/', Record<never, never>, Record<never, never>>,
+    'about': RouteRecordInfo<'about', '/about', Record<never, never>, Record<never, never>>,
     'forgot-password': RouteRecordInfo<'forgot-password', '/forgot-password', Record<never, never>, Record<never, never>>,
+    'how-it-works': RouteRecordInfo<'how-it-works', '/how-it-works', Record<never, never>, Record<never, never>>,
     'login': RouteRecordInfo<'login', '/login', Record<never, never>, Record<never, never>>,
     'parent': RouteRecordInfo<'parent', '/parent', Record<never, never>, Record<never, never>>,
+    'parent-children': RouteRecordInfo<'parent-children', '/parent/children', Record<never, never>, Record<never, never>>,
     'parent-complete-profile': RouteRecordInfo<'parent-complete-profile', '/parent/complete-profile', Record<never, never>, Record<never, never>>,
     'parent-favorites': RouteRecordInfo<'parent-favorites', '/parent/favorites', Record<never, never>, Record<never, never>>,
     'parent-requests': RouteRecordInfo<'parent-requests', '/parent/requests', Record<never, never>, Record<never, never>>,
@@ -30,5 +33,10 @@ declare module 'vue-router/auto-routes' {
     'register-parent': RouteRecordInfo<'register-parent', '/register/parent', Record<never, never>, Record<never, never>>,
     'register-teacher': RouteRecordInfo<'register-teacher', '/register/teacher', Record<never, never>, Record<never, never>>,
     'second-page': RouteRecordInfo<'second-page', '/second-page', Record<never, never>, Record<never, never>>,
+    'teacher': RouteRecordInfo<'teacher', '/teacher', Record<never, never>, Record<never, never>>,
+    'teacher-browse': RouteRecordInfo<'teacher-browse', '/teacher/browse', Record<never, never>, Record<never, never>>,
+    'teacher-profile': RouteRecordInfo<'teacher-profile', '/teacher/profile', Record<never, never>, Record<never, never>>,
+    'teacher-requests': RouteRecordInfo<'teacher-requests', '/teacher/requests', Record<never, never>, Record<never, never>>,
+    'teacher-subjects': RouteRecordInfo<'teacher-subjects', '/teacher/subjects', Record<never, never>, Record<never, never>>,
   }
 }

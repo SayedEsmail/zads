@@ -165,43 +165,37 @@ const handleFavorite = async () => {
             <VCol cols="12" md="8">
                 <VCard title="Subjects & Pricing" class="h-100">
                     <VCardText>
-                        <VTable hover>
-                            <thead>
-                                <tr>
-                                    <th>Subject</th>
-                                    <th>Stage</th>
-                                    <th>Price</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr
-                                    v-for="subject in teacher.subjects"
-                                    :key="subject.id"
-                                >
-                                    <td>
-                                        <div class="d-flex align-center">
-                                            <VAvatar
-                                                size="32"
-                                                color="primary"
-                                                variant="tonal"
-                                                class="me-2"
-                                            >
-                                                <VIcon icon="tabler-book" size="18" />
-                                            </VAvatar>
-                                            {{ subject.subject?.nameAr }}
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <VChip size="small">
+                        <VList lines="two" bg-color="transparent" class="pricing-list">
+                            <template v-for="(subject, index) in teacher.subjects" :key="subject.id">
+                                <VListItem class="px-0 py-3">
+                                    <template #prepend>
+                                        <VAvatar size="40" color="primary" variant="tonal" class="me-3 rounded-lg">
+                                            <VIcon icon="tabler-book" size="20" />
+                                        </VAvatar>
+                                    </template>
+                                    
+                                    <VListItemTitle class="font-weight-bold mb-1">
+                                        {{ subject.subject?.nameAr }}
+                                    </VListItemTitle>
+                                    
+                                    <VListItemSubtitle>
+                                        <VChip size="x-small" color="secondary" variant="flat" class="text-white">
                                             {{ subject.stage?.nameAr }}
                                         </VChip>
-                                    </td>
-                                    <td class="text-primary font-weight-bold">
-                                        {{ formatPrice(subject.price) }}
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </VTable>
+                                    </VListItemSubtitle>
+                                    
+                                    <template #append>
+                                        <div class="text-end">
+                                            <div class="text-primary font-weight-bold text-h6">
+                                                {{ formatPrice(subject.price) }}
+                                            </div>
+                                            <div class="text-caption text-secondary">/ {{ $t('Lesson') }}</div>
+                                        </div>
+                                    </template>
+                                </VListItem>
+                                <VDivider v-if="index !== teacher.subjects.length - 1" />
+                            </template>
+                        </VList>
                     </VCardText>
                 </VCard>
             </VCol>

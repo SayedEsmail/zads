@@ -65,16 +65,7 @@ export const nuxtI18nOptions = {
   "strategy": "no_prefix",
   "lazy": true,
   "langDir": "locales",
-  "detectBrowserLanguage": {
-    "alwaysRedirect": false,
-    "cookieCrossOrigin": false,
-    "cookieDomain": null,
-    "cookieKey": "i18n_redirected",
-    "cookieSecure": false,
-    "fallbackLocale": "",
-    "redirectOn": "root",
-    "useCookie": true
-  },
+  "detectBrowserLanguage": false,
   "differentDomains": false,
   "baseUrl": "",
   "customRoutes": "page",

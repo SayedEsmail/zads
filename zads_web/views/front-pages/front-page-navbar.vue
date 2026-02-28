@@ -51,76 +51,19 @@ const isPageActive = computed(() => menuItems.some(item => item.navItems.some(li
       <div>
         <div class="d-flex flex-column gap-y-4 pa-4">
           <NuxtLink
-            v-for="(item, index) in ['Home', 'Features']"
-            :key="index"
-            :to="{ name: 'index', hash: `#${item.toLowerCase().replace(' ', '-')}` }"
+            to="/about"
             class="nav-link font-weight-medium"
-            :class="[props.activeId?.toLocaleLowerCase().replace('-', ' ') === item.toLocaleLowerCase() ? 'active-link' : '']"
+            :class="[route.path === '/about' ? 'active-link' : '']"
           >
-            {{ item }}
+            {{ $t('Navbar.About') || 'About' }}
           </NuxtLink>
 
-          <div class="font-weight-medium cursor-pointer">
-            <div
-              :class="[isMenuOpen ? 'mb-6 active-link' : '', isPageActive ? 'active-link' : '']"
-              style="color: rgba(var(--v-theme-on-surface));"
-              class="page-link"
-              @click="isMenuOpen = !isMenuOpen"
-            >
-              Pages <VIcon :icon="isMenuOpen ? 'tabler-chevron-up' : 'tabler-chevron-down'" />
-            </div>
-
-            <div
-              class="px-4"
-              :class="isMenuOpen ? 'd-block' : 'd-none'"
-            >
-              <div
-                v-for="(item, index) in menuItems"
-                :key="index"
-              >
-                <div class="d-flex align-center gap-x-3 mb-4">
-                  <VAvatar
-                    variant="tonal"
-                    color="primary"
-                    rounded
-                    :icon="item.listIcon"
-                  />
-                  <div class="text-body-1 text-high-emphasis font-weight-medium">
-                    {{ item.listTitle }}
-                  </div>
-                </div>
-                <ul class="mb-6">
-                  <li
-                    v-for="listItem in item.navItems"
-                    :key="listItem.name"
-                    style="list-style: none;"
-                    class="text-body-1 mb-4 text-no-wrap"
-                  >
-                    <NuxtLink
-                      :to="listItem.to"
-                      :target="item.listTitle === 'Page' ? '_self' : '_blank'"
-                      class="mega-menu-item"
-                      :class="isCurrentRoute(listItem.to) ? 'active-link' : 'text-high-emphasis'"
-                    >
-                      <VIcon
-                        icon="tabler-circle"
-                        :size="10"
-                        class="me-2"
-                      />
-                      <span>  {{ listItem.name }}</span>
-                    </NuxtLink>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-
           <NuxtLink
-            to="/"
-            target="_blank"
-            class="font-weight-medium nav-link"
+            to="/how-it-works"
+            class="nav-link font-weight-medium"
+            :class="[route.path === '/how-it-works' ? 'active-link' : '']"
           >
-            Admin
+            {{ $t('Navbar.HowItWorks') || 'How It Works' }}
           </NuxtLink>
         </div>
       </div>
@@ -175,102 +118,19 @@ const isPageActive = computed(() => menuItems.some(item => item.navItems.some(li
           <!-- landing page sections -->
           <div class="text-base align-center d-none d-md-flex">
             <NuxtLink
-              v-for="(item, index) in ['Home', 'Features']"
-              :key="index"
-              :to="{ name: 'index', hash: `#${item.toLowerCase().replace(' ', '-')}` }"
+              to="/about"
               class="nav-link font-weight-medium py-2 px-2 px-lg-4"
-              :class="[props.activeId?.toLocaleLowerCase().replace('-', ' ') === item.toLocaleLowerCase() ? 'active-link' : '']"
+              :class="[route.path === '/about' ? 'active-link' : '']"
             >
-              {{ item }}
+              {{ $t('Navbar.About') || 'About' }}
             </NuxtLink>
 
-            <!-- Pages Menu -->
-            <span
-              class="font-weight-medium cursor-pointer px-2 px-lg-4 py-2"
-              :class="isPageActive || isMegaMenuOpen ? 'active-link' : ''"
-              style="color: rgba(var(--v-theme-on-surface));"
-            >
-              Pages
-              <VIcon
-                icon="tabler-chevron-down"
-                size="16"
-                class="ms-2"
-              />
-              <VMenu
-                v-model="isMegaMenuOpen"
-                open-on-hover
-                activator="parent"
-                transition="slide-y-transition"
-                location="bottom center"
-                offset="16"
-                content-class="mega-menu"
-                location-strategy="static"
-                close-on-content-click
-              >
-                <VCard max-width="1000">
-                  <VCardText class="pa-8">
-                    <div class="nav-menu">
-                      <div
-                        v-for="(item, index) in menuItems"
-                        :key="index"
-                      >
-                        <div class="d-flex align-center gap-x-3 mb-6">
-                          <VAvatar
-                            variant="tonal"
-                            color="primary"
-                            rounded
-                            :icon="item.listIcon"
-                          />
-                          <div class="text-body-1 text-high-emphasis font-weight-medium">
-                            {{ item.listTitle }}
-                          </div>
-                        </div>
-                        <ul>
-                          <li
-                            v-for="listItem in item.navItems"
-                            :key="listItem.name"
-                            style="list-style: none;"
-                            class="text-body-1 mb-4 text-no-wrap"
-                          >
-                            <NuxtLink
-                              class="mega-menu-item"
-                              :to="listItem.to"
-                              :target="item.listTitle === 'Page' ? '_self' : '_blank'"
-                              :class="isCurrentRoute(listItem.to) ? 'active-link' : 'text-high-emphasis'"
-                            >
-                              <div class="d-flex align-center">
-                                <VIcon
-                                  icon="tabler-circle"
-                                  color="primary"
-                                  :size="10"
-                                  class="me-2"
-                                />
-                                <span>{{ listItem.name }}</span>
-                              </div>
-                            </NuxtLink>
-                          </li>
-                        </ul>
-                      </div>
-                      <img
-                        :src="navImg"
-                        alt="Navigation Image"
-                        class="d-inline-block rounded-lg"
-                        style="border: 10px solid rgb(var(--v-theme-background));"
-                        :width="$vuetify.display.lgAndUp ? '330' : '250'"
-                        :height="$vuetify.display.lgAndUp ? '330' : '250'"
-                      >
-                    </div>
-                  </VCardText>
-                </VCard>
-              </VMenu>
-            </span>
-
             <NuxtLink
-              to="/"
-              target="_blank"
-              class="font-weight-medium nav-link"
+              to="/how-it-works"
+              class="nav-link font-weight-medium py-2 px-2 px-lg-4"
+              :class="[route.path === '/how-it-works' ? 'active-link' : '']"
             >
-              Admin
+              {{ $t('Navbar.HowItWorks') || 'How It Works' }}
             </NuxtLink>
           </div>
         </div>
@@ -278,31 +138,13 @@ const isPageActive = computed(() => menuItems.some(item => item.navItems.some(li
         <VSpacer />
 
         <div class="d-flex gap-x-4">
-
-
           <VBtn
-            v-if="$vuetify.display.lgAndUp"
-            prepend-icon="tabler-shopping-cart"
+            prepend-icon="tabler-login"
             variant="elevated"
             color="primary"
-            href="https://1.envato.market/vuexy_admin"
-            target="_blank"
-            rel="noopener noreferrer"
+            :to="{ name: 'login' }"
           >
-            Purchase Now
-          </VBtn>
-
-          <VBtn
-            v-else
-            rounded
-            icon
-            variant="elevated"
-            color="primary"
-            href="https://1.envato.market/vuexy_admin"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <VIcon icon="tabler-shopping-cart" />
+            {{ $t('Auth.Login') }}
           </VBtn>
         </div>
       </VAppBar>

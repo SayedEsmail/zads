@@ -50,7 +50,7 @@
         "Teacher": "معلم"
     },
     "Register": {
-        "JoinZads🚀": "انضم إلى مجتمع زادس 🚀",
+        "JoinZads🚀": "انضم إلى مجتمع زادس",
         "SelectAccountType": "اختر نوع الحساب للبدء",
         "Parent": "ولي أمر",
         "Teacher": "معلم",
@@ -58,15 +58,82 @@
         "GrowYourCareer": "طور مسيرتك المهنية",
         "AlreadyHaveAccount?": "لديك حساب بالفعل؟",
         "SignInInstead": "سجل دخولك بدلاً من ذلك",
-        "ParentRegistration👨‍👩‍👧‍👦": "تسجيل ولي أمر 👨‍👩‍👧‍👦",
-        "TeacherRegistration👨‍🏫": "تسجيل معلم 👨‍🏫",
+        "ParentRegistration👨‍👩‍👧‍👦": "تسجيل ولي أمر",
+        "TeacherRegistration👨‍🏫": "تسجيل معلم",
         "FullName": "الاسم الكامل",
         "ConfirmPassword": "تأكيد كلمة المرور",
         "SignUp": "إنشاء حساب",
         "RegistrationFailed": "فشل إنشاء الحساب"
     },
-    "ForgotPassword": {
-        "ForgotPassword?🔒": "نسيت كلمة المرور؟ 🔒",
+    "TeacherDashboard": {
+        "Title": "لوحة تحكم المعلم",
+        "WelcomeBack": "مرحباً بك مجدداً، {name}",
+        "TotalViews": "إجمالي المشاهدات",
+        "AverageRating": "متوسط التقييم",
+        "Reviews": "تقييمات",
+        "ContactRequests": "طلبات التواصل"
+    },
+    "TeacherProfile": {
+        "Title": "تعديل الملف الشخصي",
+        "Desc": "قم بتحديث بياناتك، نبذتك التعريفية، وموقعك الجغرافي ليسهل على أولياء الأمور العثور عليك.",
+        "Biography": "النبذة التعريفية",
+        "BioLabel": "عن المعلم",
+        "BioPlaceholder": "اكتب نبذة مختصرة عن نفسك، طريقة تدريسك، وأهدافك التعليمية...",
+        "ProfessionalDetails": "التفاصيل المهنية",
+        "Qualification": "المؤهل الدراسي",
+        "ExperienceYears": "سنوات الخبرة",
+        "DeliveryModes": "طرق التدريس",
+        "SelectDeliveryModes": "اختر طرق التدريس المتاحة",
+        "SelectAtLeastOneMode": "يجب اختيار طريقة تدريس واحدة على الأقل",
+        "ProfileUpdatedSuccess": "تم تحديث الملف الشخصي بنجاح",
+        "ProfileUpdateFailed": "فشل تحديث الملف الشخصي"
+    },
+    "TeacherSubjects": {
+        "Title": "المواد والأسعار",
+        "Desc": "أدر المواد التي تدرسها وأسعار الحصص لكل مرحلة دراسية.",
+        "AddSubject": "إضافة مادة",
+        "AddFirstSubject": "أضف مادتك الأولى",
+        "NoSubjects": "لا توجد مواد مضافة",
+        "NoSubjectsDesc": "قم بإضافة المواد التي تدرسها لكي تظهر للطلاب في نتائج البحث.",
+        "Active": "نشط",
+        "Inactive": "غير نشط",
+        "PriceAtTeacher": "السعر (عند المعلم)",
+        "PriceAtStudent": "السعر (عند الطالب)",
+        "PriceGroup": "السعر (مجموعة)",
+        "Edit": "تعديل السعر",
+        "EditSubject": "تعديل المادة السعرية",
+        "PricingConfiguration": "إعدادات الأسعار",
+        "PricingDesc": "أدخل سعر الحصة (بالجنيه المصري) للطرق التي تود تفعيلها، واترك الباقي فارغاً.",
+        "AddSuccess": "تم إضافة المادة بنجاح",
+        "AddFailed": "حدث خطأ أثناء إضافة المادة",
+        "UpdateSuccess": "تم تحديث المادة بنجاح",
+        "UpdateFailed": "حدث خطأ أثناء تحديث المادة"
+    },
+    "TeacherRequests": {
+        "Title": "طلبات التواصل الواردة",
+        "Desc": "راجع الطلبات المرسلة من أولياء الأمور للاستفسار أو حجز حصص دراسية لأبنائهم.",
+        "NoRequests": "لا توجد طلبات واردة حالياً",
+        "NoRequestsDesc": "عندما يقوم أحد أولياء الأمور بالتواصل معك، سيظهر طلبه هنا.",
+        "Accept": "قبول الطلب",
+        "Reject": "رفض الطلب",
+        "StatusUpdatedSuccess": "تم تحديث حالة الطلب بنجاح",
+        "StatusUpdateFailed": "فشل تحديث حالة الطلب"
+    },
+    "TeacherBrowse": {
+        "Title": "تصفح طلبات التدريس",
+        "Desc": "ابحث عن أولياء الأمور الذين يبحثون عن معلمين وتواصل معهم مباشرة.",
+        "NoRequests": "لا توجد طلبات حالياً",
+        "NoRequestsDesc": "لم يقم أي ولي أمر بطلب معلم بعد، يرجى المحاولة في وقت لاحق.",
+        "ContactParent": "تواصل مع ولي الأمر (واتساب)"
+    },
+    "UnknownParent": "ولي أمر غير معروف",
+    "RequestStatus": {
+        "pending": "قيد الانتظار",
+        "accepted": "تم القبول",
+        "rejected": "مرفوض"
+    },
+    "ParentDashboard": {
+        "ForgotPassword?🔒": "نسيت كلمة المرور؟",
         "ForgotPasswordDesc": "أدخل بريدك الإلكتروني وسنرسل لك تعليمات لاستعادة كلمة المرور",
         "Email": "البريد الإلكتروني",
         "SendResetLink": "إرسال رابط الاستعادة"
@@ -104,7 +171,7 @@
         "AddAtLeastOneChild": "أضف طفل واحد على الأقل"
     },
     "FavoritesPage": {
-        "MyFavorites❤️": "المفضلة ❤️",
+        "MyFavorites❤️": "المفضلة",
         "FavoritesDesc": "المعلمون الذين قمت بحفظهم للوصول السريع",
         "NoFavorites": "لا توجد مفضلة",
         "NoFavoritesDesc": "لم تقم بإضافة أي معلمين للمفضلة بعد",
@@ -112,7 +179,7 @@
         "Retry": "إعادة المحاولة"
     },
     "RequestsPage": {
-        "ContactRequests📨": "طلبات التواصل 📨",
+        "ContactRequests📨": "طلبات التواصل",
         "RequestsDesc": "تابع حالة طلبات التواصل مع المعلمين",
         "NoRequests": "لا توجد طلبات",
         "NoRequestsDesc": "لم تقم بإرسال أي طلبات تواصل بعد",
@@ -123,5 +190,17 @@
         "Pending": "انتظار",
         "Accepted": "مقبول",
         "Rejected": "مرفوض"
+    },
+    "Navbar": {
+        "About": "من نحن",
+        "HowItWorks": "كيف نعمل"
+    },
+    "About": {
+        "Title": "من نحن",
+        "Description": "هذا القسم قيد الإنشاء. سيحتوي على معلومات حول رسالة زادس وفريقنا."
+    },
+    "HowItWorks": {
+        "Title": "كيف نعمل",
+        "Description": "هذا القسم قيد الإنشاء. سيحتوي على معلومات حول كيفية عمل المنصة للآباء والمعلمين."
     }
 }

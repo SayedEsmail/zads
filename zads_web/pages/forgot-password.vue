@@ -70,8 +70,9 @@ definePageMeta({
         class="mt-12 mt-sm-0 pa-4"
       >
         <VCardText>
-          <h4 class="text-h4 mb-1">
+          <h4 class="text-h4 mb-1 d-flex gap-2">
             {{ $t('ForgotPassword.ForgotPassword?🔒') }}
+            <VIcon icon="tabler-lock" size="32" color="primary" />
           </h4>
           <p class="mb-0">
             {{ $t('ForgotPassword.ForgotPasswordDesc') }}

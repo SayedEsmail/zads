@@ -39,10 +39,10 @@ const login = async () => {
         const userType = authStore.userType
         console.log('Login successful. userType:', userType);
 
-        if (userType === 'teacher') {
+        if (userType === 'TEACHER') {
             console.log('Redirecting to /teacher');
             return navigateTo('/teacher')
-        } else if (userType === 'parent') {
+        } else if (userType === 'PARENT') {
             console.log('Redirecting to /parent');
             return navigateTo('/parent')
         } else {

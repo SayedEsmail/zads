@@ -50,7 +50,7 @@
         "Teacher": "Teacher"
     },
     "Register": {
-        "JoinZads🚀": "Join Zads Community 🚀",
+        "JoinZads🚀": "Join Zads Community",
         "SelectAccountType": "Select your account type to get started",
         "Parent": "Parent",
         "Teacher": "Teacher",
@@ -58,15 +58,88 @@
         "GrowYourCareer": "Grow your career",
         "AlreadyHaveAccount?": "Already have an account?",
         "SignInInstead": "Sign in instead",
-        "ParentRegistration👨‍👩‍👧‍👦": "Parent Registration 👨‍👩‍👧‍👦",
-        "TeacherRegistration👨‍🏫": "Teacher Registration 👨‍🏫",
+        "ParentRegistration👨‍👩‍👧‍👦": "Parent Registration",
+        "TeacherRegistration👨‍🏫": "Teacher Registration",
         "FullName": "Full Name",
         "ConfirmPassword": "Confirm Password",
         "SignUp": "Sign up",
         "RegistrationFailed": "Registration failed"
     },
+    "TeacherDashboard": {
+        "Title": "Teacher Dashboard",
+        "WelcomeBack": "Welcome back, {name}",
+        "TotalViews": "Total Profile Views",
+        "AverageRating": "Average Rating",
+        "Reviews": "reviews",
+        "ContactRequests": "Contact Requests"
+    },
+    "TeacherProfile": {
+        "Title": "Edit Profile",
+        "Desc": "Update your information, biography, and geographical location to make it easier for parents to find you.",
+        "Biography": "Biography",
+        "BioLabel": "About the Teacher",
+        "BioPlaceholder": "Write a brief description about yourself, your teaching methodology, and your goals...",
+        "ProfessionalDetails": "Professional Details",
+        "Qualification": "Qualification",
+        "ExperienceYears": "Years of Experience",
+        "DeliveryModes": "Teaching Methods",
+        "SelectDeliveryModes": "Select Available Teaching Methods",
+        "SelectAtLeastOneMode": "You must select at least one teaching method",
+        "ProfileUpdatedSuccess": "Profile updated successfully",
+        "ProfileUpdateFailed": "Failed to update profile"
+    },
+    "TeacherSubjects": {
+        "Title": "Subjects & Pricing",
+        "Desc": "Manage the subjects you teach and course pricing for each educational stage.",
+        "AddSubject": "Add Subject",
+        "AddFirstSubject": "Add Your First Subject",
+        "NoSubjects": "No Subjects Added",
+        "NoSubjectsDesc": "Add the subjects you teach so students can find you in search results.",
+        "Active": "Active",
+        "Inactive": "Inactive",
+        "PriceAtTeacher": "Price (At Teacher)",
+        "PriceAtStudent": "Price (At Student)",
+        "PriceGroup": "Price (Group)",
+        "Edit": "Edit Pricing",
+        "EditSubject": "Edit Subject Pricing",
+        "PricingConfiguration": "Pricing Configuration",
+        "PricingDesc": "Enter the lesson price (in EGP) for the methods you want to enable, and leave the rest blank.",
+        "AddSuccess": "Subject added successfully",
+        "AddFailed": "An error occurred while adding the subject",
+        "UpdateSuccess": "Subject updated successfully",
+        "UpdateFailed": "An error occurred while updating the subject"
+    },
+    "TeacherRequests": {
+        "Title": "Incoming Contact Requests",
+        "Desc": "Review requests sent by parents inquiring about or booking lessons for their children.",
+        "NoRequests": "No incoming requests currently",
+        "NoRequestsDesc": "When a parent contacts you, their request will appear here.",
+        "Accept": "Accept Request",
+        "Reject": "Reject Request",
+        "StatusUpdatedSuccess": "Request status updated successfully",
+        "StatusUpdateFailed": "Failed to update request status"
+    },
+    "TeacherBrowse": {
+        "Title": "Browse Tutor Requests",
+        "Desc": "Find parents looking for teachers and contact them directly.",
+        "NoRequests": "No requests currently",
+        "NoRequestsDesc": "No parent has posted a tutor request yet. Please check back later.",
+        "ContactParent": "Contact Parent (WhatsApp)"
+    },
+    "UnknownParent": "Unknown Parent",
+    "RequestStatus": {
+        "pending": "Pending",
+        "accepted": "Accepted",
+        "rejected": "Rejected"
+    },
+    "ParentDashboard": {
+        "ForgotPassword?🔒": "Forgot Password?",
+        "ForgotPasswordDesc": "Enter your email and we'll send you instructions to reset your password",
+        "Email": "Email",
+        "SendResetLink": "Send Reset Link"
+    },
     "ForgotPassword": {
-        "ForgotPassword?🔒": "Forgot Password? 🔒",
+        "ForgotPassword?🔒": "Forgot Password?",
         "ForgotPasswordDesc": "Enter your email and we'll send you instructions to reset your password",
         "Email": "Email",
         "SendResetLink": "Send Reset Link"
@@ -104,7 +177,7 @@
         "AddAtLeastOneChild": "Add at least one child"
     },
     "FavoritesPage": {
-        "MyFavorites❤️": "Favorites ❤️",
+        "MyFavorites❤️": "Favorites",
         "FavoritesDesc": "Teachers you saved for quick access",
         "NoFavorites": "No favorites found",
         "NoFavoritesDesc": "You haven't added any teachers to favorites yet",
@@ -112,7 +185,7 @@
         "Retry": "Retry"
     },
     "RequestsPage": {
-        "ContactRequests📨": "Contact Requests 📨",
+        "ContactRequests📨": "Contact Requests",
         "RequestsDesc": "Track the status of your contact requests with teachers",
         "NoRequests": "No requests found",
         "NoRequestsDesc": "You haven't sent any contact requests yet",
@@ -123,5 +196,17 @@
         "Pending": "Pending",
         "Accepted": "Accepted",
         "Rejected": "Rejected"
+    },
+    "Navbar": {
+        "About": "About",
+        "HowItWorks": "How It Works"
+    },
+    "About": {
+        "Title": "About",
+        "Description": "This section is under construction. It will contain information about the Zads mission and our team."
+    },
+    "HowItWorks": {
+        "Title": "How It Works",
+        "Description": "This section is under construction. It will contain information on how the platform operates for Parents and Teachers."
     }
 }
