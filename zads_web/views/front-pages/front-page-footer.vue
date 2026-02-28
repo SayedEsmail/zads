@@ -6,17 +6,8 @@
     <!-- 👉 Footer Line -->
     <div class="footer-line w-100">
       <VContainer>
-          <div class="text-body-1 text-white-variant text-wrap text-center me-4">
-            &copy;
-
-            {{ new Date().getFullYear() }}
-            <a
-              href="https://zads.app/"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="font-weight-bold ms-1 text-white"
-            >Zads</a>,
-            All rights reserved.
+          <div class="text-body-2 text-white opacity-70 text-wrap text-center py-4">
+            &copy; {{ new Date().getFullYear() }} Zads. {{ $t('Footer.AllRightsReserved') }}.
           </div>
       </VContainer>
     </div>

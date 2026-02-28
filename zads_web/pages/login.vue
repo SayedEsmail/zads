@@ -1,11 +1,11 @@
 <script setup>
+import loginIllustration from '@images/login.png'
 import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
 import { themeConfig } from '@themeConfig'
 import {
     phoneValidator,
     requiredValidator,
 } from '@validators'
-import AuthProvider from '@/views/pages/authentication/AuthProvider.vue'
 import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
@@ -14,7 +14,7 @@ const { signIn } = useAuth()
 const { t } = useI18n()
 
 definePageMeta({
-    layout: 'public',
+    layout: 'blank',
     public: true,
 })
 
@@ -50,16 +50,11 @@ const login = async () => {
 
         // Navigate based on user type
         const userType = authStore.userType
-        console.log('Login successful. userType:', userType);
-
         if (userType?.toUpperCase() === 'TEACHER') {
-            console.log('Redirecting to /teacher');
             return navigateTo('/teacher')
         } else if (userType?.toUpperCase() === 'PARENT') {
-            console.log('Redirecting to /parent');
             return navigateTo('/parent')
         } else {
-            console.log('Redirecting to /');
             return navigateTo('/')
         }
     } catch (err) {
@@ -78,142 +73,212 @@ const onSubmit = () => {
 </script>
 
 <template>
-    <div class="auth-wrapper d-flex align-center justify-center pa-4">
+    <div class="auth-page-wrapper d-flex align-center justify-center pa-4">
         <VCard
-            class="auth-card pa-4 pt-7"
-            max-width="448"
+            class="auth-card-premium overflow-hidden elevation-24"
+            max-width="1050"
+            width="100%"
         >
-            <VCardItem class="justify-center">
-                <template #prepend>
-                    <div class="d-flex">
-                        <VNodeRenderer :nodes="themeConfig.app.logo" />
+            <VRow no-gutters>
+                <!-- Form Section -->
+                <VCol
+                    cols="12"
+                    md="6"
+                    class="auth-form-section pa-8 pa-sm-12 d-flex flex-column"
+                >
+                    <!-- Logo -->
+                    <div class="mb-12">
+                        <NuxtLink to="/">
+                            <VNodeRenderer :nodes="themeConfig.app.logo" />
+                        </NuxtLink>
                     </div>
-                </template>
-            </VCardItem>
 
-            <VCardText class="pt-2 text-center">
-                <h5 class="text-h5 mb-1">
-                    {{ t('Welcome') }} <span class="text-capitalize"> {{ themeConfig.app.title }} </span>! 👋🏻
-                </h5>
-                <p class="mb-0">
-                    {{ $t('Auth.LoginAccount') }}
-                </p>
-            </VCardText>
+                    <div class="flex-grow-1">
+                        <h4 class="text-h4 font-weight-bold mb-2">
+                            {{ $t('Welcome') }}! 👋🏻
+                        </h4>
+                        <p class="text-body-1 text-secondary mb-8">
+                            {{ $t('Auth.LoginAccount') }}
+                        </p>
 
-            <VCardText>
-                <VAlert
-                    v-if="error"
-                    color="error"
-                    variant="tonal"
-                    class="mb-6"
-                >
-                    {{ error }}
-                </VAlert>
-
-                <VAlert
-                    color="primary"
-                    variant="tonal"
-                    class="mb-6"
-                >
-                    <p class="text-sm mb-2">
-                        {{ $t('Register.Parent') }} {{ $t('Auth.PhoneNumber') }}: <strong>01222222222</strong> / {{ $t('Auth.Password') }}: <strong>parent123</strong>
-                    </p>
-                    <p class="text-sm mb-0">
-                        {{ $t('Register.Teacher') }} {{ $t('Auth.PhoneNumber') }}: <strong>01111111111</strong> / {{ $t('Auth.Password') }}: <strong>teacher123</strong>
-                    </p>
-                </VAlert>
-
-                <VForm
-                    ref="refVForm"
-                    @submit.prevent="onSubmit"
-                >
-                    <VRow>
-                        <!-- phone -->
-                        <VCol cols="12">
-                            <AppTextField
-                                v-model="form.phone"
-                                :label="$t('Auth.PhoneNumber')"
-                                :placeholder="$t('Auth.PhoneNumber')"
-                                type="tel"
-                                autofocus
-                                :rules="[requiredValidator, phoneValidator]"
-                            />
-                        </VCol>
-
-                        <!-- password -->
-                        <VCol cols="12">
-                            <AppTextField
-                                v-model="form.password"
-                                :label="$t('Auth.Password')"
-                                placeholder="············"
-                                :rules="[requiredValidator]"
-                                :type="isPasswordVisible ? 'text' : 'password'"
-                                autocomplete="password"
-                                :append-inner-icon="isPasswordVisible ? 'tabler-eye-off' : 'tabler-eye'"
-                                @click:append-inner="isPasswordVisible = !isPasswordVisible"
-                            />
-
-                            <div class="d-flex align-center flex-wrap justify-space-between my-6">
-                                <VCheckbox
-                                    :id="useId()"
-                                    v-model="rememberMe"
-                                    :label="$t('Auth.RememberMe')"
-                                />
-                                <NuxtLink
-                                    class="text-primary ms-2 mb-1"
-                                    :to="{ name: 'forgot-password' }"
-                                >
-                                    {{ $t('Auth.ForgotPassword?') }}
-                                </NuxtLink>
-                            </div>
-
-                            <VBtn
-                                block
-                                type="submit"
-                                :loading="loading"
-                            >
-                                {{ $t('Auth.Login') }}
-                            </VBtn>
-                        </VCol>
-
-                        <!-- create account -->
-                        <VCol
-                            cols="12"
-                            class="text-center"
+                        <VAlert
+                            v-if="error"
+                            color="error"
+                            variant="tonal"
+                            class="mb-6 rounded-xl"
                         >
-                            <span>{{ $t('Auth.NewOnPlatform?') }}</span>
-                            <NuxtLink
-                                class="text-primary ms-1"
-                                :to="{ name: 'register' }"
-                            >
-                                {{ $t('Auth.CreateAccount') }}
-                            </NuxtLink>
-                        </VCol>
+                            {{ error }}
+                        </VAlert>
 
-                        <VCol
-                            cols="12"
-                            class="d-flex align-center"
-                        >
-                            <VDivider />
-                            <span class="mx-4">{{ $t('Auth.Or') }}</span>
-                            <VDivider />
-                        </VCol>
 
-                        <!-- auth providers -->
-                        <VCol
-                            cols="12"
-                            class="text-center"
-                        >
-                            <AuthProvider />
-                        </VCol>
-                    </VRow>
-                </VForm>
-            </VCardText>
+                        <VForm ref="refVForm" @submit.prevent="onSubmit">
+                            <VRow>
+                                <VCol cols="12">
+                                    <label class="text-subtitle-2 font-weight-bold mb-1 d-block text-high-emphasis">
+                                        {{ $t('Auth.PhoneNumber') }}
+                                    </label>
+                                    <AppTextField
+                                        v-model="form.phone"
+                                        placeholder="01xxxxxxxxx"
+                                        type="tel"
+                                        autofocus
+                                        variant="outlined"
+                                        :rules="[requiredValidator, phoneValidator]"
+                                        class="auth-input"
+                                    />
+                                </VCol>
 
+                                <VCol cols="12">
+                                    <div class="d-flex align-center justify-space-between mb-1">
+                                        <label class="text-subtitle-2 font-weight-bold text-high-emphasis">
+                                            {{ $t('Auth.Password') }}
+                                        </label>
+                                        <NuxtLink
+                                            class="text-primary font-weight-bold text-caption"
+                                            :to="{ name: 'forgot-password' }"
+                                        >
+                                            {{ $t('Auth.ForgotPassword?') }}
+                                        </NuxtLink>
+                                    </div>
+                                    <AppTextField
+                                        v-model="form.password"
+                                        placeholder="············"
+                                        :rules="[requiredValidator]"
+                                        :type="isPasswordVisible ? 'text' : 'password'"
+                                        autocomplete="current-password"
+                                        variant="outlined"
+                                        :append-inner-icon="isPasswordVisible ? 'tabler-eye-off' : 'tabler-eye'"
+                                        @click:append-inner="isPasswordVisible = !isPasswordVisible"
+                                        class="auth-input"
+                                    />
+
+                                    <div class="mt-4">
+                                        <VCheckbox
+                                            v-model="rememberMe"
+                                            :label="$t('Auth.RememberMe')"
+                                            density="compact"
+                                            class="ms-n3"
+                                        />
+                                    </div>
+
+                                    <VBtn
+                                        block
+                                        type="submit"
+                                        size="large"
+                                        :loading="loading"
+                                        color="primary"
+                                        class="rounded-xl mt-6 font-weight-bold"
+                                        height="52"
+                                    >
+                                        {{ $t('Auth.Login') }}
+                                    </VBtn>
+                                </VCol>
+
+                                <VCol cols="12" class="text-center pt-6">
+                                    <span class="text-secondary">{{ $t('Auth.NewOnPlatform?') }}</span>
+                                    <NuxtLink
+                                        class="text-primary font-weight-bold ms-1"
+                                        :to="{ name: 'register' }"
+                                    >
+                                        {{ $t('Auth.CreateAccount') }}
+                                    </NuxtLink>
+                                </VCol>
+
+                            </VRow>
+                        </VForm>
+                    </div>
+                </VCol>
+
+                <!-- Illustration Section -->
+                <VCol
+                    cols="12"
+                    md="6"
+                    class="d-none d-md-flex align-center justify-center bg-light-primary position-relative pa-0"
+                >
+                    <VImg
+                        :src="loginIllustration"
+                        width="100%"
+                        height="100%"
+                        cover
+                        class="illustration-hover"
+                    />
+                    
+                    <!-- Decorative Elements -->
+                    <div class="decorative-circle-1"></div>
+                    <div class="decorative-circle-2"></div>
+                </VCol>
+            </VRow>
         </VCard>
     </div>
 </template>
 
 <style lang="scss">
-@use "@core/scss/template/pages/page-auth";
+.auth-page-wrapper {
+    min-height: 100vh;
+    background: #fff !important;
+    
+    .auth-card-premium {
+        border-radius: 24px !important;
+        background: rgb(var(--v-theme-surface));
+    }
+
+    .auth-form-section {
+        background: rgb(var(--v-theme-surface));
+    }
+
+    .bg-light-primary {
+        background-color: rgba(var(--v-theme-primary), 0.03);
+    }
+
+    .auth-input {
+        .v-field {
+            border-radius: 12px !important;
+            background-color: rgb(var(--v-theme-surface));
+            
+            &.v-field--focused {
+                background-color: rgb(var(--v-theme-surface));
+            }
+        }
+    }
+
+    .bg-primary-lighten-5 {
+        background-color: rgba(var(--v-theme-primary), 0.05) !important;
+    }
+
+    .border-dashed {
+        border: 1px dashed rgba(var(--v-theme-primary), 0.3) !important;
+    }
+
+    .decorative-circle-1 {
+        position: absolute;
+        top: -50px;
+        right: -50px;
+        width: 200px;
+        height: 200px;
+        background: rgba(var(--v-theme-primary), 0.05);
+        border-radius: 50%;
+    }
+
+    .decorative-circle-2 {
+        position: absolute;
+        bottom: 20px;
+        left: -30px;
+        width: 120px;
+        height: 120px;
+        background: rgba(var(--v-theme-secondary), 0.05);
+        border-radius: 50%;
+    }
+
+    .illustration-hover {
+        transition: transform 0.4s ease-out;
+        &:hover {
+            transform: translateY(-8px) scale(1.02);
+        }
+    }
+
+    .max-w-400 {
+        max-width: 400px;
+    }
+}
+
 </style>

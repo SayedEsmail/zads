@@ -14,3 +14,10 @@ body {
         }
     }
 }
+
+// RTL Utility
+.flip-in-rtl {
+    [dir="rtl"] & {
+        transform: scaleX(-1) !important;
+    }
+}

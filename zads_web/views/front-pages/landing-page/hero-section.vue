@@ -1,28 +1,8 @@
 <script setup>
-import { useMouse } from '@vueuse/core'
+import hero3DIllustration from '@images/hero.png'
 import { useTheme } from 'vuetify'
-import { useGenerateImageVariant } from '@/@core/composable/useGenerateImageVariant'
-import joinArrow from '@images/front-pages/icons/Join-community-arrow.png'
-import heroDashboardImgDark from '@images/front-pages/landing-page/hero-dashboard-dark.png'
-import heroDashboardImgLight from '@images/front-pages/landing-page/hero-dashboard-light.png'
-import heroElementsImgDark from '@images/front-pages/landing-page/hero-elements-dark.png'
-import heroElementsImgLight from '@images/front-pages/landing-page/hero-elements-light.png'
 
 const theme = useTheme()
-const heroElementsImg = useGenerateImageVariant(heroElementsImgLight, heroElementsImgDark)
-const heroDashboardImg = useGenerateImageVariant(heroDashboardImgLight, heroDashboardImgDark)
-const { x, y } = useMouse({ touch: false })
-
-const translateMouse = computed(() => {
-  if (typeof window !== 'undefined') {
-    const rotateX = ref((window.innerHeight - 1 * y.value) / 100)
-    
-    return { transform: `perspective(1200px) rotateX(${ rotateX.value < -40 ? -20 : rotateX.value }deg) rotateY(${ (window.innerWidth - 2 * x.value) / 100 }deg) scale3d(1,1,1)` }
-  }
-
-  // Provide a default return value when `window` is undefined
-  return { transform: 'perspective(1200px) rotateX(0deg) rotateY(0deg) scale3d(1,1,1)' }
-})
 </script>
 
 <template>
@@ -36,287 +16,186 @@ const translateMouse = computed(() => {
         :class="theme.current.value.dark ? 'landing-hero-dark-bg' : 'landing-hero-light-bg'"
       >
         <VContainer>
-          <div class="hero-text-box text-center px-6">
-            <h1 class="hero-title mb-4">
-              Find the Perfect Tutor <br> for Your Child
-            </h1>
-            <h6 class="mb-6 text-h6">
-              Connect with qualified teachers in Egypt. <br> The easiest way to discover, compare, and contact private tutors.
-            </h6>
-            <div class="position-relative">
-              <!-- <h6 class="position-absolute hero-btn-item d-md-flex d-none text-h6 text-medium-emphasis">
-                Join Community
-                <VImg
-                  :src="joinArrow"
-                  class="flip-in-rtl"
-                  width="54"
-                  height="31"
-                />
-              </h6> -->
+          <VRow align="center" class="gap-y-12 py-12">
+            <!-- Text Section -->
+            <VCol cols="12" lg="6" class="text-center text-lg-start">
+              <div class="hero-content">
+                <div class="d-inline-flex align-center gap-2 pa-2 pe-4 mb-6 rounded-pill bg-primary-lighten-5 border border-primary-opacity-20 translate-y-n2">
+                    <VChip color="primary" size="small" label variant="elevated" class="rounded-pill">New</VChip>
+                    <span class="text-caption font-weight-bold text-primary">{{ $t('Register.JoinZads🚀') }}</span>
+                </div>
+                
+                <h1 class="hero-title-v2 font-weight-black mb-6 leading-tight">
+                   {{ $t('FindPerfectTutor') }} <br>
+                   <span class="text-gradient"> {{ $t('ForYourChild') }} </span>
+                </h1>
+                
+                <p class="text-h6 text-secondary leading-relaxed mb-10 max-w-500 mx-auto mx-lg-0">
+                  {{ $t('HeroDesc') }}
+                </p>
 
-            <div class="d-flex justify-center gap-4 flex-wrap mt-8">
-              <VBtn
-                size="x-large"
-                color="primary"
-                :to="{ name: 'register-parent' }"
-                prepend-icon="tabler-users"
-                class="px-8"
-              >
-                {{ $t('Auth.Parent') }}
-              </VBtn>
-              
-              <VBtn
-                size="x-large"
-                color="secondary"
-                variant="elevated"
-                :to="{ name: 'register-teacher' }"
-                prepend-icon="tabler-school"
-                class="px-8"
-              >
-                {{ $t('Auth.Teacher') }}
-              </VBtn>
-            </div>
-            
-            <div class="mt-6 text-body-1">
-              {{ $t('Auth.AlreadyHaveAccount') }}
-              <NuxtLink :to="{ name: 'login' }" class="text-primary font-weight-bold ml-1">
-                {{ $t('Auth.Login') }}
-              </NuxtLink>
-            </div>
-            </div>
-          </div>
+                <div class="d-flex flex-wrap justify-center justify-lg-start gap-4">
+                  <VBtn
+                    size="x-large"
+                    color="primary"
+                    :to="{ name: 'register-parent' }"
+                    class="px-10 rounded-xl elevation-4 text-capitalize font-weight-bold"
+                    height="56"
+                  >
+                    <template #prepend>
+                        <VIcon icon="tabler-users" size="24" />
+                    </template>
+                    {{ $t('Auth.Parent') }}
+                  </VBtn>
+                  
+                  <VBtn
+                    size="x-large"
+                    color="secondary"
+                    variant="tonal"
+                    :to="{ name: 'register-teacher' }"
+                    class="px-10 rounded-xl font-weight-bold text-capitalize"
+                    height="56"
+                  >
+                    <template #prepend>
+                        <VIcon icon="tabler-school" size="24" />
+                    </template>
+                    {{ $t('Auth.Teacher') }}
+                  </VBtn>
+                </div>
+
+                <div class="mt-8 d-flex align-center justify-center justify-lg-start gap-3">
+                   <div class="d-flex -space-x-2">
+                        <VAvatar size="32" class="border-2 border-surface" image="https://i.pravatar.cc/100?u=1" />
+                        <VAvatar size="32" class="border-2 border-surface" image="https://i.pravatar.cc/100?u=2" />
+                        <VAvatar size="32" class="border-2 border-surface" image="https://i.pravatar.cc/100?u=3" />
+                   </div>
+                   <div class="text-caption font-weight-medium text-secondary">
+                        <span class="text-primary font-weight-bold">1000+</span> {{ $t('HappyFamilies') }}
+                   </div>
+                </div>
+              </div>
+            </VCol>
+
+            <!-- Image Section -->
+            <VCol cols="12" lg="6" class="position-relative">
+              <div class="hero-image-container ps-lg-12">
+                 <VImg
+                    :src="hero3DIllustration"
+                    class="hero-3d-img transition-bounce"
+                    max-width="700"
+                 />
+                 
+                 <!-- Decorative elements -->
+                 <div class="glow-circle primary"></div>
+                 <div class="glow-circle secondary"></div>
+              </div>
+            </VCol>
+          </VRow>
         </VContainer>
       </div>
     </div>
-
-    <VContainer>
-      <div class="position-relative">
-        <div class="blank-section" />
-        <div class="hero-animation-img position-absolute">
-          <NuxtLink
-            :to="{ name: 'index' }"
-            target="_blank"
-          >
-            <div
-              class="hero-dashboard-img position-relative"
-              :style="translateMouse"
-              data-allow-mismatch
-            >
-              <img
-                :src="heroDashboardImg"
-                alt="Hero Dashboard"
-                class="animation-img"
-              >
-              <img
-                :src="heroElementsImg"
-                alt="hero elements"
-                class="hero-elements-img animation-img position-absolute"
-                style="transform: translateZ(1rem);"
-              >
-            </div>
-          </NuxtLink>
-        </div>
-      </div>
-    </VContainer>
   </div>
 </template>
 
 <style lang="scss" scoped>
 .landing-hero {
-  border-radius: 0 0 50px 50px;
-  padding-block: 9.75rem 22rem;
+  border-radius: 0 0 80px 80px;
+  padding-block: 4rem 4rem;
+  overflow: hidden;
+  position: relative;
+  min-height: calc(100vh - 120px); /* Fill screen minus navbar/buffer */
+  display: flex;
+  align-items: center;
 }
 
-.hero-animation-img {
-  inline-size: 90%;
-  inset-block-start: -25rem;
-  inset-inline-start: 4.425rem;
-  margin-inline: auto;
+@media (min-width: 1280px) {
+    .landing-hero {
+        padding-block: 6rem 6rem;
+    }
 }
 
-section {
-  display: block;
+.hero-title-v2 {
+    font-size: clamp(2rem, 5vw, 4rem);
+    line-height: 1.1;
+    color: rgb(var(--v-theme-on-surface));
 }
 
-.blank-section {
-  background-color: rgba(var(--v-theme-surface));
-  min-block-size: 25rem;
+.text-gradient {
+    background: linear-gradient(135deg, rgb(var(--v-theme-primary)) 0%, rgb(var(--v-theme-secondary)) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
-@media (min-width: 1280px) and (max-width: 1440px) {
-  .blank-section {
-    min-block-size: 18rem;
-  }
-
-  .landing-hero {
-    padding-block-end: 22rem;
-  }
-
-  .hero-animation-img {
-    inset-block-start: -25rem;
-  }
+.hero-3d-img {
+    filter: drop-shadow(0 20px 50px rgba(0,0,0,0.1));
+    z-index: 2;
+    position: relative;
 }
 
-@media (min-width: 900px) and (max-width: 1279px) {
-  .blank-section {
-    min-block-size: 13rem;
-  }
-
-  .landing-hero {
-    padding-block-end: 14rem;
-  }
-
-  .hero-animation-img {
-    inset-block-start: -17rem;
-    inset-inline-start: 2.75rem;
-  }
+.hero-image-container {
+    perspective: 1000px;
+    position: relative;
 }
 
-@media (min-width: 768px) and (max-width: 899px) {
-  .blank-section {
-    min-block-size: 12rem;
-  }
-
-  .landing-hero {
-    padding-block-end: 12rem;
-  }
-
-  .hero-animation-img {
-    inset-block-start: -15rem;
-    inset-inline-start: 2.5rem;
-  }
+.glow-circle {
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    filter: blur(100px);
+    z-index: 1;
+    opacity: 0.3;
+    
+    &.primary {
+        background: rgb(var(--v-theme-primary));
+        top: 20%;
+        left: 20%;
+    }
+    
+    &.secondary {
+        background: rgb(var(--v-theme-secondary));
+        bottom: 20%;
+        right: 20%;
+    }
 }
 
-@media (min-width: 600px) and (max-width: 767px) {
-  .blank-section {
-    min-block-size: 12rem;
-  }
-
-  .landing-hero {
-    padding-block-end: 8rem;
-  }
-
-  .hero-animation-img {
-    inset-block-start: -11rem;
-    inset-inline-start: 2rem;
-  }
+.bg-primary-lighten-5 {
+  background-color: rgba(var(--v-theme-primary), 0.08) !important;
 }
 
-@media (min-width: 425px) and (max-width: 600px) {
-  .blank-section {
-    min-block-size: 8rem;
-  }
-
-  .landing-hero {
-    padding-block-end: 8rem;
-  }
-
-  .hero-animation-img {
-    inset-block-start: -9rem;
-    inset-inline-start: 1.7rem;
-  }
+.transition-bounce {
+    animation: floating 6s ease-in-out infinite;
 }
 
-@media (min-width: 300px) and (max-width: 424px) {
-  .blank-section {
-    min-block-size: 4rem;
-  }
-
-  .landing-hero {
-    padding-block-end: 6rem;
-  }
-
-  .hero-animation-img {
-    inset-block-start: -7rem;
-    inset-inline-start: 1.25rem;
-  }
-}
-
-.landing-hero::before {
-  position: absolute;
-  background-repeat: no-repeat;
-  inset-block: 0;
-  opacity: 0.5;
+@keyframes floating {
+    0% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-20px) rotate(1deg); }
+    100% { transform: translateY(0px) rotate(0deg); }
 }
 
 .landing-hero-dark-bg {
   background-color: #25293c;
-  background-image: url("@images/front-pages/backgrounds/hero-bg.png");
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: cover;
+  background-image: radial-gradient(circle at 20% 30%, rgba(var(--v-theme-primary), 0.1) 0%, transparent 40%),
+                    radial-gradient(circle at 80% 70%, rgba(var(--v-theme-secondary), 0.1) 0%, transparent 40%);
 }
 
 .landing-hero-light-bg {
-  background: url("@images/front-pages/backgrounds/hero-bg.png") center no-repeat, linear-gradient(138.18deg, #eae8fd 0%, #fce5e6 94.44%);
-  background-size: cover;
+  background: linear-gradient(135deg, #f8f7ff 0%, #fff9f4 100%);
 }
 
-@media (min-width: 650px) {
-  .hero-text-box {
-    inline-size: 38rem;
-    margin-block-end: 1rem;
-    margin-inline: auto;
-  }
+.max-w-500 {
+    max-width: 500px;
 }
 
-@media (max-width: 599px) {
-  .hero-title {
-    font-size: 1.5rem !important;
-    line-height: 2.375rem !important;
-  }
+.-space-x-2 > * {
+    margin-left: -0.5rem;
 }
 
-.hero-title {
-  animation: shine 2s ease-in-out infinite alternate;
-  background: linear-gradient(135deg, #28c76f 0%, #5a4aff 47.92%, #ff3739 100%);
-  //  stylelint-disable-next-line property-no-vendor-prefix
-  -webkit-background-clip: text;
-  background-clip: text;
-  background-size: 200% auto;
-  font-size: 42px;
-  font-weight: 800;
-  line-height: 48px;
-  -webkit-text-fill-color: rgba(0, 0, 0, 0%);
-}
-
-@keyframes shine {
-  0% {
-    background-position: 0% 50%;
-  }
-
-  80% {
-    background-position: 50% 90%;
-  }
-
-  100% {
-    background-position: 91% 100%;
-  }
-}
-
-.hero-dashboard-img {
-  margin-block: 0;
-  margin-inline: auto;
-  transform-style: preserve-3d;
-  transition: all 0.35s;
-
-  img {
-    inline-size: 100%;
-  }
-}
-
-.hero-elements-img {
-  position: absolute;
-  inset-block: 0;
-  inset-inline-start: 0;
-}
-
-.feature-cards {
-  margin-block-start: 6.25rem;
-}
-
-.hero-btn-item {
-  inset-block-start: 80%;
-  inset-inline-start: 5%;
+[dir="rtl"] {
+    .-space-x-2 > * {
+        margin-left: 0;
+        margin-right: -0.5rem;
+    }
 }
 </style>

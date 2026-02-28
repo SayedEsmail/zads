@@ -4,128 +4,181 @@ import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
 import { themeConfig } from '@themeConfig'
 import authV2ForgotPasswordIllustrationDark from '@images/pages/auth-v2-forgot-password-illustration-dark.png'
 import authV2ForgotPasswordIllustrationLight from '@images/pages/auth-v2-forgot-password-illustration-light.png'
-import authV2MaskDark from '@images/pages/misc-mask-dark.png'
-import authV2MaskLight from '@images/pages/misc-mask-light.png'
+
+definePageMeta({
+    layout: 'blank',
+    public: true,
+})
 
 const email = ref('')
 const authThemeImg = useGenerateImageVariant(authV2ForgotPasswordIllustrationLight, authV2ForgotPasswordIllustrationDark)
-const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
 const { t } = useI18n()
-
-definePageMeta({
-  layout: 'public',
-  unauthenticatedOnly: true,
-
-})
 </script>
 
 <template>
-  <NuxtLink to="/">
-    <div class="auth-logo d-flex align-center gap-x-3">
-      <VNodeRenderer :nodes="themeConfig.app.logo" />
-      <h1 class="auth-title">
-        {{ themeConfig.app.title }}
-      </h1>
-    </div>
-  </NuxtLink>
-
-  <VRow
-    class="auth-wrapper bg-surface"
-    no-gutters
-  >
-    <VCol
-      md="8"
-      class="d-none d-md-flex"
-    >
-      <div class="position-relative bg-background w-100 me-0">
-        <div
-          class="d-flex align-center justify-center w-100 h-100"
-          style="padding-inline: 150px;"
+    <div class="auth-page-wrapper d-flex align-center justify-center pa-4">
+        <VCard
+            class="auth-card-premium overflow-hidden elevation-24"
+            max-width="1050"
+            width="100%"
         >
-          <VImg
-            max-width="468"
-            :src="authThemeImg"
-            class="auth-illustration mt-16 mb-2"
-          />
-        </div>
-
-        <img
-          class="auth-footer-mask"
-          :src="authThemeMask"
-          alt="auth-footer-mask"
-          height="280"
-          width="100"
-        >
-      </div>
-    </VCol>
-
-    <VCol
-      cols="12"
-      md="4"
-      class="d-flex align-center justify-center"
-    >
-      <VCard
-        flat
-        :max-width="500"
-        class="mt-12 mt-sm-0 pa-4"
-      >
-        <VCardText>
-          <h4 class="text-h4 mb-1 d-flex gap-2">
-            {{ $t('ForgotPassword.ForgotPassword?🔒') }}
-            <VIcon icon="tabler-lock" size="32" color="primary" />
-          </h4>
-          <p class="mb-0">
-            {{ $t('ForgotPassword.ForgotPasswordDesc') }}
-          </p>
-        </VCardText>
-
-        <VCardText>
-          <VForm @submit.prevent="() => {}">
-            <VRow>
-              <!-- email -->
-              <VCol cols="12">
-                <AppTextField
-                  v-model="email"
-                  autofocus
-                  :label="$t('ForgotPassword.Email')"
-                  type="email"
-                  placeholder="johndoe@email.com"
-                />
-              </VCol>
-
-              <!-- Reset link -->
-              <VCol cols="12">
-                <VBtn
-                  block
-                  type="submit"
+            <VRow no-gutters>
+                <!-- Form Section -->
+                <VCol
+                    cols="12"
+                    md="6"
+                    class="auth-form-section pa-8 pa-sm-12 d-flex flex-column"
                 >
-                  {{ $t('ForgotPassword.SendResetLink') }}
-                </VBtn>
-              </VCol>
+                    <!-- Logo -->
+                    <div class="mb-10">
+                        <NuxtLink to="/">
+                            <VNodeRenderer :nodes="themeConfig.app.logo" />
+                        </NuxtLink>
+                    </div>
 
-              <!-- back to login -->
-              <VCol cols="12">
-                <NuxtLink
-                  class="d-flex align-center justify-center"
-                  :to="{ name: 'login' }"
+                    <div class="flex-grow-1">
+                        <h4 class="text-h4 font-weight-bold mb-2">
+                            {{ $t('ForgotPassword.ForgotPassword?🔒') }}
+                        </h4>
+                        <p class="text-body-1 text-secondary mb-8">
+                            {{ $t('ForgotPassword.ForgotPasswordDesc') }}
+                        </p>
+
+                        <VForm @submit.prevent="() => {}">
+                            <VRow>
+                                <!-- Email -->
+                                <VCol cols="12">
+                                    <label class="text-subtitle-2 font-weight-bold mb-1 d-block text-high-emphasis">
+                                        {{ $t('ForgotPassword.Email') }}
+                                    </label>
+                                    <AppTextField
+                                        v-model="email"
+                                        autofocus
+                                        placeholder="johndoe@email.com"
+                                        type="email"
+                                        variant="outlined"
+                                        class="auth-input"
+                                    />
+                                </VCol>
+
+                                <VCol cols="12" class="pt-6">
+                                    <VBtn
+                                        block
+                                        type="submit"
+                                        size="large"
+                                        color="primary"
+                                        class="rounded-xl font-weight-bold"
+                                        height="52"
+                                    >
+                                        {{ $t('ForgotPassword.SendResetLink') }}
+                                    </VBtn>
+                                </VCol>
+
+                                <VCol cols="12" class="text-center pt-8">
+                                    <NuxtLink
+                                        class="d-flex align-center justify-center text-primary font-weight-bold"
+                                        :to="{ name: 'login' }"
+                                    >
+                                        <VIcon
+                                            icon="tabler-chevron-left"
+                                            size="20"
+                                            class="me-1 flip-in-rtl"
+                                        />
+                                        <span>{{ $t('Auth.BackToLogin') }}</span>
+                                    </NuxtLink>
+                                </VCol>
+                            </VRow>
+                        </VForm>
+                    </div>
+                </VCol>
+
+                <!-- Illustration Section -->
+                <VCol
+                    cols="12"
+                    md="6"
+                    class="d-none d-md-flex align-center justify-center bg-light-primary position-relative pa-0"
                 >
-                  <VIcon
-                    icon="tabler-chevron-left"
-                    size="20"
-                    class="me-1 flip-in-rtl"
-                  />
-                  <span>{{ $t('Auth.BackToLogin') }}</span>
-                </NuxtLink>
-              </VCol>
+                    <VImg
+                        :src="authThemeImg"
+                        width="100%"
+                        height="100%"
+                        cover
+                        class="illustration-hover"
+                    />
+                    
+                    <!-- Decorative Elements -->
+                    <div class="decorative-circle-1"></div>
+                    <div class="decorative-circle-2"></div>
+                </VCol>
             </VRow>
-          </VForm>
-        </VCardText>
-
-      </VCard>
-    </VCol>
-  </VRow>
+        </VCard>
+    </div>
 </template>
 
 <style lang="scss">
-@use "@core/scss/template/pages/page-auth.scss";
+.auth-page-wrapper {
+    min-height: 100vh;
+    background: #fff !important;
+    
+    .auth-card-premium {
+        border-radius: 24px !important;
+        background: rgb(var(--v-theme-surface));
+    }
+
+    .auth-form-section {
+        background: rgb(var(--v-theme-surface));
+    }
+
+    .bg-light-primary {
+        background-color: rgba(var(--v-theme-primary), 0.03);
+    }
+
+    .auth-input {
+        .v-field {
+            border-radius: 12px !important;
+            background-color: rgb(var(--v-theme-surface));
+            
+            &.v-field--focused {
+                background-color: rgb(var(--v-theme-surface));
+            }
+        }
+    }
+
+    .decorative-circle-1 {
+        position: absolute;
+        top: -50px;
+        right: -50px;
+        width: 200px;
+        height: 200px;
+        background: rgba(var(--v-theme-primary), 0.05);
+        border-radius: 50%;
+    }
+
+    .decorative-circle-2 {
+        position: absolute;
+        bottom: 20px;
+        left: -30px;
+        width: 120px;
+        height: 120px;
+        background: rgba(var(--v-theme-secondary), 0.05);
+        border-radius: 50%;
+    }
+
+    .illustration-hover {
+        transition: transform 0.4s ease-out;
+        &:hover {
+            transform: translateY(-8px) scale(1.02);
+        }
+    }
+
+    .max-w-400 {
+        max-width: 400px;
+    }
+
+    .flip-in-rtl {
+        [dir="rtl"] & {
+            transform: scaleX(-1);
+        }
+    }
+}
 </style>
