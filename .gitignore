@@ -141,3 +141,5 @@ build/
 *.keystore
 secrets/
 credentials/
+
+.agent/

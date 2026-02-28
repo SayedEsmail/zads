@@ -27,8 +27,9 @@ definePageMeta({
       </VCardItem>
 
       <VCardText class="pt-2 text-center">
-        <h5 class="text-h5 mb-1">
+        <h5 class="text-h5 mb-1 d-flex align-center justify-center gap-2">
           {{ $t('Register.JoinZads🚀') }}
+          <VIcon icon="tabler-rocket" size="24" color="primary" />
         </h5>
         <p class="mb-0">
           {{ $t('Register.SelectAccountType') }}

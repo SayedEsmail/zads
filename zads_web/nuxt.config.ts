@@ -151,6 +151,7 @@ export default defineNuxtConfig({
     langDir: 'locales',
     defaultLocale: 'ar',
     strategy: 'no_prefix',
+    detectBrowserLanguage: false,
   },
 
   modules: [

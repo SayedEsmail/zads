@@ -409,6 +409,8 @@ declare global {
   const useSupported: typeof import('@vueuse/core')['useSupported']
   const useSwipe: typeof import('@vueuse/core')['useSwipe']
   const useSwitchLocalePath: typeof import('../../node_modules/.pnpm/@nuxtjs+i18n@9.1.1_eslint@8.57.1_rollup@4.57.1_typescript@5.9.3_vue@3.5.27/node_modules/@nuxtjs/i18n/dist/runtime/composables/index')['useSwitchLocalePath']
+  const useTeacherStore: typeof import('../../stores/teacher')['useTeacherStore']
+  const useTeacherSubjectsStore: typeof import('../../stores/teacherSubjects')['useTeacherSubjectsStore']
   const useTemplateRef: typeof import('../../node_modules/.pnpm/vue@3.5.27_typescript@5.9.3/node_modules/vue')['useTemplateRef']
   const useTemplateRefsList: typeof import('@vueuse/core')['useTemplateRefsList']
   const useTextDirection: typeof import('@vueuse/core')['useTextDirection']
@@ -428,6 +430,7 @@ declare global {
   const useTransition: typeof import('@vueuse/core')['useTransition']
   const useTransitionState: typeof import('../../node_modules/.pnpm/vue@3.5.27_typescript@5.9.3/node_modules/vue')['useTransitionState']
   const useTrunc: typeof import('@vueuse/math')['useTrunc']
+  const useTutorRequestsStore: typeof import('../../stores/tutorRequests')['useTutorRequestsStore']
   const useUrlSearchParams: typeof import('@vueuse/core')['useUrlSearchParams']
   const useUserMedia: typeof import('@vueuse/core')['useUserMedia']
   const useVModel: typeof import('@vueuse/core')['useVModel']
@@ -883,6 +886,8 @@ declare module 'vue' {
     readonly useSupported: UnwrapRef<typeof import('@vueuse/core')['useSupported']>
     readonly useSwipe: UnwrapRef<typeof import('@vueuse/core')['useSwipe']>
     readonly useSwitchLocalePath: UnwrapRef<typeof import('../../node_modules/.pnpm/@nuxtjs+i18n@9.1.1_eslint@8.57.1_rollup@4.57.1_typescript@5.9.3_vue@3.5.27/node_modules/@nuxtjs/i18n/dist/runtime/composables/index')['useSwitchLocalePath']>
+    readonly useTeacherStore: UnwrapRef<typeof import('../../stores/teacher')['useTeacherStore']>
+    readonly useTeacherSubjectsStore: UnwrapRef<typeof import('../../stores/teacherSubjects')['useTeacherSubjectsStore']>
     readonly useTemplateRef: UnwrapRef<typeof import('../../node_modules/.pnpm/vue@3.5.27_typescript@5.9.3/node_modules/vue')['useTemplateRef']>
     readonly useTemplateRefsList: UnwrapRef<typeof import('@vueuse/core')['useTemplateRefsList']>
     readonly useTextDirection: UnwrapRef<typeof import('@vueuse/core')['useTextDirection']>
@@ -902,6 +907,7 @@ declare module 'vue' {
     readonly useTransition: UnwrapRef<typeof import('@vueuse/core')['useTransition']>
     readonly useTransitionState: UnwrapRef<typeof import('../../node_modules/.pnpm/vue@3.5.27_typescript@5.9.3/node_modules/vue')['useTransitionState']>
     readonly useTrunc: UnwrapRef<typeof import('@vueuse/math')['useTrunc']>
+    readonly useTutorRequestsStore: UnwrapRef<typeof import('../../stores/tutorRequests')['useTutorRequestsStore']>
     readonly useUrlSearchParams: UnwrapRef<typeof import('@vueuse/core')['useUrlSearchParams']>
     readonly useUserMedia: UnwrapRef<typeof import('@vueuse/core')['useUserMedia']>
     readonly useVModel: UnwrapRef<typeof import('@vueuse/core')['useVModel']>

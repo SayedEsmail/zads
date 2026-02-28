@@ -37,6 +37,7 @@ export const useAuthStore = defineStore('auth', {
 
                 const tokenCookie = useCookie('token', { maxAge: 60 * 60 * 24 * 7 }) // 1 week
                 const userCookie = useCookie('user', { maxAge: 60 * 60 * 24 * 7 })
+                const userAbilityRules = useCookie('userAbilityRules', { maxAge: 60 * 60 * 24 * 7 })
 
                 this.user = response.data.user
                 this.token = response.data.token
@@ -46,7 +47,22 @@ export const useAuthStore = defineStore('auth', {
                 tokenCookie.value = this.token
                 userCookie.value = this.user
 
-
+                // Define abilities based on userType
+                const rules = []
+                if (this.user.userType === 'ADMIN') {
+                    rules.push({ action: 'manage', subject: 'all' })
+                } else if (this.user.userType === 'PARENT') {
+                    rules.push({ action: 'read', subject: 'Parent' })
+                    rules.push({ action: 'manage', subject: 'Children' })
+                    rules.push({ action: 'manage', subject: 'Requests' })
+                } else if (this.user.userType === 'TEACHER') {
+                    rules.push({ action: 'read', subject: 'Teacher' })
+                    rules.push({ action: 'manage', subject: 'Subjects' })
+                    rules.push({ action: 'manage', subject: 'IncomingRequests' })
+                } else {
+                    rules.push({ action: 'read', subject: 'Auth' })
+                }
+                userAbilityRules.value = rules
 
                 return response.data
             } catch (error) {
@@ -66,6 +82,7 @@ export const useAuthStore = defineStore('auth', {
 
                 const tokenCookie = useCookie('token', { maxAge: 60 * 60 * 24 * 7 })
                 const userCookie = useCookie('user', { maxAge: 60 * 60 * 24 * 7 })
+                const userAbilityRules = useCookie('userAbilityRules', { maxAge: 60 * 60 * 24 * 7 })
 
                 this.user = response.data.user
                 this.token = response.data.token
@@ -73,7 +90,13 @@ export const useAuthStore = defineStore('auth', {
                 tokenCookie.value = this.token
                 userCookie.value = this.user
 
-
+                // Define abilities for PARENT
+                const rules = [
+                    { action: 'read', subject: 'Parent' },
+                    { action: 'manage', subject: 'Children' },
+                    { action: 'manage', subject: 'Requests' }
+                ]
+                userAbilityRules.value = rules
 
                 return response.data
             } catch (error) {
@@ -93,6 +116,7 @@ export const useAuthStore = defineStore('auth', {
 
                 const tokenCookie = useCookie('token', { maxAge: 60 * 60 * 24 * 7 })
                 const userCookie = useCookie('user', { maxAge: 60 * 60 * 24 * 7 })
+                const userAbilityRules = useCookie('userAbilityRules', { maxAge: 60 * 60 * 24 * 7 })
 
                 this.user = response.data.user
                 this.token = response.data.token
@@ -100,7 +124,13 @@ export const useAuthStore = defineStore('auth', {
                 tokenCookie.value = this.token
                 userCookie.value = this.user
 
-
+                // Define abilities for TEACHER
+                const rules = [
+                    { action: 'read', subject: 'Teacher' },
+                    { action: 'manage', subject: 'Subjects' },
+                    { action: 'manage', subject: 'IncomingRequests' }
+                ]
+                userAbilityRules.value = rules
 
                 return response.data
             } catch (error) {
@@ -117,11 +147,11 @@ export const useAuthStore = defineStore('auth', {
 
             const tokenCookie = useCookie('token')
             const userCookie = useCookie('user')
+            const userAbilityRules = useCookie('userAbilityRules')
 
             tokenCookie.value = null
             userCookie.value = null
-
-
+            userAbilityRules.value = null
         },
     },
 })

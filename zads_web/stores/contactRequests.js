@@ -42,5 +42,39 @@ export const useContactRequestsStore = defineStore('contactRequests', {
                 this.loading = false
             }
         },
+
+        // --- Teacher Specific Actions ---
+
+        async fetchIncomingRequests() {
+            this.loading = true
+            this.error = null
+
+            try {
+                const response = await api.get('/contact-requests/incoming')
+                this.requests = response.data || []
+                return this.requests
+            } catch (error) {
+                this.error = error.message
+                throw error
+            } finally {
+                this.loading = false
+            }
+        },
+
+        async updateRequestStatus(requestId, status) {
+            this.loading = true
+            this.error = null
+
+            try {
+                const response = await api.patch(`/contact-requests/${requestId}/status`, { status })
+                await this.fetchIncomingRequests() // Refresh the list
+                return response.data
+            } catch (error) {
+                this.error = error.message
+                throw error
+            } finally {
+                this.loading = false
+            }
+        },
     },
 })

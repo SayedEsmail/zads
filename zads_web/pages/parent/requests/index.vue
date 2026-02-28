@@ -29,8 +29,9 @@ onMounted(() => {
     <div>
         <VRow class="mb-6">
             <VCol cols="12">
-                <h1 class="text-h4 mb-2">
+                <h1 class="text-h4 mb-2 d-flex align-center gap-2">
                     {{ $t('RequestsPage.ContactRequests📨') }}
+                    <VIcon icon="tabler-mail" color="primary" size="32" />
                 </h1>
                 <p class="text-body-1 text-secondary">
                     {{ $t('RequestsPage.RequestsDesc') }}

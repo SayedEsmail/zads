@@ -29,7 +29,6 @@ const refFaq = ref()
 
 useIntersectionObserver([
   refHome,
-  refFeatures,
   refTeam,
   refContact,
   refFaq,
@@ -46,10 +45,6 @@ useIntersectionObserver([
     <!-- 👉 Hero Section  -->
     <HeroSection ref="refHome" />
 
-    <!-- 👉 Useful features  -->
-    <div :style="{ 'background-color': 'rgb(var(--v-theme-surface))' }">
-      <Features ref="refFeatures" />
-    </div>
 
     <!-- 👉 Customer Review -->
     <!-- <div :style="{ 'background-color': 'rgb(var(--v-theme-surface))' }">

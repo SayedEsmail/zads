@@ -6,7 +6,7 @@ import { themeConfig } from '@themeConfig'
 
 const _syncAppRtl = () => {
   const configStore = useConfigStore()
-  const storedLang = cookieRef('language', null)
+  const storedLang = cookieRef('language', themeConfig.app.i18n.defaultLocale)
   const { locale } = useI18n({ useScope: 'global' })
 
   // TODO: Handle case where i18n can't read persisted value
