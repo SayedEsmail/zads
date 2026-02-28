@@ -15,36 +15,32 @@ export default NuxtAuthHandler({
       name: 'Credentials',
       credentials: {},
       async authorize(credentials) {
-        try {
-          const apiBaseUrl = process.env.NUXT_PUBLIC_API_BASE_URL || 'http://localhost:3000'
+        const apiBaseUrl = 'http://127.0.0.1:3000/api'
 
-          // Use NUXT_PUBLIC_API_BASE_URL which should point to the backend API (e.g. http://localhost:3000/api)
-          const response = await $fetch(`${apiBaseUrl}/auth/login`, {
-            method: 'POST',
-            body: credentials,
-          })
+        // Force an absolute URL because server-side $fetch crashes on relative paths like '/api'
+        const response = await $fetch(`${apiBaseUrl}/auth/login`, {
+          method: 'POST',
+          body: {
+            phone: credentials.phone,
+            password: credentials.password,
+          },
+        })
 
-          if (response.success && response.data) {
-            const { user, token } = response.data
+        if (response?.success && response?.data) {
+          const { user, token } = response.data
 
-            // Return user object with token to be saved in session
-            return {
-              id: user.id,
-              name: user.name,
-              email: user.email,
-              phone: user.phone,
-              userType: user.userType,
-              accessToken: token,
-              // Map other fields as needed
-            }
+          // Return user object with token to be saved in session
+          return {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            phone: user.phone,
+            userType: user.userType,
+            accessToken: token,
+            // Map other fields as needed
           }
-          return null
-        } catch (error) {
-          throw createError({
-            statusCode: 403,
-            statusMessage: 'Invalid phone or password',
-          })
         }
+        return null
       },
     }),
   ],

@@ -11,13 +11,21 @@ import OurTeam from '@/views/front-pages/landing-page/our-team.vue'
 import PricingPlans from '@/views/front-pages/landing-page/pricing-plans.vue'
 import ProductStats from '@/views/front-pages/landing-page/product-stats.vue'
 import { useConfigStore } from '@core/stores/config'
-
-const store = useConfigStore()
-
-store.skin = 'default'
 definePageMeta({
   layout: 'blank',
   public: true,
+  middleware: [
+    function (to, from) {
+      const authStore = useAuthStore()
+      if (authStore.isAuthenticated) {
+        if (authStore.userType?.toUpperCase() === 'TEACHER') {
+          return navigateTo('/teacher')
+        } else if (authStore.userType?.toUpperCase() === 'PARENT') {
+          return navigateTo('/parent')
+        }
+      }
+    }
+  ]
 })
 
 const activeSectionId = ref()

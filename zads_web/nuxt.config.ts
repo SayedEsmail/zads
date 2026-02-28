@@ -10,11 +10,26 @@ export default defineNuxtConfig({
       titleTemplate: '%s - Zads',
       title: 'زادس - سوق المعلمين',
 
-      link: [{
-        rel: 'icon',
-        type: 'image/x-icon',
-        href: process.env.NUXT_APP_BASE_URL + '/favicon.ico',
-      }],
+      link: [
+        {
+          rel: 'icon',
+          type: 'image/x-icon',
+          href: process.env.NUXT_APP_BASE_URL + '/favicon.ico',
+        },
+        {
+          rel: 'preconnect',
+          href: 'https://fonts.googleapis.com',
+        },
+        {
+          rel: 'preconnect',
+          href: 'https://fonts.gstatic.com',
+          crossorigin: 'anonymous',
+        },
+        {
+          rel: 'stylesheet',
+          href: 'https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap',
+        },
+      ],
     },
   },
 
@@ -171,7 +186,7 @@ export default defineNuxtConfig({
   },
 
   auth: {
-    baseURL: process.env.AUTH_ORIGIN ? `${process.env.AUTH_ORIGIN}/api/auth` : undefined,
+    baseURL: 'http://localhost:4000/api/auth',
     globalAppMiddleware: false,
     provider: {
       type: 'authjs',

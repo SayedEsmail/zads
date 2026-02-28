@@ -20,10 +20,13 @@ export default defineNuxtRouteMiddleware(to => {
           (WARN: Don't allow executing further by return statement because next code will check for permissions)
          */
   if (to.meta.unauthenticatedOnly) {
-    if (isLoggedIn)
+    if (isLoggedIn) {
+      if (authStore.userType?.toUpperCase() === 'TEACHER') return navigateTo('/teacher')
+      if (authStore.userType?.toUpperCase() === 'PARENT') return navigateTo('/parent')
       return navigateTo('/')
-    else
+    } else {
       return undefined
+    }
   }
   if (!canNavigate(to) && to.matched.length) {
     /* eslint-disable indent */

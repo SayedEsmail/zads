@@ -1,21 +1,73 @@
 <script setup>
 import { useTutorRequestsStore } from '~/stores/tutorRequests'
+import { useSearchStore } from '~/stores/search'
+import { useTeacherStore } from '~/stores/teacher'
+import { useAnalytics } from '~/composables/useAnalytics'
 
 definePageMeta({
     layout: 'default',
 })
 
 const tutorRequestsStore = useTutorRequestsStore()
+const searchStore = useSearchStore()
+const teacherStore = useTeacherStore()
+const { logWhatsAppClick } = useAnalytics()
 const { t } = useI18n()
 
 onMounted(async () => {
+    await Promise.all([
+        searchStore.fetchGovernorates(),
+        teacherStore.fetchProfile()
+    ])
+    
+    // Auto-search nearby requests if profile has location
+    if (teacherStore.profile?.areaId) {
+        tutorRequestsStore.filters.areaId = teacherStore.profile.areaId
+        tutorRequestsStore.filters.cityId = teacherStore.profile.area?.cityId
+        tutorRequestsStore.filters.governorateId = teacherStore.profile.area?.city?.governorateId
+        
+        // Ensure dropdowns have data
+        if (tutorRequestsStore.filters.governorateId) {
+            await searchStore.fetchCities(tutorRequestsStore.filters.governorateId)
+        }
+        if (tutorRequestsStore.filters.cityId) {
+            await searchStore.fetchAreas(tutorRequestsStore.filters.cityId)
+        }
+    }
+
     await tutorRequestsStore.fetchTutorRequests(1)
 })
 
+watch(() => tutorRequestsStore.filters.governorateId, async (val, oldVal) => {
+    if (val === oldVal) return
+    if (oldVal !== undefined && oldVal !== null) {
+        tutorRequestsStore.filters.cityId = null
+        tutorRequestsStore.filters.areaId = null
+    }
+    if (val) await searchStore.fetchCities(val)
+})
+
+watch(() => tutorRequestsStore.filters.cityId, async (val, oldVal) => {
+    if (val === oldVal) return
+    if (oldVal !== undefined && oldVal !== null) {
+        tutorRequestsStore.filters.areaId = null
+    }
+    if (val) await searchStore.fetchAreas(val)
+})
+
+const handleFilterChange = () => {
+    tutorRequestsStore.fetchTutorRequests(1)
+}
+
+const handleClearFilters = () => {
+    tutorRequestsStore.filters.governorateId = null
+    tutorRequestsStore.filters.cityId = null
+    tutorRequestsStore.filters.areaId = null
+    tutorRequestsStore.fetchTutorRequests(1)
+}
+
 const loadMore = async () => {
     if (tutorRequestsStore.pagination.page < tutorRequestsStore.pagination.totalPages) {
-        // Simple manual pagination handling for now (append to current list or just navigate)
-        // Here we just override the list with the requested page.
         await tutorRequestsStore.fetchTutorRequests(tutorRequestsStore.pagination.page + 1)
     }
 }
@@ -24,7 +76,7 @@ const loadMore = async () => {
 <template>
     <div>
         <VRow class="mb-6">
-            <VCol cols="12">
+            <VCol cols="12" md="6">
                 <h1 class="text-h4 mb-2 d-flex align-center gap-2">
                     {{ $t('TeacherBrowse.Title') }}
                     <VIcon icon="tabler-search" color="primary" size="32" />
@@ -34,6 +86,72 @@ const loadMore = async () => {
                 </p>
             </VCol>
         </VRow>
+
+        <!-- Filters Section -->
+        <VCard border flat class="mb-6 bg-var-theme-background pa-4">
+            <VRow align="center" dense>
+                <VCol cols="12" md="3">
+                    <VAutocomplete
+                        v-model="tutorRequestsStore.filters.governorateId"
+                        :items="searchStore.governorates"
+                        item-title="nameAr"
+                        item-value="id"
+                        :placeholder="$t('CompleteProfile.Governorate')"
+                        variant="outlined"
+                        bg-color="surface"
+                        density="compact"
+                        hide-details
+                        clearable
+                        prepend-inner-icon="tabler-map"
+                        @update:model-value="handleFilterChange"
+                    />
+                </VCol>
+                <VCol cols="12" md="3">
+                    <VAutocomplete
+                        v-model="tutorRequestsStore.filters.cityId"
+                        :items="searchStore.cities"
+                        item-title="nameAr"
+                        item-value="id"
+                        :placeholder="$t('CompleteProfile.City')"
+                        variant="outlined"
+                        bg-color="surface"
+                        density="compact"
+                        hide-details
+                        clearable
+                        :disabled="!tutorRequestsStore.filters.governorateId"
+                        prepend-inner-icon="tabler-building"
+                        @update:model-value="handleFilterChange"
+                    />
+                </VCol>
+                <VCol cols="12" md="3">
+                    <VAutocomplete
+                        v-model="tutorRequestsStore.filters.areaId"
+                        :items="searchStore.areas"
+                        item-title="nameAr"
+                        item-value="id"
+                        :placeholder="$t('CompleteProfile.Area')"
+                        variant="outlined"
+                        bg-color="surface"
+                        density="compact"
+                        hide-details
+                        clearable
+                        :disabled="!tutorRequestsStore.filters.cityId"
+                        prepend-inner-icon="tabler-map-pin"
+                        @update:model-value="handleFilterChange"
+                    />
+                </VCol>
+                <VCol cols="12" md="3" class="d-flex justify-end gap-2">
+                    <VBtn 
+                        color="error" 
+                        variant="text" 
+                        @click="handleClearFilters"
+                        v-if="tutorRequestsStore.filters.governorateId || tutorRequestsStore.filters.cityId || tutorRequestsStore.filters.areaId"
+                    >
+                        {{ $t('Reset') }}
+                    </VBtn>
+                </VCol>
+            </VRow>
+        </VCard>
 
         <VRow v-if="tutorRequestsStore.loading && !tutorRequestsStore.requests.length" justify="center" class="py-12">
             <VProgressCircular indeterminate color="primary" size="48" />
@@ -93,8 +211,7 @@ const loadMore = async () => {
                             color="primary"
                             variant="flat"
                             prepend-icon="tabler-brand-whatsapp"
-                            :href="`https://wa.me/${request.parent?.user?.phone}`"
-                            target="_blank"
+                            @click="logWhatsAppClick(teacherStore.profile?.id, request.parent?.user?.phone)"
                         >
                             {{ $t('TeacherBrowse.ContactParent') }}
                         </VBtn>

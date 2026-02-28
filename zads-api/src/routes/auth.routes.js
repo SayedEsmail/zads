@@ -6,7 +6,8 @@ const validate = require('../middlewares/validate');
 const {
     registerTeacherSchema,
     registerParentSchema,
-    loginSchema
+    loginSchema,
+    updateProfileSchema
 } = require('../utils/validators');
 
 // Register teacher
@@ -32,6 +33,14 @@ router.post(
 
 // Get current user profile (protected)
 router.get('/profile', auth, authController.getProfile);
+
+// Update current user profile (protected)
+router.put(
+    '/profile',
+    auth,
+    validate(updateProfileSchema),
+    authController.updateProfile
+);
 
 // Update FCM token (protected)
 router.post('/fcm-token', auth, authController.updateFcmToken);

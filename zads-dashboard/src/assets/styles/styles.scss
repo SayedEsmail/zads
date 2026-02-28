@@ -2,7 +2,7 @@
 
 // Typography - Using Cairo for Arabic and Poppins for English
 :root {
-    --font-family-primary: 'Cairo', 'Poppins', sans-serif;
+    --font-family-primary: 'IBM Plex Sans Arabic', 'Cairo', 'Poppins', sans-serif;
 }
 
 body,
@@ -11,10 +11,24 @@ body,
 }
 
 // Ensure all text uses Cairo
-h1, h2, h3, h4, h5, h6,
-.text-h1, .text-h2, .text-h3, .text-h4, .text-h5, .text-h6,
-.v-card-title, .v-card-subtitle,
-.v-list-item-title, .v-list-item-subtitle,
-.v-btn, .v-chip, .v-tab {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.text-h1,
+.text-h2,
+.text-h3,
+.text-h4,
+.text-h5,
+.text-h6,
+.v-card-title,
+.v-card-subtitle,
+.v-list-item-title,
+.v-list-item-subtitle,
+.v-btn,
+.v-chip,
+.v-tab {
     font-family: var(--font-family-primary) !important;
 }

@@ -10,10 +10,11 @@ import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const { signIn } = useAuth()
 const { t } = useI18n()
 
 definePageMeta({
-    layout: 'blank',
+    layout: 'public',
     public: true,
 })
 
@@ -35,14 +36,26 @@ const login = async () => {
     try {
         await authStore.login(form.value.phone, form.value.password)
 
+        // Sync with nuxt-auth
+        const authResponse = await signIn('credentials', {
+            phone: form.value.phone,
+            password: form.value.password,
+            redirect: false,
+            callbackUrl: '/',
+        })
+        
+        if (authResponse?.error) {
+           throw new Error(authResponse.error)
+        }
+
         // Navigate based on user type
         const userType = authStore.userType
         console.log('Login successful. userType:', userType);
 
-        if (userType === 'TEACHER') {
+        if (userType?.toUpperCase() === 'TEACHER') {
             console.log('Redirecting to /teacher');
             return navigateTo('/teacher')
-        } else if (userType === 'PARENT') {
+        } else if (userType?.toUpperCase() === 'PARENT') {
             console.log('Redirecting to /parent');
             return navigateTo('/parent')
         } else {

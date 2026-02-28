@@ -7,12 +7,15 @@ import navImg from '@images/front-pages/misc/nav-item-col-img.png'
 import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
 import { themeConfig } from '@themeConfig'
 
+import { useAuthStore } from '@/stores/auth'
+
 const props = defineProps({ activeId: String })
 
 const display = useDisplay()
 const { y } = useWindowScroll()
 const route = useRoute()
 const router = useRouter()
+const authStore = useAuthStore()
 const sidebar = ref(false)
 
 watch(() => display, () => {
@@ -138,14 +141,26 @@ const isPageActive = computed(() => menuItems.some(item => item.navItems.some(li
         <VSpacer />
 
         <div class="d-flex gap-x-4">
-          <VBtn
-            prepend-icon="tabler-login"
-            variant="elevated"
-            color="primary"
-            :to="{ name: 'login' }"
-          >
-            {{ $t('Auth.Login') }}
-          </VBtn>
+          <template v-if="!authStore.isAuthenticated">
+            <VBtn
+              prepend-icon="tabler-login"
+              variant="elevated"
+              color="primary"
+              :to="{ name: 'login' }"
+            >
+              {{ $t('Auth.Login') }}
+            </VBtn>
+          </template>
+          <template v-else>
+             <VBtn
+              variant="elevated"
+              color="primary"
+              :to="authStore.userType?.toUpperCase() === 'TEACHER' ? '/teacher' : '/parent'"
+            >
+              {{ $t('Dashboard') || 'Dashboard' }} 
+              <VIcon end icon="tabler-chevron-right" class="flip-in-rtl" />
+            </VBtn>
+          </template>
         </div>
       </VAppBar>
     </div>

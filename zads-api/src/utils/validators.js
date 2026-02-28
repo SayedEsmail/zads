@@ -33,7 +33,9 @@ const loginSchema = z.object({
 const updateProfileSchema = z.object({
     name: z.string().min(2).optional(),
     email: z.string().email().optional().nullable(),
-    avatarUrl: z.string().url().optional().nullable()
+    avatarUrl: z.string().url().optional().nullable(),
+    phone: z.string().regex(phoneRegex, 'Invalid Egyptian phone number').optional(),
+    password: z.string().min(6, 'Password must be at least 6 characters').optional()
 });
 
 module.exports = {

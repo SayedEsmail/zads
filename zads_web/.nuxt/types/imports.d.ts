@@ -193,6 +193,7 @@ declare global {
   const useAbility: typeof import('../../plugins/casl/composables/useAbility')['useAbility']
   const useAbs: typeof import('@vueuse/math')['useAbs']
   const useActiveElement: typeof import('@vueuse/core')['useActiveElement']
+  const useAnalytics: typeof import('../../composables/useAnalytics')['useAnalytics']
   const useAnimate: typeof import('@vueuse/core')['useAnimate']
   const useApi: typeof import('../../composables/useApi')['useApi']
   const useAppConfig: typeof import('../../node_modules/.pnpm/nuxt@3.14.1592_eslint@8.57.1_rollup@4.57.1_sass@1.76.0_stylelint@16.8.0_typescript@5.9.3_vite@5.4.11/node_modules/nuxt/dist/app/config')['useAppConfig']
@@ -398,6 +399,7 @@ declare global {
   const useShare: typeof import('@vueuse/core')['useShare']
   const useSkins: typeof import('../../@core/composable/useSkins')['useSkins']
   const useSlots: typeof import('../../node_modules/.pnpm/vue@3.5.27_typescript@5.9.3/node_modules/vue')['useSlots']
+  const useSnackbar: typeof import('../../composables/useSnackbar')['useSnackbar']
   const useSorted: typeof import('@vueuse/core')['useSorted']
   const useSpeechRecognition: typeof import('@vueuse/core')['useSpeechRecognition']
   const useSpeechSynthesis: typeof import('@vueuse/core')['useSpeechSynthesis']
@@ -670,6 +672,7 @@ declare module 'vue' {
     readonly useAbility: UnwrapRef<typeof import('../../plugins/casl/composables/useAbility')['useAbility']>
     readonly useAbs: UnwrapRef<typeof import('@vueuse/math')['useAbs']>
     readonly useActiveElement: UnwrapRef<typeof import('@vueuse/core')['useActiveElement']>
+    readonly useAnalytics: UnwrapRef<typeof import('../../composables/useAnalytics')['useAnalytics']>
     readonly useAnimate: UnwrapRef<typeof import('@vueuse/core')['useAnimate']>
     readonly useApi: UnwrapRef<typeof import('../../composables/useApi')['useApi']>
     readonly useAppConfig: UnwrapRef<typeof import('../../node_modules/.pnpm/nuxt@3.14.1592_eslint@8.57.1_rollup@4.57.1_sass@1.76.0_stylelint@16.8.0_typescript@5.9.3_vite@5.4.11/node_modules/nuxt/dist/app/config')['useAppConfig']>
@@ -875,6 +878,7 @@ declare module 'vue' {
     readonly useShare: UnwrapRef<typeof import('@vueuse/core')['useShare']>
     readonly useSkins: UnwrapRef<typeof import('../../@core/composable/useSkins')['useSkins']>
     readonly useSlots: UnwrapRef<typeof import('../../node_modules/.pnpm/vue@3.5.27_typescript@5.9.3/node_modules/vue')['useSlots']>
+    readonly useSnackbar: UnwrapRef<typeof import('../../composables/useSnackbar')['useSnackbar']>
     readonly useSorted: UnwrapRef<typeof import('@vueuse/core')['useSorted']>
     readonly useSpeechRecognition: UnwrapRef<typeof import('@vueuse/core')['useSpeechRecognition']>
     readonly useSpeechSynthesis: UnwrapRef<typeof import('@vueuse/core')['useSpeechSynthesis']>

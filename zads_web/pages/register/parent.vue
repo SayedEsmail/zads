@@ -10,10 +10,11 @@ import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const { signIn } = useAuth()
 const { t } = useI18n()
 
 definePageMeta({
-    layout: 'blank',
+    layout: 'public',
     public: true,
 })
 
@@ -35,6 +36,18 @@ const onSubmit = async () => {
 
     try {
         await authStore.registerParent(form.value.name, form.value.phone, form.value.password)
+
+        // Sync with nuxt-auth to establish the session
+        const authResponse = await signIn('credentials', {
+            phone: form.value.phone,
+            password: form.value.password,
+            redirect: false,
+            callbackUrl: '/',
+        })
+        
+        if (authResponse?.error) {
+           throw new Error(authResponse.error)
+        }
 
         // Navigate based on user type
         router.push('/parent')

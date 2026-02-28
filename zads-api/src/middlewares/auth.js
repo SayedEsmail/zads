@@ -43,6 +43,43 @@ const auth = async (req, res, next) => {
 };
 
 /**
+ * Optional Authentication middleware
+ * Verifies JWT token and attaches user to request if present, but doesn't block if missing
+ */
+const optionalAuth = async (req, res, next) => {
+    try {
+        const authHeader = req.headers.authorization;
+
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return next();
+        }
+
+        const token = authHeader.split(' ')[1];
+
+        try {
+            const decoded = jwt.verify(token, jwtSecret);
+            const user = await prisma.user.findUnique({
+                where: { id: decoded.userId },
+                include: {
+                    teacher: true,
+                    parent: true
+                }
+            });
+
+            if (user && user.status === 'active') {
+                req.user = user;
+            }
+        } catch (e) {
+            // ignore token errors for optional auth
+        }
+
+        next();
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
  * Check if user is a teacher
  */
 const isTeacher = (req, res, next) => {
@@ -81,4 +118,4 @@ const isAdmin = (req, res, next) => {
     next();
 };
 
-module.exports = { auth, isTeacher, isParent, isAdmin };
+module.exports = { auth, optionalAuth, isTeacher, isParent, isAdmin };

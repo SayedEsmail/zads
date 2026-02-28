@@ -20,6 +20,8 @@ const isSaving = ref(false)
 // Form State
 const formData = ref({
     id: null,
+    subjectIds: [],
+    stageIds: [],
     subjectId: null,
     stageId: null,
     priceAtTeacher: null,
@@ -44,6 +46,8 @@ const openAddDialog = () => {
     isEditing.value = false
     formData.value = {
         id: null,
+        subjectIds: [],
+        stageIds: [],
         subjectId: null,
         stageId: null,
         priceAtTeacher: null,
@@ -58,6 +62,8 @@ const openEditDialog = (item) => {
     isEditing.value = true
     formData.value = {
         id: item.id,
+        subjectIds: [],
+        stageIds: [],
         subjectId: item.subjectId,
         stageId: item.stageId,
         priceAtTeacher: item.priceAtTeacher,
@@ -74,7 +80,7 @@ const saveSubject = async () => {
 
     isSaving.value = true
     try {
-        const payload = {
+        const payloadBase = {
             priceAtTeacher: formData.value.priceAtTeacher ? Number(formData.value.priceAtTeacher) : null,
             priceAtStudent: formData.value.priceAtStudent ? Number(formData.value.priceAtStudent) : null,
             priceGroup: formData.value.priceGroup ? Number(formData.value.priceGroup) : null,
@@ -82,12 +88,20 @@ const saveSubject = async () => {
         }
 
         if (isEditing.value) {
-            await subjectsStore.updateSubject(formData.value.id, payload)
+            await subjectsStore.updateSubject(formData.value.id, payloadBase)
             showSnackbar(t('TeacherSubjects.UpdateSuccess'), 'success')
         } else {
-            payload.subjectId = formData.value.subjectId
-            payload.stageId = formData.value.stageId
-            await subjectsStore.addSubject(payload)
+            const promises = []
+            for (const subId of formData.value.subjectIds) {
+                for (const stgId of formData.value.stageIds) {
+                    promises.push(subjectsStore.addSubject({
+                        ...payloadBase,
+                        subjectId: subId,
+                        stageId: stgId
+                    }))
+                }
+            }
+            await Promise.all(promises)
             showSnackbar(t('TeacherSubjects.AddSuccess'), 'success')
         }
         isDialogOpen.value = false
@@ -211,8 +225,22 @@ const formatPrice = (price) => {
                 <VCardText class="pa-6">
                     <VForm ref="dialogForm" @submit.prevent="saveSubject">
                         <VRow>
-                            <!-- Subject & Stage Selectors (Disabled during edit because API requires dropping/adding for core changes, or we just freeze them) -->
-                            <VCol cols="12" sm="6">
+                            <!-- Subject & Stage Selectors -->
+                            <VCol cols="12" sm="6" v-if="!isEditing">
+                                <VAutocomplete
+                                    v-model="formData.subjectIds"
+                                    :items="searchStore.subjects"
+                                    item-title="nameAr"
+                                    item-value="id"
+                                    :label="$t('Subject')"
+                                    variant="outlined"
+                                    multiple
+                                    chips
+                                    closable-chips
+                                    :rules="[v => v.length > 0 || $t('RequiredField')]"
+                                />
+                            </VCol>
+                            <VCol cols="12" sm="6" v-else>
                                 <VAutocomplete
                                     v-model="formData.subjectId"
                                     :items="searchStore.subjects"
@@ -220,11 +248,25 @@ const formatPrice = (price) => {
                                     item-value="id"
                                     :label="$t('Subject')"
                                     variant="outlined"
-                                    :disabled="isEditing"
-                                    :rules="[v => !!v || $t('RequiredField')]"
+                                    disabled
                                 />
                             </VCol>
-                            <VCol cols="12" sm="6">
+
+                            <VCol cols="12" sm="6" v-if="!isEditing">
+                                <VAutocomplete
+                                    v-model="formData.stageIds"
+                                    :items="searchStore.stages"
+                                    item-title="nameAr"
+                                    item-value="id"
+                                    :label="$t('Stage')"
+                                    variant="outlined"
+                                    multiple
+                                    chips
+                                    closable-chips
+                                    :rules="[v => v.length > 0 || $t('RequiredField')]"
+                                />
+                            </VCol>
+                            <VCol cols="12" sm="6" v-else>
                                 <VAutocomplete
                                     v-model="formData.stageId"
                                     :items="searchStore.stages"
@@ -232,8 +274,7 @@ const formatPrice = (price) => {
                                     item-value="id"
                                     :label="$t('Stage')"
                                     variant="outlined"
-                                    :disabled="isEditing"
-                                    :rules="[v => !!v || $t('RequiredField')]"
+                                    disabled
                                 />
                             </VCol>
 

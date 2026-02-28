@@ -13,7 +13,7 @@ const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
 const { t } = useI18n()
 
 definePageMeta({
-  layout: 'blank',
+  layout: 'public',
   unauthenticatedOnly: true,
 
 })

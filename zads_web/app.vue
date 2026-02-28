@@ -29,6 +29,7 @@ const configStore = useConfigStore()
       </NuxtLayout>
 
       <ScrollToTop />
+      <AppSnackbar />
     </VApp>
   </VLocaleProvider>
 </template>

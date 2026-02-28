@@ -64,7 +64,7 @@ const userAvatar = computed(() => authStore.user?.avatarUrl || avatar1)
           <VDivider class="my-2" />
 
           <!-- 👉 Profile -->
-          <VListItem link to="/parent/complete-profile">
+          <VListItem link :to="authStore.user?.userType === 'teacher' ? '/teacher/profile' : '/parent/complete-profile'">
             <template #prepend>
               <VIcon
                 class="me-2"

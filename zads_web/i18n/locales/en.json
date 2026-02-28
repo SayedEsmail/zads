@@ -12,6 +12,7 @@
     "MyRequests": "My Requests",
     "Categories": "Subjects",
     "ViewAll": "View All",
+    "New": "New",
     "NearbyTeachers": "Nearby Teachers",
     "Nearby": "Nearby",
     "ContactNow": "Contact Now",
@@ -21,6 +22,8 @@
     "NotSpecified": "Not Specified",
     "Online": "Online",
     "InPerson": "In-Person",
+    "InPersonTeacher": "In-Person (Tutor's Location)",
+    "InPersonStudent": "In-Person (Student's Location)",
     "OnlineInPerson": "Online & In-Person",
     "Unknown": "Unknown",
     "NoResults": "No matching results found",
@@ -68,10 +71,21 @@
     "TeacherDashboard": {
         "Title": "Teacher Dashboard",
         "WelcomeBack": "Welcome back, {name}",
+        "CompleteProfileDesc": "Complete your profile to appear to students and start teaching",
         "TotalViews": "Total Profile Views",
         "AverageRating": "Average Rating",
         "Reviews": "reviews",
-        "ContactRequests": "Contact Requests"
+        "ContactRequests": "Contact Requests",
+        "Opportunities": "Opportunities",
+        "RequestsInYourArea": "Student Requests in your Area",
+        "NoRequestsInArea": "No new requests in your area",
+        "QuickActions": "Quick Actions",
+        "EditProfile": "Edit Profile",
+        "EditProfileDesc": "Add your info and teaching subjects",
+        "ManageSubjects": "Set Subjects & Stages",
+        "ManageSubjectsDesc": "Define the subjects and stages you teach",
+        "FilterLocation": "Set Location",
+        "FilterLocationDesc": "Define your geographical area"
     },
     "TeacherProfile": {
         "Title": "Edit Profile",
@@ -111,11 +125,16 @@
     },
     "TeacherRequests": {
         "Title": "Incoming Contact Requests",
-        "Desc": "Review requests sent by parents inquiring about or booking lessons for their children.",
+        "Desc": "Manage student requests and incoming contact requests",
+        "StudentsTab": "Students",
+        "ContactRequestsTab": "Contact Requests",
+        "NoStudentsRequests": "No student requests currently",
+        "NoStudentsRequestsDesc": "Student requests for teachers in your area will appear here.",
         "NoRequests": "No incoming requests currently",
         "NoRequestsDesc": "When a parent contacts you, their request will appear here.",
         "Accept": "Accept Request",
         "Reject": "Reject Request",
+        "ContactParent": "Contact Parent (WhatsApp)",
         "StatusUpdatedSuccess": "Request status updated successfully",
         "StatusUpdateFailed": "Failed to update request status"
     },
@@ -131,6 +150,45 @@
         "pending": "Pending",
         "accepted": "Accepted",
         "rejected": "Rejected"
+    },
+    "Settings": {
+        "AccountSettings": "Account Settings",
+        "ProfileInfo": "Profile Information",
+        "UpdateYourCoreInformation": "Update your general account information",
+        "Location": "Location",
+        "UpdateYourLocationToFindNearbyTeachers": "Update your location to easily find nearby teachers",
+        "ChildrenAndSubjects": "Children & Subjects",
+        "AddNewChild": "Add New Child",
+        "ManageChildren": "Manage Children",
+        "SubjectsForThisChild": "Subjects for this child",
+        "SaveSubjects": "Save Subjects",
+        "SaveChanges": "Save Changes",
+        "AccountUpdatedSuccessfully": "Account updated successfully",
+        "LocationUpdatedSuccessfully": "Location updated successfully",
+        "ChildAdded": "Child added successfully",
+        "ChildRemoved": "Child removed successfully",
+        "SubjectsUpdated": "Subjects updated successfully"
+    },
+    "MyTutorRequests": {
+        "Title": "My Tutor Requests",
+        "Desc": "Manage your open requests and see how many teachers have tried to contact you.",
+        "CreateNew": "Create New Request",
+        "NoRequests": "No Tutor Requests",
+        "NoRequestsDesc": "You haven't posted any requests yet. Create one to let teachers find you!",
+        "NoActiveRequests": "No active requests",
+        "StatusActive": "Active",
+        "StatusClosed": "Closed",
+        "ContactCount": "Contact Attempts",
+        "Close": "Mark as Fulfilled",
+        "CreatedSuccess": "Request created successfully",
+        "ClosedSuccess": "Request marked as fulfilled",
+        "DeletedSuccess": "Request deleted successfully",
+        "DescriptionLabel": "Request Details",
+        "DescriptionPlaceholder": "E.g. I need a native English speaker for my son in Grade 5. Focus on conversation.",
+        "PreferredLessonType": "Preferred Lesson Type",
+        "BudgetMin": "Minimum Budget (EGP)",
+        "BudgetMax": "Maximum Budget (EGP)",
+        "Submit": "Post Request"
     },
     "ParentDashboard": {
         "ForgotPassword?🔒": "Forgot Password?",
@@ -208,5 +266,29 @@
     "HowItWorks": {
         "Title": "How It Works",
         "Description": "This section is under construction. It will contain information on how the platform operates for Parents and Teachers."
+    },
+    "Nav": {
+        "ParentDashboard": "Parent Dashboard",
+        "TeacherDashboard": "Teacher Dashboard",
+        "FindTeachers": "Find Teachers",
+        "MyChildren": "My Children",
+        "MyRequests": "My Requests",
+        "Favorites": "Favorites",
+        "Settings": "Settings",
+        "Dashboard": "Dashboard",
+        "EditProfile": "Edit Profile",
+        "SubjectsPricing": "Subjects & Pricing",
+        "IncomingRequests": "Incoming Requests",
+        "BrowseRequests": "Browse Requests",
+        "Logout": "Logout"
+    },
+    "Footer": {
+        "About": "About Us",
+        "HowItWorks": "How it Works",
+        "License": "License",
+        "Support": "Support",
+        "AllRightsReserved": "All rights reserved",
+        "MadeWith": "Made with",
+        "By": "by"
     }
 }

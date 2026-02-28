@@ -49,13 +49,14 @@ export const useAuthStore = defineStore('auth', {
 
                 // Define abilities based on userType
                 const rules = []
-                if (this.user.userType === 'ADMIN') {
+                const uType = this.user.userType?.toUpperCase()
+                if (uType === 'ADMIN') {
                     rules.push({ action: 'manage', subject: 'all' })
-                } else if (this.user.userType === 'PARENT') {
+                } else if (uType === 'PARENT') {
                     rules.push({ action: 'read', subject: 'Parent' })
                     rules.push({ action: 'manage', subject: 'Children' })
                     rules.push({ action: 'manage', subject: 'Requests' })
-                } else if (this.user.userType === 'TEACHER') {
+                } else if (uType === 'TEACHER') {
                     rules.push({ action: 'read', subject: 'Teacher' })
                     rules.push({ action: 'manage', subject: 'Subjects' })
                     rules.push({ action: 'manage', subject: 'IncomingRequests' })
@@ -133,6 +134,55 @@ export const useAuthStore = defineStore('auth', {
                 userAbilityRules.value = rules
 
                 return response.data
+            } catch (error) {
+                this.error = error.message
+                throw error
+            } finally {
+                this.loading = false
+            }
+        },
+
+        async updateAccount(payload) {
+            this.loading = true
+            this.error = null
+
+            try {
+                const response = await api.put('/auth/profile', payload)
+
+                // Update the user cookie with new basic info
+                const userCookie = useCookie('user')
+                this.user = response.data.user
+                userCookie.value = this.user
+
+                return response.data
+            } catch (error) {
+                this.error = error.message
+                throw error
+            } finally {
+                this.loading = false
+            }
+        },
+
+        async uploadAvatar(file) {
+            this.loading = true
+            this.error = null
+
+            try {
+                const formData = new FormData()
+                formData.append('image', file)
+
+                const response = await api.post('/upload/image', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                })
+
+                const imageUrl = response.data.data.url
+
+                // Update the profile with the new avatarUrl
+                await this.updateAccount({ avatarUrl: imageUrl })
+
+                return imageUrl
             } catch (error) {
                 this.error = error.message
                 throw error

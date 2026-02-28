@@ -12,6 +12,7 @@
     "MyRequests": "طلباتي",
     "Categories": "المواد الدراسية",
     "ViewAll": "عرض الكل",
+    "New": "جديد",
     "NearbyTeachers": "مدرسون بالقرب منك",
     "Nearby": "قريب",
     "ContactNow": "تواصل الآن",
@@ -21,6 +22,8 @@
     "NotSpecified": "غير محدد",
     "Online": "أونلاين",
     "InPerson": "حضوري",
+    "InPersonTeacher": "حضوري (عند المدرس)",
+    "InPersonStudent": "حضوري (عند الطالب)",
     "OnlineInPerson": "أونلاين وحضوري",
     "Unknown": "غير معروف",
     "NoResults": "لا توجد نتائج مطابقة",
@@ -68,10 +71,21 @@
     "TeacherDashboard": {
         "Title": "لوحة تحكم المعلم",
         "WelcomeBack": "مرحباً بك مجدداً، {name}",
+        "CompleteProfileDesc": "أكمل ملفك الشخصي لتظهر للطلاب وابدأ في التدريس",
         "TotalViews": "إجمالي المشاهدات",
         "AverageRating": "متوسط التقييم",
         "Reviews": "تقييمات",
-        "ContactRequests": "طلبات التواصل"
+        "ContactRequests": "طلبات التواصل",
+        "Opportunities": "الفرص",
+        "RequestsInYourArea": "طلبات الطلاب في منطقتك",
+        "NoRequestsInArea": "لا توجد طلبات جديدة في منطقتك",
+        "QuickActions": "إجراءات سريعة",
+        "EditProfile": "تعديل الملف الشخصي",
+        "EditProfileDesc": "أضف معلوماتك ومواد التدريس",
+        "ManageSubjects": "تحديد المواد والمراحل",
+        "ManageSubjectsDesc": "حدد المواد والمراحل التي تدرسها",
+        "FilterLocation": "تحديد الموقع",
+        "FilterLocationDesc": "حدد منطقتك الجغرافية"
     },
     "TeacherProfile": {
         "Title": "تعديل الملف الشخصي",
@@ -111,11 +125,16 @@
     },
     "TeacherRequests": {
         "Title": "طلبات التواصل الواردة",
-        "Desc": "راجع الطلبات المرسلة من أولياء الأمور للاستفسار أو حجز حصص دراسية لأبنائهم.",
+        "Desc": "إدارة طلبات الطلاب وطلبات التواصل الواردة",
+        "StudentsTab": "الطلاب",
+        "ContactRequestsTab": "طلبات التواصل",
+        "NoStudentsRequests": "لا توجد طلبات طلاب حالياً",
+        "NoStudentsRequestsDesc": "ستظهر هنا طلبات الطلاب البحث عن معلمين في منطقتك.",
         "NoRequests": "لا توجد طلبات واردة حالياً",
         "NoRequestsDesc": "عندما يقوم أحد أولياء الأمور بالتواصل معك، سيظهر طلبه هنا.",
         "Accept": "قبول الطلب",
         "Reject": "رفض الطلب",
+        "ContactParent": "تواصل مع ولي الأمر (واتساب)",
         "StatusUpdatedSuccess": "تم تحديث حالة الطلب بنجاح",
         "StatusUpdateFailed": "فشل تحديث حالة الطلب"
     },
@@ -131,6 +150,45 @@
         "pending": "قيد الانتظار",
         "accepted": "تم القبول",
         "rejected": "مرفوض"
+    },
+    "Settings": {
+        "AccountSettings": "إعدادات الحساب",
+        "ProfileInfo": "المعلومات الشخصية",
+        "UpdateYourCoreInformation": "تحديث معلومات حسابك العامة",
+        "Location": "الموقع الجغرافي",
+        "UpdateYourLocationToFindNearbyTeachers": "قم بتحديث موقعك لتسهيل إيجاد المعلمين القريبين منك",
+        "ChildrenAndSubjects": "الأبناء والمواد",
+        "AddNewChild": "إضافة ابن/ة جديد",
+        "ManageChildren": "إدارة الأبناء",
+        "SubjectsForThisChild": "المواد الدراسية لهذا الابن/ة",
+        "SaveSubjects": "حفظ المواد",
+        "SaveChanges": "حفظ التغييرات",
+        "AccountUpdatedSuccessfully": "تم تحديث الحساب بنجاح",
+        "LocationUpdatedSuccessfully": "تم تحديث الموقع بنجاح",
+        "ChildAdded": "تم إضافة الابن/ة بنجاح",
+        "ChildRemoved": "تم حذف الابن/ة بنجاح",
+        "SubjectsUpdated": "تم تحديث المواد بنجاح"
+    },
+    "MyTutorRequests": {
+        "Title": "طلبات التدريس الخاصة بي",
+        "Desc": "أدر طلباتك المفتوحة وشاهد عدد المعلمين الذين حاولوا التواصل معك.",
+        "CreateNew": "إنشاء طلب جديد",
+        "NoRequests": "لا توجد طلبات تدريس",
+        "NoRequestsDesc": "لم تقم بنشر أي طلبات بعد. أنشئ طلباً ليتمكن المعلمون من إيجادك!",
+        "NoActiveRequests": "لا توجد طلبات نشطة",
+        "StatusActive": "نشط",
+        "StatusClosed": "مغلق",
+        "ContactCount": "محاولات التواصل",
+        "Close": "تحديد كمكتمل",
+        "CreatedSuccess": "تم إنشاء الطلب بنجاح",
+        "ClosedSuccess": "تم إغلاق الطلب بنجاح",
+        "DeletedSuccess": "تم حذف الطلب بنجاح",
+        "DescriptionLabel": "تفاصيل الطلب",
+        "DescriptionPlaceholder": "مثال: أحتاج لمعلم لغة إنجليزية للتأسيس، التركيز على المحادثة.",
+        "PreferredLessonType": "نوع الحصة المفضل",
+        "BudgetMin": "الحد الأدنى للميزانية (جنيه)",
+        "BudgetMax": "الحد الأقصى للميزانية (جنيه)",
+        "Submit": "نشر الطلب"
     },
     "ParentDashboard": {
         "ForgotPassword?🔒": "نسيت كلمة المرور؟",
@@ -202,5 +260,29 @@
     "HowItWorks": {
         "Title": "كيف نعمل",
         "Description": "هذا القسم قيد الإنشاء. سيحتوي على معلومات حول كيفية عمل المنصة للآباء والمعلمين."
+    },
+    "Nav": {
+        "ParentDashboard": "لوحة تحكم ولي الأمر",
+        "TeacherDashboard": "لوحة تحكم المعلم",
+        "FindTeachers": "ابحث عن معلم",
+        "MyChildren": "أبنائي",
+        "MyRequests": "طلباتي",
+        "Favorites": "المفضلة",
+        "Settings": "الإعدادات",
+        "Dashboard": "الرئيسية",
+        "EditProfile": "الملف الشخصي",
+        "SubjectsPricing": "المواد والأسعار",
+        "IncomingRequests": "الطلبات الواردة",
+        "BrowseRequests": "فرص التدريس",
+        "Logout": "تسجيل الخروج"
+    },
+    "Footer": {
+        "About": "من نحن",
+        "HowItWorks": "كيف نعمل",
+        "License": "الترخيص",
+        "Support": "الدعم",
+        "AllRightsReserved": "جميع الحقوق محفوظة",
+        "MadeWith": "صنع بـ",
+        "By": "بواسطة"
     }
 }
