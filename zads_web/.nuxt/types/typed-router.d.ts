@@ -28,6 +28,7 @@ declare module 'vue-router/auto-routes' {
     'parent-complete-profile': RouteRecordInfo<'parent-complete-profile', '/parent/complete-profile', Record<never, never>, Record<never, never>>,
     'parent-favorites': RouteRecordInfo<'parent-favorites', '/parent/favorites', Record<never, never>, Record<never, never>>,
     'parent-requests': RouteRecordInfo<'parent-requests', '/parent/requests', Record<never, never>, Record<never, never>>,
+    'parent-settings': RouteRecordInfo<'parent-settings', '/parent/settings', Record<never, never>, Record<never, never>>,
     'parent-teacher-id': RouteRecordInfo<'parent-teacher-id', '/parent/teacher/:id()', { id: ParamValue<true> }, { id: ParamValue<false> }>,
     'register': RouteRecordInfo<'register', '/register', Record<never, never>, Record<never, never>>,
     'register-parent': RouteRecordInfo<'register-parent', '/register/parent', Record<never, never>, Record<never, never>>,
@@ -37,6 +38,7 @@ declare module 'vue-router/auto-routes' {
     'teacher-browse': RouteRecordInfo<'teacher-browse', '/teacher/browse', Record<never, never>, Record<never, never>>,
     'teacher-profile': RouteRecordInfo<'teacher-profile', '/teacher/profile', Record<never, never>, Record<never, never>>,
     'teacher-requests': RouteRecordInfo<'teacher-requests', '/teacher/requests', Record<never, never>, Record<never, never>>,
+    'teacher-settings': RouteRecordInfo<'teacher-settings', '/teacher/settings', Record<never, never>, Record<never, never>>,
     'teacher-subjects': RouteRecordInfo<'teacher-subjects', '/teacher/subjects', Record<never, never>, Record<never, never>>,
   }
 }

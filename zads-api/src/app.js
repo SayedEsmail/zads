@@ -16,6 +16,7 @@ const adminRoutes = require('./routes/admin.routes');
 const locationsRoutes = require('./routes/locations.routes');
 const uploadRoutes = require('./routes/upload.routes');
 const notificationsRoutes = require('./routes/notifications.routes');
+const analyticsRoutes = require('./routes/analytics.routes');
 
 const errorMiddleware = require('./middlewares/error');
 
@@ -69,6 +70,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/locations', locationsRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/notifications', notificationsRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 // 404 Handler
 app.use((req, res) => {

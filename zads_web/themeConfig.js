@@ -1,3 +1,4 @@
+import { h } from 'vue'
 import { breakpointsVuetifyV3 } from '@vueuse/core'
 import { VIcon } from 'vuetify/components/VIcon'
 import { defineThemeConfig } from '@core'

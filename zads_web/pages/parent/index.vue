@@ -127,7 +127,7 @@ const handleContact = teacher => {
                         <div class="location-header d-flex align-center gap-2 mb-4">
                             <VIcon icon="tabler-map-pin" color="primary" />
                             <span class="text-body-1 font-weight-bold">{{ locationName }}</span>
-                            <VBtn variant="text" color="primary" size="small" to="/parent/profile/edit" class="ms-auto">
+                            <VBtn variant="text" color="primary" size="small" to="/parent/complete-profile" class="ms-auto">
                                 {{ $t('ChangeLocation') }}
                             </VBtn>
                         </div>
@@ -257,21 +257,35 @@ const handleContact = teacher => {
                                             :items="searchStore.governorates"
                                             item-title="nameAr"
                                             item-value="id"
-                                            placeholder="المحافظة"
+                                            :placeholder="$t('CompleteProfile.Governorate')"
                                             variant="outlined"
                                             density="compact"
                                             hide-details
+                                            clearable
                                         />
                                         <VAutocomplete
                                             v-model="searchStore.filters.cityId"
                                             :items="searchStore.cities"
                                             item-title="nameAr"
                                             item-value="id"
-                                            placeholder="المدينة"
+                                            :placeholder="$t('CompleteProfile.City')"
                                             variant="outlined"
                                             density="compact"
                                             hide-details
+                                            clearable
                                             :disabled="!searchStore.filters.governorateId"
+                                        />
+                                        <VAutocomplete
+                                            v-model="searchStore.filters.areaId"
+                                            :items="searchStore.areas"
+                                            item-title="nameAr"
+                                            item-value="id"
+                                            :placeholder="$t('CompleteProfile.Area')"
+                                            variant="outlined"
+                                            density="compact"
+                                            hide-details
+                                            clearable
+                                            :disabled="!searchStore.filters.cityId"
                                         />
                                     </div>
                                 </div>

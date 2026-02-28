@@ -9,8 +9,7 @@ export async function loadFonts() {
     webFontLoader.load({
         google: {
             families: [
-                'Cairo:wght@300;400;500;600;700&display=swap',
-                'Poppins:wght@300;400;500;600;700&display=swap',
+                'IBM Plex Sans Arabic:wght@300;400;500;600;700&display=swap',
             ],
         },
     })

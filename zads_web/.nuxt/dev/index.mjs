@@ -943,7 +943,7 @@ const _inlineRuntimeConfig = {
     },
     "auth": {
       "isEnabled": true,
-      "baseURL": "http://localhost:3001/api/auth",
+      "baseURL": "http://localhost:4000/api/auth",
       "disableInternalRouting": false,
       "disableServerSideAuth": false,
       "originEnvKey": "AUTH_ORIGIN",
@@ -961,7 +961,7 @@ const _inlineRuntimeConfig = {
       }
     }
   },
-  "AUTH_ORIGIN": "http://localhost:3001",
+  "AUTH_ORIGIN": "http://localhost:4000",
   "AUTH_SECRET": "your-secret-key-for-zads-web-portal"
 };
 const envOptions = {
@@ -1364,7 +1364,7 @@ const _8wAnS8G_taIUrrJgvJlDPt1XzejTMri5jdu7GaAUM = (function(nitro) {
 
 const rootDir = "/Users/sayed/Devs/Zads/zads_web";
 
-const appHead = {"meta":[{"name":"viewport","content":"width=device-width, initial-scale=1"},{"charset":"utf-8"}],"link":[{"rel":"icon","type":"image/x-icon","href":"undefined/favicon.ico"}],"style":[],"script":[],"noscript":[],"titleTemplate":"%s - Zads","title":"زادس - سوق المعلمين"};
+const appHead = {"meta":[{"name":"viewport","content":"width=device-width, initial-scale=1"},{"charset":"utf-8"}],"link":[{"rel":"icon","type":"image/x-icon","href":"undefined/favicon.ico"},{"rel":"preconnect","href":"https://fonts.googleapis.com"},{"rel":"preconnect","href":"https://fonts.gstatic.com","crossorigin":"anonymous"},{"rel":"stylesheet","href":"https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap"}],"style":[],"script":[],"noscript":[],"titleTemplate":"%s - Zads","title":"زادس - سوق المعلمين"};
 
 const appRootTag = "div";
 
@@ -1606,7 +1606,15 @@ _AhNBE6KIPYuOeZGqEZSJHqdDe5vP3lemdVXYfTK78G8,
 _XAgqPJX2LSxxSDyJVWQc0a9vJbxOPrZ7dUWMZhI4S4
 ];
 
-const assets = {};
+const assets = {
+  "/index.mjs": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"170d6-efUZt+RftR6eGViUOr10Xn9bUg0\"",
+    "mtime": "2026-02-28T19:30:04.376Z",
+    "size": 94422,
+    "path": "index.mjs"
+  }
+};
 
 function readAsset (id) {
   const serverDir = dirname$1(fileURLToPath(globalThis._importMeta_.url));
@@ -2084,31 +2092,27 @@ const _____ = NuxtAuthHandler({
       name: "Credentials",
       credentials: {},
       async authorize(credentials) {
-        try {
-          const apiBaseUrl = process.env.NUXT_PUBLIC_API_BASE_URL || "http://localhost:3000";
-          const response = await $fetch(`${apiBaseUrl}/auth/login`, {
-            method: "POST",
-            body: credentials
-          });
-          if (response.success && response.data) {
-            const { user, token } = response.data;
-            return {
-              id: user.id,
-              name: user.name,
-              email: user.email,
-              phone: user.phone,
-              userType: user.userType,
-              accessToken: token
-              // Map other fields as needed
-            };
+        const apiBaseUrl = "http://127.0.0.1:3000/api";
+        const response = await $fetch(`${apiBaseUrl}/auth/login`, {
+          method: "POST",
+          body: {
+            phone: credentials.phone,
+            password: credentials.password
           }
-          return null;
-        } catch (error) {
-          throw createError({
-            statusCode: 403,
-            statusMessage: "Invalid phone or password"
-          });
+        });
+        if ((response == null ? void 0 : response.success) && (response == null ? void 0 : response.data)) {
+          const { user, token } = response.data;
+          return {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            phone: user.phone,
+            userType: user.userType,
+            accessToken: token
+            // Map other fields as needed
+          };
         }
+        return null;
       }
     })
   ],

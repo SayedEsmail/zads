@@ -1,6 +1,8 @@
 <script setup>
 import { useTeacherStore } from '~/stores/teacher'
 import { useSearchStore } from '~/stores/search'
+import { useAuthStore } from '~/stores/auth'
+import { useSnackbar } from '~/composables/useSnackbar'
 
 definePageMeta({
     layout: 'default',
@@ -8,12 +10,18 @@ definePageMeta({
 
 const teacherStore = useTeacherStore()
 const searchStore = useSearchStore()
+const authStore = useAuthStore()
 const { t } = useI18n()
 const { showSnackbar } = useSnackbar()
+
+// Avatar state
+const fileInput = ref(null)
+const isUploadingImage = ref(false)
 
 // Form reference
 const refForm = ref()
 const isSaving = ref(false)
+const isInitializingLocation = ref(true)
 
 // Data models mapping to the api body requirements
 const formData = ref({
@@ -36,6 +44,8 @@ const lessonTypeOptions = [
 
 // Initialize the form state
 onMounted(async () => {
+    isInitializingLocation.value = true
+
     // Make sure we have the original governorate arrays loaded
     if (!searchStore.governorates.length) {
         await searchStore.fetchGovernorates()
@@ -71,31 +81,34 @@ onMounted(async () => {
             }
         }
     }
+    
+    isInitializingLocation.value = false
 })
 
 // Watchers for drill-down location dropdowns
 watch(selectedGovernorateId, async (newId) => {
+    if (isInitializingLocation.value) return;
+
     if (newId) {
         await searchStore.fetchCities(newId)
     } else {
         searchStore.cities = []
         searchStore.areas = []
     }
-    // Prevent overriding the cached value when initially mounting the component
-    if (formData.value.areaId && searchStore.areas.find(a => a.id === formData.value.areaId)) return;
     
     selectedCityId.value = null
     formData.value.areaId = null
 })
 
 watch(selectedCityId, async (newId) => {
+    if (isInitializingLocation.value) return;
+
     if (newId) {
         await searchStore.fetchAreas(newId)
     } else {
         searchStore.areas = []
     }
     
-    if (formData.value.areaId && searchStore.areas.find(a => a.id === formData.value.areaId)) return;
     formData.value.areaId = null
 })
 
@@ -119,6 +132,26 @@ const saveProfile = async () => {
         isSaving.value = false
     }
 }
+
+const triggerFileInput = () => {
+    fileInput.value.click()
+}
+
+const onFileSelected = async (event) => {
+    const file = event.target.files[0]
+    if (!file) return
+
+    isUploadingImage.value = true
+    try {
+        await authStore.uploadAvatar(file)
+        showSnackbar(t('TeacherProfile.AvatarUpdatedSuccess') || 'تم تحديث الصورة بنجاح', 'success')
+    } catch (error) {
+        showSnackbar(error?.response?.data?.message || t('General.Error') || 'حدث خطأ', 'error')
+    } finally {
+        isUploadingImage.value = false
+        event.target.value = '' // reset
+    }
+}
 </script>
 
 <template>
@@ -139,6 +172,37 @@ const saveProfile = async () => {
             <VCol cols="12" md="8">
                 <VCard border flat>
                     <VCardText>
+                        <!-- Avatar Upload -->
+                        <div class="d-flex justify-center mb-8 mt-4">
+                            <div class="position-relative">
+                                <VAvatar
+                                    color="primary"
+                                    variant="tonal"
+                                    size="100"
+                                    class="rounded-circle border"
+                                >
+                                    <VImg v-if="authStore.user?.avatarUrl" :src="authStore.user?.avatarUrl" />
+                                    <span v-else class="text-h3 font-weight-bold">{{ authStore.user?.name?.charAt(0) || 'U' }}</span>
+                                </VAvatar>
+                                <VBtn
+                                    icon="tabler-camera"
+                                    color="primary"
+                                    size="small"
+                                    class="position-absolute"
+                                    style="bottom: 0; right: 0; z-index: 1"
+                                    :loading="isUploadingImage"
+                                    @click="triggerFileInput"
+                                />
+                                <input
+                                    ref="fileInput"
+                                    type="file"
+                                    accept="image/*"
+                                    class="d-none"
+                                    @change="onFileSelected"
+                                >
+                            </div>
+                        </div>
+
                         <VForm ref="refForm" @submit.prevent="saveProfile">
                             <VRow>
                                 <!-- Biography -->

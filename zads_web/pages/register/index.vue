@@ -3,7 +3,7 @@ import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
 import { themeConfig } from '@themeConfig'
 
 definePageMeta({
-  layout: 'blank',
+  layout: 'public',
   public: true,
   unauthenticatedOnly: true,
   auth: {

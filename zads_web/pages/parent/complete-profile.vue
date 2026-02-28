@@ -4,7 +4,7 @@ import { useChildrenStore } from '~/stores/children'
 import { useSearchStore } from '~/stores/search'
 
 definePageMeta({
-    layout: 'blank',
+    layout: 'default',
 })
 
 const router = useRouter()
@@ -158,7 +158,7 @@ const skipToHome = () => {
 </script>
 
 <template>
-    <div class="complete-profile-wrapper d-flex flex-column">
+    <div class="complete-profile-wrapper d-flex flex-column bg-background">
         <!-- Sticky Header (Mobile) -->
         <div class="d-md-none bg-surface elevation-2 position-sticky top-0 z-index-100 pa-4 text-center">
             <h1 class="text-h5 font-weight-bold mb-1">{{ $t('CompleteProfile.CompleteProfile') }}</h1>
@@ -449,6 +449,5 @@ const skipToHome = () => {
 <style lang="scss" scoped>
 .complete-profile-wrapper {
     min-height: 100vh;
-    background: linear-gradient(135deg, rgb(var(--v-theme-primary)) 0%, rgb(var(--v-theme-secondary)) 100%);
 }
 </style>

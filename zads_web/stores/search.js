@@ -105,7 +105,7 @@ export const useSearchStore = defineStore('search', {
                 return
             }
             try {
-                const response = await api.get(`/locations/cities/${governorateId}`)
+                const response = await api.get(`/locations/governorates/${governorateId}/cities`)
                 this.cities = response.data || []
                 this.areas = []
             } catch (error) {
@@ -119,7 +119,7 @@ export const useSearchStore = defineStore('search', {
                 return
             }
             try {
-                const response = await api.get(`/locations/areas/${cityId}`)
+                const response = await api.get(`/locations/cities/${cityId}/areas`)
                 this.areas = response.data || []
             } catch (error) {
                 console.error('Failed to fetch areas:', error)

@@ -258,10 +258,66 @@ const updateFcmToken = async (req, res, next) => {
     }
 };
 
+/**
+ * Update current user profile (name, phone, password, email)
+ */
+const updateProfile = async (req, res, next) => {
+    try {
+        const { name, email, avatarUrl, phone, password } = req.body;
+        const userId = req.user.id;
+
+        // Check if phone is being updated and if it belongs to someone else
+        if (phone && phone !== req.user.phone) {
+            const existingUser = await prisma.user.findUnique({
+                where: { phone }
+            });
+            if (existingUser) {
+                return response.error(res, 'Phone number already registered', 409);
+            }
+        }
+
+        const dataToUpdate = {
+            ...(name && { name }),
+            ...(email !== undefined && { email }),
+            ...(avatarUrl !== undefined && { avatarUrl }),
+            ...(phone && { phone }),
+        };
+
+        if (password) {
+            dataToUpdate.passwordHash = await bcrypt.hash(password, 10);
+        }
+
+        const updatedUser = await prisma.user.update({
+            where: { id: userId },
+            data: dataToUpdate,
+            include: {
+                teacher: true,
+                parent: true
+            }
+        });
+
+        return response.success(res, {
+            user: {
+                id: updatedUser.id,
+                phone: updatedUser.phone,
+                name: updatedUser.name,
+                email: updatedUser.email,
+                avatarUrl: updatedUser.avatarUrl,
+                userType: updatedUser.userType
+            },
+            teacher: updatedUser.teacher,
+            parent: updatedUser.parent
+        }, 'Profile updated successfully');
+    } catch (error) {
+        next(error);
+    }
+};
+
 module.exports = {
     registerTeacher,
     registerParent,
     login,
     getProfile,
-    updateFcmToken
+    updateFcmToken,
+    updateProfile
 };
