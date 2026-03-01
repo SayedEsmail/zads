@@ -74,22 +74,18 @@ const loadMore = async () => {
 </script>
 
 <template>
-    <div>
-        <VRow class="mb-6">
-            <VCol cols="12" md="6">
-                <h1 class="text-h4 mb-2 d-flex align-center gap-2">
-                    {{ $t('TeacherBrowse.Title') }}
-                    <VIcon icon="tabler-search" color="primary" size="32" />
-                </h1>
-                <p class="text-body-1 text-secondary">
-                    {{ $t('TeacherBrowse.Desc') }}
-                </p>
-            </VCol>
-        </VRow>
+    <div class="teacher-browse-page">
+        <!-- Premium Header Section -->
+        <PremiumPageHeader
+            :title="$t('TeacherBrowse.Title')"
+            :description="$t('TeacherBrowse.Desc')"
+        />
 
-        <!-- Filters Section -->
-        <VCard border flat class="mb-6 bg-var-theme-background pa-4">
-            <VRow align="center" dense>
+        <VContainer class="mt-n8">
+        <!-- Glassmorphism Filters Section -->
+        <VCard elevation="0" class="mb-8 glassmorphism-card border rounded-xl overflow-hidden pa-2">
+            <VCardText class="pa-4">
+                <VRow align="center" dense>
                 <VCol cols="12" md="3">
                     <VAutocomplete
                         v-model="tutorRequestsStore.filters.governorateId"
@@ -151,6 +147,7 @@ const loadMore = async () => {
                     </VBtn>
                 </VCol>
             </VRow>
+            </VCardText>
         </VCard>
 
         <VRow v-if="tutorRequestsStore.loading && !tutorRequestsStore.requests.length" justify="center" class="py-12">
@@ -171,12 +168,12 @@ const loadMore = async () => {
 
         <VRow v-else>
             <VCol v-for="request in tutorRequestsStore.requests" :key="request.id" cols="12">
-                <VCard border flat class="mb-2">
-                    <VCardItem>
+                <VCard class="mb-4 request-card-premium border-0" flat>
+                    <VCardItem class="pa-5">
                         <template #prepend>
-                            <VAvatar color="primary" variant="tonal" size="56" class="rounded-lg mr-4">
+                            <VAvatar color="primary" variant="tonal" size="64" class="rounded-xl shadow-sm mr-4">
                                 <VImg v-if="request.parent?.user?.avatarUrl" :src="request.parent.user.avatarUrl" />
-                                <VIcon v-else icon="tabler-user" size="28" />
+                                <VIcon v-else icon="tabler-user" size="32" />
                             </VAvatar>
                         </template>
 
@@ -184,32 +181,38 @@ const loadMore = async () => {
                             {{ request.parent?.user?.name || $t('UnknownParent') }}
                         </VCardTitle>
                         
-                        <VCardSubtitle class="d-flex align-center flex-wrap gap-4 mt-2">
-                            <span class="d-flex align-center gap-1 text-body-2">
-                                <VIcon icon="tabler-book" size="18" />
+                        <VCardSubtitle class="d-flex align-center flex-wrap gap-4 mt-3">
+                            <span class="d-flex align-center gap-1 text-body-1 font-weight-medium">
+                                <VIcon icon="tabler-book" size="20" color="primary" />
                                 {{ request.subject?.nameAr }}
                             </span>
-                            <span class="d-flex align-center gap-1 text-body-2">
-                                <VIcon icon="tabler-school" size="18" />
+                            <span class="d-flex align-center gap-1 text-body-1 font-weight-medium">
+                                <VIcon icon="tabler-school" size="20" color="secondary" />
                                 {{ request.stage?.nameAr }}
                             </span>
-                            <span class="d-flex align-center gap-1 text-body-2">
-                                <VIcon icon="tabler-map-pin" size="18" />
+                            <span class="d-flex align-center gap-1 text-body-1 text-disabled">
+                                <VIcon icon="tabler-map-pin" size="20" />
                                 {{ request.area?.nameAr }} - {{ request.area?.city?.nameAr }}
                             </span>
                         </VCardSubtitle>
                     </VCardItem>
 
-                    <VCardText class="pt-4 pb-4 bg-var-theme-background opacity-90 rounded-b-lg mx-4 mb-4 mt-2">
-                        <p class="text-body-1 font-italic mb-0 text-high-emphasis">
-                            "{{ request.details }}"
-                        </p>
+                    <VCardText class="px-5 pb-5">
+                        <div class="pa-4 bg-primary-lighten-5 rounded-lg border-primary-light">
+                            <p class="text-body-1 font-italic mb-0 text-high-emphasis line-height-relaxed">
+                                "{{ request.details }}"
+                            </p>
+                        </div>
                     </VCardText>
 
-                    <VCardActions class="px-6 pb-4 pt-0 justify-end">
+                    <VDivider class="border-opacity-10 mx-5" />
+
+                    <VCardActions class="pa-5 justify-end">
                         <VBtn
-                            color="primary"
+                            color="success"
                             variant="flat"
+                            size="large"
+                            class="rounded-pill font-weight-bold px-8 shadow-success"
                             prepend-icon="tabler-brand-whatsapp"
                             @click="logWhatsAppClick(teacherStore.profile?.id, request.parent?.user?.phone)"
                         >
@@ -221,15 +224,64 @@ const loadMore = async () => {
         </VRow>
 
         <!-- Pagination Controls -->
-        <VRow v-if="tutorRequestsStore.pagination.totalPages > 1" class="mt-4">
+        <VRow v-if="tutorRequestsStore.pagination.totalPages > 1" class="mt-6 mb-8">
             <VCol cols="12" class="d-flex justify-center">
                 <VPagination
                     v-model="tutorRequestsStore.pagination.page"
                     :length="tutorRequestsStore.pagination.totalPages"
                     @update:model-value="tutorRequestsStore.fetchTutorRequests($event)"
                     active-color="primary"
+                    variant="elevated"
+                    elevation="2"
+                    class="premium-pagination"
                 />
             </VCol>
         </VRow>
+        </VContainer>
     </div>
 </template>
+
+<style lang="scss" scoped>
+.teacher-browse-page {
+    .glassmorphism-card {
+        background: rgba(var(--v-theme-surface), 0.7) !important;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(var(--v-theme-primary), 0.1) !important;
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.05) !important;
+    }
+
+    .request-card-premium {
+        border-radius: 24px !important;
+        border: 1px solid rgba(var(--v-border-color), 0.06) !important;
+        transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.03) !important;
+
+        &:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 32px rgba(var(--v-theme-primary), 0.08) !important;
+            border-color: rgba(var(--v-theme-primary), 0.2) !important;
+        }
+    }
+
+    .bg-primary-lighten-5 {
+        background-color: rgba(var(--v-theme-primary), 0.04) !important;
+    }
+
+    .border-primary-light {
+        border: 1px solid rgba(var(--v-theme-primary), 0.1);
+    }
+
+    .shadow-sm {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
+    }
+
+    .shadow-success {
+        box-shadow: 0 8px 16px rgba(var(--v-theme-success), 0.2) !important;
+    }
+
+    .line-height-relaxed {
+        line-height: 1.8;
+    }
+}
+</style>

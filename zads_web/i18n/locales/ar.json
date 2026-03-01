@@ -107,7 +107,8 @@
         "SelectDeliveryModes": "اختر طرق التدريس المتاحة",
         "SelectAtLeastOneMode": "يجب اختيار طريقة تدريس واحدة على الأقل",
         "ProfileUpdatedSuccess": "تم تحديث الملف الشخصي بنجاح",
-        "ProfileUpdateFailed": "فشل تحديث الملف الشخصي"
+        "ProfileUpdateFailed": "فشل تحديث الملف الشخصي",
+        "ContactTeacher": "تواصل مع المعلم"
     },
     "TeacherSubjects": {
         "Title": "المواد والأسعار",
@@ -233,7 +234,8 @@
         "FinishAndStart": "إنهاء وبدء الاستخدام",
         "SkipAndCompleteLater": "تخطي وإكمال لاحقاً",
         "ConfirmDeleteChild": "هل أنت متأكد من حذف هذا الطفل؟",
-        "AddAtLeastOneChild": "أضف طفل واحد على الأقل"
+        "AddAtLeastOneChild": "أضف طفل واحد على الأقل",
+        "SaveChanges": "حفظ التغييرات"
     },
     "FavoritesPage": {
         "MyFavorites❤️": "المفضلة",
@@ -241,7 +243,9 @@
         "NoFavorites": "لا توجد مفضلة",
         "NoFavoritesDesc": "لم تقم بإضافة أي معلمين للمفضلة بعد",
         "BrowseTeachers": "تصفح المعلمين",
-        "Retry": "إعادة المحاولة"
+        "Retry": "إعادة المحاولة",
+        "AddFavorite": "إضافة للمفضلة",
+        "RemoveFavorite": "إزالة المفضلة"
     },
     "RequestsPage": {
         "ContactRequests📨": "طلبات التواصل",

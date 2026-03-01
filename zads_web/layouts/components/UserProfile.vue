@@ -64,7 +64,7 @@ const userAvatar = computed(() => authStore.user?.avatarUrl || avatar1)
           <VDivider class="my-2" />
 
           <!-- 👉 Profile -->
-          <VListItem link :to="authStore.user?.userType === 'teacher' ? '/teacher/profile' : '/parent/complete-profile'">
+          <VListItem link :to="authStore.user?.userType === 'teacher' ? '/teacher/profile' : '/parent/profile'">
             <template #prepend>
               <VIcon
                 class="me-2"
@@ -74,6 +74,19 @@ const userAvatar = computed(() => authStore.user?.avatarUrl || avatar1)
             </template>
 
             <VListItemTitle>{{ $t('Auth.Profile') }}</VListItemTitle>
+          </VListItem>
+
+          <!-- 👉 Settings -->
+          <VListItem link :to="authStore.user?.userType === 'teacher' ? '/teacher/settings' : '/parent/settings'">
+            <template #prepend>
+              <VIcon
+                class="me-2"
+                icon="tabler-settings"
+                size="22"
+              />
+            </template>
+
+            <VListItemTitle>{{ $t('Settings.AccountSettings') }}</VListItemTitle>
           </VListItem>
 
           <!-- Divider -->

@@ -106,7 +106,8 @@
         "SelectDeliveryModes": "Select Available Teaching Methods",
         "SelectAtLeastOneMode": "You must select at least one teaching method",
         "ProfileUpdatedSuccess": "Profile updated successfully",
-        "ProfileUpdateFailed": "Failed to update profile"
+        "ProfileUpdateFailed": "Failed to update profile",
+        "ContactTeacher": "Contact Teacher"
     },
     "TeacherSubjects": {
         "Title": "Subjects & Pricing",
@@ -238,7 +239,8 @@
         "FinishAndStart": "Finish and start using",
         "SkipAndCompleteLater": "Skip and complete later",
         "ConfirmDeleteChild": "Are you sure you want to delete this child?",
-        "AddAtLeastOneChild": "Add at least one child"
+        "AddAtLeastOneChild": "Add at least one child",
+        "SaveChanges": "Save Changes"
     },
     "FavoritesPage": {
         "MyFavorites❤️": "Favorites",
@@ -246,7 +248,9 @@
         "NoFavorites": "No favorites found",
         "NoFavoritesDesc": "You haven't added any teachers to favorites yet",
         "BrowseTeachers": "Browse Teachers",
-        "Retry": "Retry"
+        "Retry": "Retry",
+        "AddFavorite": "Add to Favorites",
+        "RemoveFavorite": "Remove from Favorites"
     },
     "RequestsPage": {
         "ContactRequests📨": "Contact Requests",

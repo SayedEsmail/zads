@@ -1,5 +1,5 @@
 <script setup>
-import loginIllustration from '@images/login.png'
+import loginIllustration from '@images/illustrations/login.png'
 import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
 import { themeConfig } from '@themeConfig'
 

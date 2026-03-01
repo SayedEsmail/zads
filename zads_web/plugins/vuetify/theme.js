@@ -7,9 +7,11 @@ export const themes = {
       'primary': staticPrimaryColor,
       'on-primary': '#fff',
       'primary-darken-1': '#06358d',
+      'primary-light': '#F0F4FA', // Added for subtle backgrounds
       'secondary': '#f68023',
       'on-secondary': '#fff',
       'secondary-darken-1': '#f68023',
+      'secondary-light': '#FEF2E9', // Added for subtle backgrounds
       'success': '#28C76F',
       'on-success': '#fff',
       'success-darken-1': '#24B364',

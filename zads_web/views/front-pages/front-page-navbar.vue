@@ -52,20 +52,21 @@ const isPageActive = computed(() => menuItems.some(item => item.navItems.some(li
     >
       <!-- Nav items -->
       <div>
-        <div class="d-flex flex-column gap-y-4 pa-4">
+        <div class="d-flex flex-column gap-y-2 pa-4">
           <NuxtLink
             to="/about"
-            class="nav-link font-weight-medium"
-            :class="[route.path === '/about' ? 'active-link' : '']"
+            class="nav-link font-weight-medium d-flex align-center gap-x-3 pa-2 rounded-lg"
+            :class="[route.path === '/about' ? 'active-link bg-primary-lighten-5 text-primary' : '']"
           >
+            <VIcon icon="tabler-info-circle" size="20" />
             {{ $t('Navbar.About') || 'About' }}
           </NuxtLink>
-
           <NuxtLink
             to="/how-it-works"
-            class="nav-link font-weight-medium"
-            :class="[route.path === '/how-it-works' ? 'active-link' : '']"
+            class="nav-link font-weight-medium d-flex align-center gap-x-3 pa-2 rounded-lg"
+            :class="[route.path === '/how-it-works' ? 'active-link bg-primary-lighten-5 text-primary' : '']"
           >
+            <VIcon icon="tabler-help-circle" size="20" />
             {{ $t('Navbar.HowItWorks') || 'How It Works' }}
           </NuxtLink>
         </div>
@@ -141,7 +142,8 @@ const isPageActive = computed(() => menuItems.some(item => item.navItems.some(li
             <VBtn
               prepend-icon="tabler-login"
               variant="elevated"
-              color="primary"
+              color="secondary"
+              class="rounded-pill px-6 shadow-secondary"
               :to="{ name: 'login' }"
             >
               {{ $t('Auth.Login') }}
@@ -151,6 +153,7 @@ const isPageActive = computed(() => menuItems.some(item => item.navItems.some(li
              <VBtn
               variant="elevated"
               color="primary"
+              class="rounded-pill px-6"
               :to="authStore.userType?.toUpperCase() === 'TEACHER' ? '/teacher' : '/parent'"
             >
               {{ $t('Dashboard') || 'Dashboard' }} 

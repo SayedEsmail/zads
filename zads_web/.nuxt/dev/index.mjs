@@ -1606,15 +1606,7 @@ _AhNBE6KIPYuOeZGqEZSJHqdDe5vP3lemdVXYfTK78G8,
 _XAgqPJX2LSxxSDyJVWQc0a9vJbxOPrZ7dUWMZhI4S4
 ];
 
-const assets = {
-  "/index.mjs": {
-    "type": "text/javascript; charset=utf-8",
-    "etag": "\"170d6-efUZt+RftR6eGViUOr10Xn9bUg0\"",
-    "mtime": "2026-02-28T19:30:04.376Z",
-    "size": 94422,
-    "path": "index.mjs"
-  }
-};
+const assets = {};
 
 function readAsset (id) {
   const serverDir = dirname$1(fileURLToPath(globalThis._importMeta_.url));
