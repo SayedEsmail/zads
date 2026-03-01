@@ -14,7 +14,7 @@ export const { themeConfig, layoutConfig } = defineThemeConfig({
     logo: h('img', { src: logo, alt: 'Zads', style: 'height: 80px; max-width: 100%;' }),
     isRTL: true,
     contentWidth: ContentWidth.Boxed,
-    contentLayoutNav: AppContentLayoutNav.Horizontal,
+    contentLayoutNav: AppContentLayoutNav.Vertical,
     overlayNavFromBreakpoint: breakpointsVuetifyV3.md - 1, // 1 for matching with vuetify breakpoint. Docs: https://next.vuetifyjs.com/en/features/display-and-platform/
     i18n: {
       enable: true,

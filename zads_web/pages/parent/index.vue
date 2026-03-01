@@ -5,7 +5,7 @@ import { useAuthStore } from '~/stores/auth'
 import { useParentStore } from '~/stores/parent'
 import TeacherCard from '~/components/TeacherCard.vue'
 import SubjectsDialog from '~/components/SubjectsDialog.vue'
-import parentDashboardIllustration from '@images/parent_dashboard.png'
+import parentDashboardIllustration from '@images/illustrations/parent_dashboard.png'
 
 definePageMeta({
     layout: 'default',

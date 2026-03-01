@@ -25,7 +25,14 @@ export const useLayoutConfigStore = defineStore('layoutConfig', () => {
   const appContentWidth = cookieRef('appContentWidth', layoutConfig.app.contentWidth)
 
   // 👉 App Content Layout Nav
+  // Force the layout to use the themeConfig value, ignoring previous cached cookies
   const appContentLayoutNav = ref(layoutConfig.app.contentLayoutNav)
+  const cachedLayoutNav = cookieRef('appContentLayoutNav', layoutConfig.app.contentLayoutNav)
+
+  // Sync cookie with the forced config to overwrite old cached user preferences
+  onMounted(() => {
+    cachedLayoutNav.value = layoutConfig.app.contentLayoutNav
+  })
 
   watch(appContentLayoutNav, val => {
     // If Navbar type is hidden while switching to horizontal nav => Reset it to sticky
