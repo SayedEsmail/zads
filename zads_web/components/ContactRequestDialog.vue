@@ -66,77 +66,64 @@ const handleSubmit = async () => {
 </script>
 
 <template>
-    <VDialog
+    <PremiumDialog
         v-model="isVisible"
-        max-width="500"
+        :title="`تواصل مع ${teacher.user?.name}`"
+        :loading="loading"
+        :disabled="!selectedChildId"
+        icon="tabler-send"
+        confirm-text="إرسال الطلب"
+        @confirm="handleSubmit"
     >
-        <VCard>
-            <VCardTitle>
-                تواصل مع {{ teacher.user?.name }}
-            </VCardTitle>
+        <VAlert
+            v-if="error"
+            color="error"
+            variant="tonal"
+            class="mb-4 rounded-lg"
+        >
+            {{ error }}
+        </VAlert>
 
-            <VCardText>
-                <VAlert
-                    v-if="error"
-                    color="error"
-                    variant="tonal"
-                    class="mb-4"
-                >
-                    {{ error }}
-                </VAlert>
+        <p class="text-body-2 text-secondary mb-6">
+            أرسل طلب تواصل للمعلم بخصوص أحد أبنائك. سيقوم المعلم بالرد عليك قريباً.
+        </p>
 
-                <p class="text-body-2 mb-4">
-                    أرسل طلب تواصل للمعلم بخصوص أحد أبنائك. سيقوم المعلم بالرد عليك قريباً.
-                </p>
-
-                <VForm @submit.prevent="handleSubmit">
-                    <VSelect
-                        v-model="selectedChildId"
-                        :items="childrenStore.children"
-                        item-title="name"
-                        item-value="id"
-                        label="اختر الابن/الابنة"
-                        :rules="[rules.required]"
-                        class="mb-4"
-                        placeholder="اختر الطالب"
-                    >
-                        <template #item="{ props: itemProps, item }">
-                            <VListItem
-                                v-bind="itemProps"
-                                :subtitle="item.raw.stage?.nameAr"
-                            />
-                        </template>
-                    </VSelect>
-
-                    <VTextarea
-                        v-model="message"
-                        label="رسالة (اختياري)"
-                        placeholder="اكتب أي تفاصيل إضافية للمعلم..."
-                        rows="3"
-                        auto-grow
+        <VForm @submit.prevent="handleSubmit">
+            <VLabel class="mb-2 text-caption font-weight-bold text-uppercase text-secondary">اختر الابن/الابنة *</VLabel>
+            <VSelect
+                v-model="selectedChildId"
+                :items="childrenStore.children"
+                item-title="name"
+                item-value="id"
+                :rules="[rules.required]"
+                class="mb-4"
+                placeholder="اختر الطالب"
+                variant="outlined"
+                density="comfortable"
+            >
+                <template #item="{ props: itemProps, item }">
+                    <VListItem
+                        v-bind="itemProps"
+                        :subtitle="item.raw.stage?.nameAr"
                     />
-                </VForm>
-            </VCardText>
+                </template>
+            </VSelect>
 
-            <VCardActions>
-                <VSpacer />
-                <VBtn
-                    color="secondary"
-                    variant="text"
-                    @click="isVisible = false"
-                >
-                    إلغاء
-                </VBtn>
-                <VBtn
-                    color="primary"
-                    :loading="loading"
-                    :disabled="!selectedChildId"
-                    @click="handleSubmit"
-                >
-                    <VIcon start icon="tabler-send" />
-                    إرسال الطلب
-                </VBtn>
-            </VCardActions>
-        </VCard>
-    </VDialog>
+            <VLabel class="mb-2 text-caption font-weight-bold text-uppercase text-secondary">رسالة (اختياري)</VLabel>
+            <VTextarea
+                v-model="message"
+                placeholder="اكتب أي تفاصيل إضافية للمعلم..."
+                rows="3"
+                auto-grow
+                variant="outlined"
+                density="comfortable"
+            />
+        </VForm>
+    </PremiumDialog>
 </template>
+
+<style scoped>
+.shadow-secondary {
+    box-shadow: 0 8px 16px -4px rgba(var(--v-theme-secondary), 0.3) !important;
+}
+</style>

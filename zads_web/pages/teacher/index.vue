@@ -34,27 +34,18 @@ const isLoading = computed(() => teacherStore.loading || tutorRequestsStore.load
 </script>
 
 <template>
-    <div>
-        <!-- Greeting Section -->
-        <VRow class="mb-4">
-            <VCol cols="12">
-                <VCard border flat color="var-theme-surface" class="bg-primary-lighten-5">
-                    <VCardText class="d-flex align-center justify-space-between pa-6">
-                        <div>
-                            <h1 class="text-h4 font-weight-bold mb-2 text-primary-darken-1">
-                                {{ $t('TeacherDashboard.WelcomeBack', { name: teacherStore.profile?.user?.name?.split(' ')[0] || '' }) }}
-                            </h1>
-                            <p class="text-body-1 text-secondary mb-0">
-                                {{ $t('TeacherDashboard.CompleteProfileDesc') || 'أكمل ملفك الشخصي لتظهر للطلاب وابدأ في التدريس' }}
-                            </p>
-                        </div>
-                        <!-- Placeholder Logo / Graphic -->
-                        <VIcon icon="tabler-school" color="primary" size="80" class="opacity-80 d-none d-sm-block" />
-                    </VCardText>
-                </VCard>
-            </VCol>
-        </VRow>
+    <div class="teacher-dashboard-page">
+        <!-- Premium Greeting Section -->
+        <PremiumPageHeader
+            :title="$t('TeacherDashboard.WelcomeBack', { name: teacherStore.profile?.user?.name?.split(' ')[0] || '' })"
+            :description="$t('TeacherDashboard.CompleteProfileDesc') || 'أكمل ملفك الشخصي لتظهر للطلاب وابدأ في التدريس'"
+        >
+            <template #actions>
+                <VIcon icon="tabler-school" color="primary" size="64" class="opacity-20 d-none d-sm-block ms-auto" />
+            </template>
+        </PremiumPageHeader>
 
+        <VContainer class="mt-n8">
         <VRow v-if="isLoading && !teacherStore.profile" class="mb-6">
             <VCol cols="12" class="d-flex justify-center py-12">
                 <VProgressCircular indeterminate color="primary" size="48" />
@@ -62,21 +53,21 @@ const isLoading = computed(() => teacherStore.loading || tutorRequestsStore.load
         </VRow>
 
         <template v-else>
-            <!-- Stats Row -->
-            <VRow class="mb-6">
+            <!-- Premium Stats Row -->
+            <VRow class="mb-8">
                 <!-- Total Profile Views -->
                 <VCol cols="12" sm="4">
-                    <VCard class="h-100" border flat>
-                        <VCardItem>
+                    <VCard class="h-100 stat-card-premium bg-info-subtle border-0" flat>
+                        <VCardItem class="pa-6">
                             <template #prepend>
-                                <VAvatar color="info" variant="tonal" size="48" class="mr-3 rounded-lg">
-                                    <VIcon icon="tabler-eye" size="24" />
+                                <VAvatar color="info" variant="flat" size="56" class="mr-4 rounded-xl shadow-sm text-white">
+                                    <VIcon icon="tabler-eye" size="28" />
                                 </VAvatar>
                             </template>
-                            <VCardTitle class="text-body-2 text-secondary mb-1">
+                            <VCardTitle class="text-body-1 font-weight-bold text-secondary mb-1 text-uppercase tracking-wide">
                                 {{ $t('TeacherDashboard.TotalViews') || 'المشاهدات' }}
                             </VCardTitle>
-                            <VCardSubtitle class="text-h5 font-weight-bold text-high-emphasis opacity-100">
+                            <VCardSubtitle class="text-h4 font-weight-black text-info opacity-100 line-height-1">
                                 {{ stats.views }}
                             </VCardSubtitle>
                         </VCardItem>
@@ -85,17 +76,17 @@ const isLoading = computed(() => teacherStore.loading || tutorRequestsStore.load
 
                 <!-- Contact Requests -->
                 <VCol cols="12" sm="4">
-                    <VCard class="h-100 cursor-pointer" border flat hover @click="$router.push('/teacher/requests')">
-                        <VCardItem>
+                    <VCard class="h-100 stat-card-premium bg-success-subtle border-0 cursor-pointer transition-all" flat hover @click="$router.push('/teacher/requests')">
+                        <VCardItem class="pa-6">
                             <template #prepend>
-                                <VAvatar color="success" variant="tonal" size="48" class="mr-3 rounded-lg">
-                                    <VIcon icon="tabler-message" size="24" />
+                                <VAvatar color="success" variant="flat" size="56" class="mr-4 rounded-xl shadow-sm text-white">
+                                    <VIcon icon="tabler-message" size="28" />
                                 </VAvatar>
                             </template>
-                            <VCardTitle class="text-body-2 text-secondary mb-1">
+                            <VCardTitle class="text-body-1 font-weight-bold text-secondary mb-1 text-uppercase tracking-wide">
                                 {{ $t('TeacherDashboard.ContactRequests') || 'الرسائل' }}
                             </VCardTitle>
-                            <VCardSubtitle class="text-h5 font-weight-bold text-high-emphasis opacity-100">
+                            <VCardSubtitle class="text-h4 font-weight-black text-success opacity-100 line-height-1">
                                 {{ stats.contactRequests }}
                             </VCardSubtitle>
                         </VCardItem>
@@ -104,17 +95,17 @@ const isLoading = computed(() => teacherStore.loading || tutorRequestsStore.load
 
                 <!-- Opportunities (General Requests) -->
                 <VCol cols="12" sm="4">
-                    <VCard class="h-100 cursor-pointer" border flat hover @click="$router.push('/teacher/requests')">
-                        <VCardItem>
+                    <VCard class="h-100 stat-card-premium bg-warning-subtle border-0 cursor-pointer transition-all" flat hover @click="$router.push('/teacher/requests')">
+                        <VCardItem class="pa-6">
                             <template #prepend>
-                                <VAvatar color="warning" variant="tonal" size="48" class="mr-3 rounded-lg">
-                                    <VIcon icon="tabler-school" size="24" />
+                                <VAvatar color="warning" variant="flat" size="56" class="mr-4 rounded-xl shadow-sm text-white">
+                                    <VIcon icon="tabler-school" size="28" />
                                 </VAvatar>
                             </template>
-                            <VCardTitle class="text-body-2 text-secondary mb-1">
+                            <VCardTitle class="text-body-1 font-weight-bold text-secondary mb-1 text-uppercase tracking-wide">
                                 {{ $t('TeacherDashboard.Opportunities') || 'الفرص' }}
                             </VCardTitle>
-                            <VCardSubtitle class="text-h5 font-weight-bold text-high-emphasis opacity-100">
+                            <VCardSubtitle class="text-h4 font-weight-black text-warning opacity-100 line-height-1">
                                 {{ tutorRequestsStore.pagination.total || tutorRequestsStore.requests.length }}
                             </VCardSubtitle>
                         </VCardItem>
@@ -164,52 +155,52 @@ const isLoading = computed(() => teacherStore.loading || tutorRequestsStore.load
 
                     <div class="d-flex flex-column gap-3">
                         <!-- Edit Profile -->
-                        <VCard border flat hover @click="$router.push('/teacher/profile')" class="rounded-lg">
-                            <VCardItem class="pa-3">
-                                <div class="d-flex align-center gap-3">
-                                    <VAvatar color="primary" variant="tonal" size="40" class="rounded">
-                                        <VIcon icon="tabler-user-edit" size="20" />
+                        <VCard flat hover @click="$router.push('/teacher/profile')" class="rounded-xl border shadow-sm transition-all quick-action-card">
+                            <VCardItem class="pa-4">
+                                <div class="d-flex align-center gap-4">
+                                    <VAvatar color="primary" variant="tonal" size="48" class="rounded-lg">
+                                        <VIcon icon="tabler-user-edit" size="24" />
                                     </VAvatar>
                                     <div>
                                         <div class="font-weight-bold text-body-1">{{ $t('TeacherDashboard.EditProfile') || 'تعديل الملف الشخصي' }}</div>
                                         <div class="text-caption text-secondary">{{ $t('TeacherDashboard.EditProfileDesc') || 'أضف معلوماتك ومواد التدريس' }}</div>
                                     </div>
                                     <VSpacer />
-                                    <VIcon icon="tabler-chevron-left" class="text-secondary" />
+                                    <VIcon icon="tabler-chevron-left" class="text-secondary opacity-50" />
                                 </div>
                             </VCardItem>
                         </VCard>
 
                         <!-- Manage Subjects -->
-                        <VCard border flat hover @click="$router.push('/teacher/subjects')" class="rounded-lg">
-                            <VCardItem class="pa-3">
-                                <div class="d-flex align-center gap-3">
-                                    <VAvatar color="primary" variant="tonal" size="40" class="rounded">
-                                        <VIcon icon="tabler-books" size="20" />
+                        <VCard flat hover @click="$router.push('/teacher/subjects')" class="rounded-xl border shadow-sm transition-all quick-action-card">
+                            <VCardItem class="pa-4">
+                                <div class="d-flex align-center gap-4">
+                                    <VAvatar color="secondary" variant="tonal" size="48" class="rounded-lg">
+                                        <VIcon icon="tabler-books" size="24" />
                                     </VAvatar>
                                     <div>
                                         <div class="font-weight-bold text-body-1">{{ $t('TeacherDashboard.ManageSubjects') || 'تحديد المواد والمراحل' }}</div>
                                         <div class="text-caption text-secondary">{{ $t('TeacherDashboard.ManageSubjectsDesc') || 'حدد المواد والمراحل التي تدرسها' }}</div>
                                     </div>
                                     <VSpacer />
-                                    <VIcon icon="tabler-chevron-left" class="text-secondary" />
+                                    <VIcon icon="tabler-chevron-left" class="text-secondary opacity-50" />
                                 </div>
                             </VCardItem>
                         </VCard>
 
                         <!-- Set Location -->
-                        <VCard border flat hover @click="$router.push('/teacher/profile')" class="rounded-lg">
-                            <VCardItem class="pa-3">
-                                <div class="d-flex align-center gap-3">
-                                    <VAvatar color="primary" variant="tonal" size="40" class="rounded">
-                                        <VIcon icon="tabler-map-pin" size="20" />
+                        <VCard flat hover @click="$router.push('/teacher/profile')" class="rounded-xl border shadow-sm transition-all quick-action-card">
+                            <VCardItem class="pa-4">
+                                <div class="d-flex align-center gap-4">
+                                    <VAvatar color="info" variant="tonal" size="48" class="rounded-lg">
+                                        <VIcon icon="tabler-map-pin" size="24" />
                                     </VAvatar>
                                     <div>
                                         <div class="font-weight-bold text-body-1">{{ $t('TeacherDashboard.FilterLocation') || 'تحديد الموقع' }}</div>
                                         <div class="text-caption text-secondary">{{ $t('TeacherDashboard.FilterLocationDesc') || 'حدد منطقتك الجغرافية' }}</div>
                                     </div>
                                     <VSpacer />
-                                    <VIcon icon="tabler-chevron-left" class="text-secondary" />
+                                    <VIcon icon="tabler-chevron-left" class="text-secondary opacity-50" />
                                 </div>
                             </VCardItem>
                         </VCard>
@@ -217,11 +208,57 @@ const isLoading = computed(() => teacherStore.loading || tutorRequestsStore.load
                 </VCol>
             </VRow>
         </template>
+        </VContainer>
     </div>
 </template>
 
 <style lang="scss" scoped>
-.bg-primary-lighten-5 {
-    background-color: rgba(var(--v-theme-primary), 0.05) !important;
+.teacher-dashboard-page {
+    .bg-primary-lighten-5 {
+        background-color: rgba(var(--v-theme-primary), 0.05) !important;
+    }
+    
+    .bg-info-subtle {
+        background-color: rgba(var(--v-theme-info), 0.08) !important;
+    }
+    
+    .bg-success-subtle {
+        background-color: rgba(var(--v-theme-success), 0.08) !important;
+    }
+    
+    .bg-warning-subtle {
+        background-color: rgba(var(--v-theme-warning), 0.08) !important;
+    }
+
+    .stat-card-premium {
+        border-radius: 24px !important;
+        
+        &:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.05) !important;
+        }
+    }
+
+    .shadow-sm {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important;
+    }
+
+    .quick-action-card {
+        border-color: rgba(var(--v-border-color), 0.08) !important;
+        
+        &:hover {
+            border-color: rgba(var(--v-theme-primary), 0.2) !important;
+            box-shadow: 0 8px 24px rgba(var(--v-theme-primary), 0.08) !important;
+            transform: translateX(-4px); // RTL friendly slide
+        }
+    }
+
+    .tracking-wide {
+        letter-spacing: 0.5px;
+    }
+    
+    .line-height-1 {
+        line-height: 1;
+    }
 }
 </style>

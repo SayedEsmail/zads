@@ -13,8 +13,8 @@ const childrenStore = useChildrenStore()
 const searchStore = useSearchStore()
 const { t } = useI18n()
 
-const step = ref(1)
 const loading = ref(false)
+const finishing = ref(false)
 
 // Step 1: Location
 const location = ref({
@@ -75,22 +75,7 @@ onMounted(async () => {
     loading.value = false
 })
 
-// Step 1: Save Location
-const saveLocation = async () => {
-    if (!location.value.areaId) return
-
-    loading.value = true
-    try {
-        await parentStore.updateProfile({ areaId: location.value.areaId })
-        step.value = 2
-    } catch (error) {
-        console.error('Failed to save location:', error)
-    } finally {
-        loading.value = false
-    }
-}
-
-// Step 2: Add Child
+// Add Child
 const addChild = async () => {
     if (!newChild.value.name || !newChild.value.stageId) return
 
@@ -122,18 +107,23 @@ const removeChild = async childId => {
     }
 }
 
-const goToStep3 = () => {
+// Final Step: Save Location and Subjects, then go to home
+const finishSetup = async () => {
+    if (!location.value.areaId) {
+        alert(t('CompleteProfile.LocationRequired'))
+        return
+    }
     if (childrenStore.children.length === 0) {
         alert(t('CompleteProfile.AddAtLeastOneChild'))
         return
     }
-    step.value = 3
-}
 
-// Step 3: Save Subjects
-const saveSubjects = async () => {
-    loading.value = true
+    finishing.value = true
     try {
+        // Save location
+        await parentStore.updateProfile({ areaId: location.value.areaId })
+
+        // Save subjects
         const promises = Object.entries(selectedSubjects.value).map(([childId, subjectIds]) => {
             return childrenStore.updateChild({
                 childId,
@@ -145,9 +135,9 @@ const saveSubjects = async () => {
         // Complete! Go to parent home
         router.push('/parent')
     } catch (error) {
-        console.error('Failed to save subjects:', error)
+        console.error('Failed to finish setup:', error)
     } finally {
-        loading.value = false
+        finishing.value = false
     }
 }
 
@@ -158,67 +148,27 @@ const skipToHome = () => {
 </script>
 
 <template>
-    <div class="complete-profile-wrapper d-flex flex-column bg-background">
-        <!-- Sticky Header (Mobile) -->
-        <div class="d-md-none bg-surface elevation-2 position-sticky top-0 z-index-100 pa-4 text-center">
-            <h1 class="text-h5 font-weight-bold mb-1">{{ $t('CompleteProfile.CompleteProfile') }}</h1>
-            <div class="d-flex align-center justify-center gap-2">
-                <template v-for="i in 3" :key="i">
-                     <div 
-                        class="rounded-circle transition-all"
-                        :class="step >= i ? 'bg-primary' : 'bg-secondary opacity-30'"
-                        style="width: 8px; height: 8px;"
-                     />
-                </template>
-            </div>
-        </div>
+    <div class="parent-profile-page">
+        <!-- Premium Header Section -->
+        <PremiumPageHeader
+            :title="$t('CompleteProfile.CompleteProfile')"
+            :description="$t('CompleteProfile.ProfileStepsDesc')"
+        />
 
-        <!-- Main Content -->
-        <VContainer fluid class="flex-grow-1 d-flex align-center justify-center pa-0 pa-md-6">
-            <VCard
-                class="pa-0 pa-md-6 w-100 h-100 h-md-auto d-flex flex-column"
-                max-width="800"
-                :elevation="$vuetify.display.mdAndUp ? 4 : 0"
-                rounded="lg"
-            >
-                <!-- Desktop Header -->
-                <VCardTitle class="text-center mb-6 d-none d-md-block">
-                    <h2 class="text-h3 font-weight-bold text-primary mb-2">
-                        {{ $t('CompleteProfile.CompleteProfile') }}
-                    </h2>
-                    <p class="text-body-1 text-secondary">
-                        {{ $t('CompleteProfile.ProfileStepsDesc') }}
-                    </p>
-                    
-                    <!-- Desktop Stepper -->
-                    <div class="d-flex justify-center mt-6">
-                        <VChipGroup>
-                            <VChip
-                                v-for="s in 3"
-                                :key="s"
-                                :color="step >= s ? 'primary' : 'default'"
-                                :variant="step === s ? 'elevated' : 'tonal'"
-                                size="default"
-                                class="px-6"
-                            >
-                                <span class="font-weight-bold">{{ s }}</span>
-                                <span class="mx-2">{{ s === 1 ? $t('CompleteProfile.Location') : s === 2 ? $t('CompleteProfile.Children') : $t('CompleteProfile.PreferredSubjects') }}</span>
-                            </VChip>
-                        </VChipGroup>
+        <VContainer class="max-width-900 pa-0">
+            <!-- Main Content Sections -->
+            <VCard class="rounded-xl elevation-2 overflow-hidden mb-6">
+                <!-- Section 1: Location -->
+                <div class="pa-6 pa-md-8 border-b">
+                    <div class="d-flex align-center gap-4 mb-6">
+                        <VAvatar color="primary-lighten-5" size="56" class="rounded-lg">
+                            <VIcon icon="tabler-map-pin" size="28" color="primary" />
+                        </VAvatar>
+                        <div>
+                            <h3 class="text-h5 font-weight-bold">{{ $t('CompleteProfile.WhereDoYouLive?') }}</h3>
+                            <p class="text-body-2 text-secondary mb-0">{{ $t('CompleteProfile.LocationDesc') }}</p>
+                        </div>
                     </div>
-                </VCardTitle>
-
-                <VCardText class="flex-grow-1 overflow-y-auto pa-4 pa-md-2" style="max-height: calc(100vh - 140px); overflow-x: hidden;">
-                    <VWindow v-model="step">
-                        <!-- Step 1: Location -->
-                        <VWindowItem :value="1">
-                            <div class="text-center mb-6">
-                                <VAvatar color="primary-lighten-5" size="80" class="mb-4">
-                                    <VIcon icon="tabler-map-pin" size="40" color="primary" />
-                                </VAvatar>
-                                <h3 class="text-h5 font-weight-bold">{{ $t('CompleteProfile.WhereDoYouLive?') }}</h3>
-                                <p class="text-body-2 text-secondary">{{ $t('CompleteProfile.LocationDesc') }}</p>
-                            </div>
 
                             <VRow>
                                 <VCol cols="12">
@@ -263,17 +213,19 @@ const skipToHome = () => {
                                     />
                                 </VCol>
                             </VRow>
-                        </VWindowItem>
+                </div>
 
-                        <!-- Step 2: Children -->
-                        <VWindowItem :value="2">
-                             <div class="text-center mb-6">
-                                <VAvatar color="primary-lighten-5" size="80" class="mb-4">
-                                    <VIcon icon="tabler-users" size="40" color="primary" />
-                                </VAvatar>
-                                <h3 class="text-h5 font-weight-bold">{{ $t('CompleteProfile.AddChildren') }}</h3>
-                                <p class="text-body-2 text-secondary">{{ $t('CompleteProfile.ChildrenDesc') }}</p>
-                            </div>
+                <!-- Section 2: Children -->
+                <div class="pa-6 pa-md-8 border-b">
+                    <div class="d-flex align-center gap-4 mb-6">
+                        <VAvatar color="primary-lighten-5" size="56" class="rounded-lg">
+                            <VIcon icon="tabler-users" size="28" color="primary" />
+                        </VAvatar>
+                        <div>
+                            <h3 class="text-h5 font-weight-bold">{{ $t('CompleteProfile.AddChildren') }}</h3>
+                            <p class="text-body-2 text-secondary mb-0">{{ $t('CompleteProfile.ChildrenDesc') }}</p>
+                        </div>
+                    </div>
 
                             <!-- Existing children List -->
                             <div v-if="childrenStore.children.length" class="mb-6">
@@ -324,32 +276,37 @@ const skipToHome = () => {
                                             hide-details="auto"
                                         />
                                     </VCol>
-                                    <VCol cols="12">
+                                    <VCol cols="12" sm="3" class="text-end">
                                         <VBtn
-                                            color="black"
+                                            color="secondary"
+                                            size="large"
                                             block
-                                            variant="flat"
+                                            variant="outlined"
+                                            class="rounded-pill font-weight-bold"
                                             :loading="loading"
                                             :disabled="!newChild.name || !newChild.stageId"
                                             @click="addChild"
                                             height="48"
+                                            prepend-icon="tabler-plus"
                                         >
                                             {{ $t('CompleteProfile.AddToList') }}
                                         </VBtn>
                                     </VCol>
                                 </VRow>
                             </VCard>
-                        </VWindowItem>
+                </div>
 
-                        <!-- Step 3: Subjects -->
-                        <VWindowItem :value="3">
-                             <div class="text-center mb-6">
-                                <VAvatar color="primary-lighten-5" size="80" class="mb-4">
-                                    <VIcon icon="tabler-books" size="40" color="primary" />
-                                </VAvatar>
-                                <h3 class="text-h5 font-weight-bold">{{ $t('CompleteProfile.PreferredSubjects') }}</h3>
-                                <p class="text-body-2 text-secondary">{{ $t('CompleteProfile.SubjectsDesc') }}</p>
-                            </div>
+                <!-- Section 3: Subjects -->
+                <div class="pa-6 pa-md-8">
+                    <div class="d-flex align-center gap-4 mb-6">
+                        <VAvatar color="primary-lighten-5" size="56" class="rounded-lg">
+                            <VIcon icon="tabler-books" size="28" color="primary" />
+                        </VAvatar>
+                        <div>
+                            <h3 class="text-h5 font-weight-bold">{{ $t('CompleteProfile.PreferredSubjects') }}</h3>
+                            <p class="text-body-2 text-secondary mb-0">{{ $t('CompleteProfile.SubjectsDesc') }}</p>
+                        </div>
+                    </div>
 
                             <div v-for="child in childrenStore.children" :key="child.id" class="mb-6">
                                 <h4 class="text-h6 font-weight-bold mb-3 d-flex align-center">
@@ -381,65 +338,31 @@ const skipToHome = () => {
                                     </template>
                                 </VAutocomplete>
                             </div>
-                        </VWindowItem>
-                    </VWindow>
-                </VCardText>
-
-                <VDivider />
-
-                <!-- Sticky Actions Footer -->
-                <VCardActions class="pa-4 bg-surface">
-                     <VBtn
-                        v-if="step > 1"
-                        variant="text"
-                        color="secondary"
-                        size="large"
-                        @click="step--"
-                        class="px-6"
-                    >
-                        {{ $t('CompleteProfile.Previous') }}
-                    </VBtn>
-                    
-                    <VSpacer />
-                    
-                    <VBtn
-                         v-if="step < 3"
-                        color="primary"
-                        size="large"
-                        class="px-8"
-                        elevation="2"
-                        :loading="loading"
-                        :disabled="step === 1 ? !location.areaId : childrenStore.children.length === 0"
-                        @click="step === 1 ? saveLocation() : goToStep3()"
-                    >
-                        {{ $t('CompleteProfile.Next') }}
-                        <VIcon end icon="tabler-arrow-left" class="flip-in-rtl" />
-                    </VBtn>
-
-                    <VBtn
-                        v-else
-                        color="primary"
-                        size="large"
-                        class="px-8"
-                        elevation="2"
-                        :loading="loading"
-                        @click="saveSubjects"
-                    >
-                        {{ $t('CompleteProfile.FinishAndStart') }}
-                        <VIcon end icon="tabler-check" />
-                    </VBtn>
-                </VCardActions>
+                </div>
             </VCard>
-            
-            <!-- Skip Link (Absolute bottom on Desktop, below card) -->
-             <div class="position-absolute bottom-0 mb-4 d-none d-md-block">
+
+            <!-- Actions Footer -->
+            <div class="d-flex flex-column flex-sm-row align-center justify-space-between gap-4 mt-6">
                 <VBtn
                     variant="text"
-                    size="small"
+                    size="large"
                     color="secondary"
+                    class="font-weight-bold"
                     @click="skipToHome"
                 >
                     {{ $t('CompleteProfile.SkipAndCompleteLater') }}
+                </VBtn>
+                
+                <VBtn
+                    color="secondary"
+                    size="x-large"
+                    class="px-8 rounded-pill font-weight-bold shadow-secondary"
+                    :loading="finishing"
+                    :disabled="!location.areaId || childrenStore.children.length === 0"
+                    @click="finishSetup"
+                >
+                    {{ $t('CompleteProfile.FinishAndStart') }}
+                    <VIcon end icon="tabler-rocket" class="ms-2" />
                 </VBtn>
             </div>
         </VContainer>
@@ -447,7 +370,22 @@ const skipToHome = () => {
 </template>
 
 <style lang="scss" scoped>
-.complete-profile-wrapper {
-    min-height: 100vh;
+.parent-profile-page {
+
+    .shadow-secondary {
+        box-shadow: 0 8px 16px rgba(var(--v-theme-secondary), 0.2) !important;
+    }
+
+    // Form Field Refinement
+    :deep(.v-field) {
+        border-radius: 12px !important;
+        background: #fdfdfd !important;
+        
+        &.v-field--focused {
+            .v-field__outline {
+                color: rgb(var(--v-theme-primary)) !important;
+            }
+        }
+    }
 }
 </style>

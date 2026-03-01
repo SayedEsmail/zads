@@ -197,53 +197,39 @@ const updateChildSubjects = async (childId) => {
 
 <template>
     <div class="parent-settings-page">
-        <VRow>
-            <VCol cols="12" md="3">
-                <!-- Navigation Tabs -->
-                <VCard elevation="2" class="rounded-lg h-100">
-                    <VCardTitle class="px-4 py-3 bg-primary text-white">
-                        <VIcon icon="tabler-settings" class="me-2" />
-                        {{ $t('Settings.AccountSettings') }}
-                    </VCardTitle>
-                    <VList nav density="compact" class="py-2">
-                        <VListItem
-                            :active="activeTab === 'account'"
-                            color="primary"
-                            rounded="lg"
-                            @click="activeTab = 'account'"
-                        >
-                            <template #prepend>
-                                <VIcon icon="tabler-user" />
-                            </template>
-                            <VListItemTitle>{{ $t('Settings.ProfileInfo') }}</VListItemTitle>
-                        </VListItem>
-                        <VListItem
-                            :active="activeTab === 'location'"
-                            color="primary"
-                            rounded="lg"
-                            @click="activeTab = 'location'"
-                        >
-                            <template #prepend>
-                                <VIcon icon="tabler-map-pin" />
-                            </template>
-                            <VListItemTitle>{{ $t('Settings.Location') }}</VListItemTitle>
-                        </VListItem>
-                        <VListItem
-                            :active="activeTab === 'children'"
-                            color="primary"
-                            rounded="lg"
-                            @click="activeTab = 'children'"
-                        >
-                            <template #prepend>
-                                <VIcon icon="tabler-users" />
-                            </template>
-                            <VListItemTitle>{{ $t('Settings.ChildrenAndSubjects') }}</VListItemTitle>
-                        </VListItem>
-                    </VList>
-                </VCard>
-            </VCol>
+        <!-- Premium Header Section -->
+        <PremiumPageHeader
+            :title="$t('Settings.AccountSettings')"
+            :description="$t('Settings.UpdateYourCoreInformation')"
+        >
+            <template #actions>
+                <!-- Premium Horizontal Tabs -->
+                <div class="premium-tabs-container w-100 mt-2">
+                    <VTabs
+                        v-model="activeTab"
+                        color="primary"
+                        align-tabs="start"
+                        class="premium-tabs rounded-pill"
+                        hide-slider
+                    >
+                        <VTab value="account" class="rounded-pill px-6">
+                            <VIcon icon="tabler-user" start />
+                            {{ $t('Settings.ProfileInfo') }}
+                        </VTab>
+                        <VTab value="location" class="rounded-pill px-6">
+                            <VIcon icon="tabler-map-pin" start />
+                            {{ $t('Settings.Location') }}
+                        </VTab>
+                        <VTab value="children" class="rounded-pill px-6">
+                            <VIcon icon="tabler-users" start />
+                            {{ $t('Settings.ChildrenAndSubjects') }}
+                        </VTab>
+                    </VTabs>
+                </div>
+            </template>
+        </PremiumPageHeader>
 
-            <VCol cols="12" md="9">
+        <VContainer class="settings-content-container mt-n8">
                 <!-- Content Area -->
                 <VWindow v-model="activeTab" class="h-100" :touch="false">
                     <!-- Account Tab -->
@@ -288,9 +274,11 @@ const updateChildSubjects = async (childId) => {
                                     <div class="d-flex justify-end mt-4">
                                         <VBtn
                                             type="submit"
-                                            color="primary"
+                                            color="secondary"
+                                            size="large"
                                             :loading="loading"
                                             prepend-icon="tabler-device-floppy"
+                                            class="rounded-pill px-8 font-weight-bold shadow-secondary"
                                         >
                                             {{ $t('Settings.SaveChanges') }}
                                         </VBtn>
@@ -347,10 +335,12 @@ const updateChildSubjects = async (childId) => {
                                 </VRow>
                                 <div class="d-flex justify-end mt-4">
                                     <VBtn
-                                        color="primary"
+                                        color="secondary"
+                                        size="large"
                                         :loading="loading"
                                         :disabled="!locationData.areaId"
                                         prepend-icon="tabler-device-floppy"
+                                        class="rounded-pill px-8 font-weight-bold shadow-secondary"
                                         @click="updateLocation"
                                     >
                                         {{ $t('Settings.SaveChanges') }}
@@ -394,11 +384,13 @@ const updateChildSubjects = async (childId) => {
                                         </VCol>
                                         <VCol cols="12" sm="2" class="text-end">
                                             <VBtn
-                                                color="primary"
+                                                color="secondary"
                                                 prepend-icon="tabler-plus"
+                                                size="large"
                                                 block
                                                 :disabled="!newChild.name || !newChild.stageId"
                                                 :loading="loading"
+                                                class="rounded-pill font-weight-bold shadow-secondary"
                                                 @click="addChild"
                                             >
                                                 {{ $t('CompleteProfile.AddChild') }}
@@ -476,10 +468,12 @@ const updateChildSubjects = async (childId) => {
                                             </VCol>
                                             <VCol cols="12" sm="3" class="text-end">
                                                 <VBtn 
-                                                    color="primary" 
+                                                    color="secondary" 
                                                     variant="outlined"
+                                                    size="large"
                                                     block
                                                     prepend-icon="tabler-device-floppy"
+                                                    class="rounded-pill font-weight-bold"
                                                     @click="updateChildSubjects(child.id)"
                                                 >
                                                     {{ $t('Settings.SaveSubjects') }}
@@ -502,9 +496,74 @@ const updateChildSubjects = async (childId) => {
                         </VCard>
                     </VWindowItem>
                 </VWindow>
-            </VCol>
-        </VRow>
-    </div>
+            </VContainer>
+        </div>
 </template>
 
+<style lang="scss" scoped>
+.parent-settings-page {
+    .premium-tabs-container {
+        .premium-tabs {
+            background: rgba(var(--v-theme-primary), 0.03);
+            border: 1px solid rgba(var(--v-theme-primary), 0.05);
+            padding: 4px;
+            display: inline-flex;
 
+            :deep(.v-slide-group__content) {
+                gap: 4px;
+            }
+
+            .v-tab {
+                text-transform: none;
+                letter-spacing: 0;
+                font-weight: 600;
+                transition: all 0.3s ease;
+                min-width: 140px;
+                height: 48px;
+
+                &.v-tab--selected {
+                    background: rgb(var(--v-theme-primary));
+                    color: #fff !important;
+                    box-shadow: 0 4px 12px rgba(var(--v-theme-primary), 0.2);
+                }
+
+                &:not(.v-tab--selected) {
+                    color: rgba(var(--v-theme-primary), 0.7);
+                }
+            }
+        }
+    }
+
+    .settings-content-container {
+        .window-card {
+            border-radius: 24px;
+            border: 1px solid rgba(var(--v-border-color), 0.08);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03) !important;
+        }
+    }
+
+    .shadow-secondary {
+        box-shadow: 0 8px 16px rgba(var(--v-theme-secondary), 0.2) !important;
+    }
+
+    .max-width-600 {
+        max-width: 600px;
+    }
+
+    // Form Field Refinement
+    :deep(.v-field) {
+        border-radius: 12px !important;
+        background: #fdfdfd !important;
+        
+        &.v-field--focused {
+            .v-field__outline {
+                color: rgb(var(--v-theme-primary)) !important;
+            }
+        }
+    }
+
+    .border-dashed {
+        border-style: dashed !important;
+    }
+}
+</style>

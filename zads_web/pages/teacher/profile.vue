@@ -155,41 +155,51 @@ const onFileSelected = async (event) => {
 </script>
 
 <template>
-    <div>
-        <VRow class="mb-6">
-            <VCol cols="12">
-                <h1 class="text-h4 mb-2 d-flex align-center gap-2">
-                    {{ $t('TeacherProfile.Title') }}
-                    <VIcon icon="tabler-user-edit" color="primary" size="32" />
-                </h1>
-                <p class="text-body-1 text-secondary">
-                    {{ $t('TeacherProfile.Desc') }}
-                </p>
-            </VCol>
-        </VRow>
+    <div class="teacher-profile-page">
+        <!-- Premium Header Section -->
+        <PremiumPageHeader
+            :title="$t('TeacherProfile.Title')"
+            :description="$t('TeacherProfile.Desc')"
+        >
+            <template #actions>
+                <VBtn
+                    color="primary"
+                    size="large"
+                    prepend-icon="tabler-device-floppy"
+                    class="rounded-pill px-8 font-weight-bold shadow-primary mt-4 mt-md-0"
+                    :loading="isSaving"
+                    :disabled="isSaving"
+                    @click="saveProfile"
+                >
+                    {{ $t('Save') }}
+                </VBtn>
+            </template>
+        </PremiumPageHeader>
 
-        <VRow>
-            <VCol cols="12" md="8">
-                <VCard border flat>
-                    <VCardText>
-                        <!-- Avatar Upload -->
-                        <div class="d-flex justify-center mb-8 mt-4">
+        <VContainer class="mt-n8 position-relative z-index-1">
+
+            <VCol cols="12" md="10" lg="8" class="mx-auto">
+                <VCard class="profile-card-premium border-0 overflow-visible mt-12" flat>
+                    <VCardText class="px-6 pb-8 pt-0">
+                        <!-- Avatar Upload (Overlapping Top) -->
+                        <div class="d-flex justify-center mb-8 avatar-wrapper">
                             <div class="position-relative">
                                 <VAvatar
-                                    color="primary"
-                                    variant="tonal"
-                                    size="100"
-                                    class="rounded-circle border"
+                                    color="white"
+                                    size="130"
+                                    class="rounded-circle shadow-lg avatar-border"
                                 >
                                     <VImg v-if="authStore.user?.avatarUrl" :src="authStore.user?.avatarUrl" />
-                                    <span v-else class="text-h3 font-weight-bold">{{ authStore.user?.name?.charAt(0) || 'U' }}</span>
+                                    <span v-else class="text-h2 font-weight-bold text-primary">{{ authStore.user?.name?.charAt(0) || 'U' }}</span>
                                 </VAvatar>
+                                
                                 <VBtn
                                     icon="tabler-camera"
                                     color="primary"
+                                    variant="flat"
                                     size="small"
-                                    class="position-absolute"
-                                    style="bottom: 0; right: 0; z-index: 1"
+                                    class="position-absolute shadow-sm"
+                                    style="bottom: 4px; right: 4px; z-index: 1"
                                     :loading="isUploadingImage"
                                     @click="triggerFileInput"
                                 />
@@ -202,6 +212,17 @@ const onFileSelected = async (event) => {
                                 >
                             </div>
                         </div>
+
+                        <!-- User Intro Info -->
+                        <div class="text-center mb-8">
+                            <h2 class="text-h4 font-weight-bold mb-1">{{ authStore.user?.name }}</h2>
+                            <p class="text-body-1 text-secondary d-flex align-center justify-center gap-2">
+                                <VIcon icon="tabler-mail" size="18" />
+                                <span dir="ltr">{{ authStore.user?.email }}</span>
+                            </p>
+                        </div>
+                        
+                        <VDivider class="border-opacity-10 mb-8 mx-auto" style="max-width: 200px;" />
 
                         <VForm ref="refForm" @submit.prevent="saveProfile">
                             <VRow>
@@ -297,23 +318,57 @@ const onFileSelected = async (event) => {
                                         </VCol>
                                     </VRow>
                                 </VCol>
-
-                                <VCol cols="12" class="mt-4">
-                                    <VBtn
-                                        type="submit"
-                                        color="primary"
-                                        size="large"
-                                        :loading="isSaving"
-                                        :disabled="isSaving"
-                                    >
-                                        {{ $t('Save') }}
-                                    </VBtn>
-                                </VCol>
                             </VRow>
                         </VForm>
                     </VCardText>
                 </VCard>
             </VCol>
-        </VRow>
+        </VContainer>
     </div>
 </template>
+
+<style lang="scss" scoped>
+.teacher-profile-page {
+    .z-index-1 {
+        z-index: 1;
+    }
+
+    .profile-card-premium {
+        border-radius: 24px !important;
+        border: 1px solid rgba(var(--v-border-color), 0.08) !important;
+        box-shadow: 0 12px 32px rgba(0,0,0,0.04) !important;
+        padding-top: 24px;
+        background: rgba(var(--v-theme-surface), 0.9);
+        backdrop-filter: blur(10px);
+    }
+
+    .avatar-wrapper {
+        margin-top: -85px; // Pull avatar up over the card edge
+    }
+
+    .avatar-border {
+        border: 6px solid rgb(var(--v-theme-surface));
+    }
+
+    .shadow-lg {
+        box-shadow: 0 16px 32px rgba(0,0,0,0.1) !important;
+    }
+
+    .shadow-sm {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
+    }
+
+    .shadow-primary {
+        box-shadow: 0 8px 16px rgba(var(--v-theme-primary), 0.2) !important;
+    }
+
+    :deep(.v-field--variant-outlined) {
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        
+        &.v-field--focused {
+            box-shadow: 0 4px 12px rgba(var(--v-theme-primary), 0.1);
+        }
+    }
+}
+</style>

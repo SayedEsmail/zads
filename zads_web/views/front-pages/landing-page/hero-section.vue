@@ -1,5 +1,5 @@
 <script setup>
-import hero3DIllustration from '@images/hero.png'
+import hero3DIllustration from '@images/illustrations/hero.png'
 import { useTheme } from 'vuetify'
 
 const theme = useTheme()
@@ -37,9 +37,9 @@ const theme = useTheme()
                 <div class="d-flex flex-wrap justify-center justify-lg-start gap-4">
                   <VBtn
                     size="x-large"
-                    color="primary"
+                    color="secondary"
                     :to="{ name: 'register-parent' }"
-                    class="px-10 rounded-xl elevation-4 text-capitalize font-weight-bold"
+                    class="px-10 rounded-xl elevation-4 text-capitalize font-weight-bold shadow-secondary"
                     height="56"
                   >
                     <template #prepend>
@@ -50,7 +50,7 @@ const theme = useTheme()
                   
                   <VBtn
                     size="x-large"
-                    color="secondary"
+                    color="primary"
                     variant="tonal"
                     :to="{ name: 'register-teacher' }"
                     class="px-10 rounded-xl font-weight-bold text-capitalize"
@@ -59,7 +59,7 @@ const theme = useTheme()
                     <template #prepend>
                         <VIcon icon="tabler-school" size="24" />
                     </template>
-                    {{ $t('Auth.Teacher') }}
+                    {{ $t('Auth.Teacher') || 'Teacher' }}
                   </VBtn>
                 </div>
 

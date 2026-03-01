@@ -5,6 +5,7 @@ import { useAuthStore } from '~/stores/auth'
 import { useParentStore } from '~/stores/parent'
 import TeacherCard from '~/components/TeacherCard.vue'
 import SubjectsDialog from '~/components/SubjectsDialog.vue'
+import parentDashboardIllustration from '@images/parent_dashboard.png'
 
 definePageMeta({
     layout: 'default',
@@ -102,32 +103,39 @@ const handleContact = teacher => {
 <template>
     <div class="parent-home">
         <!-- Dashboard Style Header (Mobile Parity) -->
-        <div class="hero-section bg-surface-variant pa-6 pa-md-10 mb-8 border-b">
+        <div class="hero-section bg-secondary-light pa-6 pa-md-10 mb-8 border-b">
             <VContainer>
                 <VRow align="center">
                     <VCol cols="12" md="7">
                         <!-- Greeting Banner -->
-                        <div class="greeting-banner pa-6 rounded-xl mb-6" style="background-color: #FFF4E6;">
-                            <VRow align="center">
+                        <div class="greeting-banner-premium pa-6 rounded-xl mb-6 d-flex align-center">
+                            <VRow align="center" no-gutters>
                                 <VCol cols="12" sm="8">
-                                    <h2 class="text-h4 font-weight-bold mb-2" style="color: #2D2D2D;">
-                                        {{ $t('Welcome') }} {{ userFirstName }}
-                                    </h2>
-                                    <p class="text-body-1 mb-0" style="color: #666666;">
-                                        {{ $t('FindTeachers') }}
-                                    </p>
+                                    <div class="pe-sm-6">
+                                        <h2 class="text-h4 font-weight-bold mb-2 text-high-emphasis">
+                                            {{ $t('Welcome') }} {{ userFirstName }}
+                                        </h2>
+                                        <p class="text-body-1 mb-0 text-secondary">
+                                            {{ $t('FindTeachers') }}
+                                        </p>
+                                    </div>
                                 </VCol>
                                 <VCol cols="12" sm="4" class="text-center d-none d-sm-block">
-                                    <VIcon icon="tabler-school" size="80" color="primary" style="opacity: 0.8;" />
+                                    <VImg
+                                        :src="parentDashboardIllustration"
+                                        max-height="140"
+                                        contain
+                                        class="greeting-illustration"
+                                    />
                                 </VCol>
                             </VRow>
                         </div>
 
                         <!-- Location & Search -->
                         <div class="location-header d-flex align-center gap-2 mb-4">
-                            <VIcon icon="tabler-map-pin" color="primary" />
-                            <span class="text-body-1 font-weight-bold">{{ locationName }}</span>
-                            <VBtn variant="text" color="primary" size="small" to="/parent/complete-profile" class="ms-auto">
+                            <VIcon icon="tabler-map-pin" color="primary" size="20" />
+                            <span class="text-body-2 font-weight-bold text-secondary">{{ locationName }}</span>
+                            <VBtn variant="text" color="primary" size="small" to="/parent/profile" class="ms-auto font-weight-bold">
                                 {{ $t('ChangeLocation') }}
                             </VBtn>
                         </div>
@@ -142,10 +150,10 @@ const handleContact = teacher => {
                             @keyup.enter="handleSearch"
                         >
                             <template #prepend-inner>
-                                <VIcon icon="tabler-search" class="text-secondary" />
+                                <VIcon icon="tabler-search" class="text-secondary opacity-60" />
                             </template>
                             <template #append-inner>
-                                <VBtn color="primary" @click="handleSearch">
+                                <VBtn color="primary" @click="handleSearch" class="px-6 rounded-lg font-weight-bold shadow-primary">
                                     {{ $t('SearchNow') }}
                                 </VBtn>
                             </template>
@@ -154,14 +162,19 @@ const handleContact = teacher => {
                     
                     <VCol cols="12" md="5" class="d-none d-md-block">
                         <!-- Quick Actions Grid -->
-                        <div class="text-overline font-weight-bold mb-4 px-2">{{ $t('QuickAccess') }}</div>
+                        <div class="text-overline font-weight-bold mb-4 px-2 text-secondary">{{ $t('QuickAccess') }}</div>
                         <VRow dense>
                             <VCol v-for="action in quickActions" :key="action.label" cols="4">
-                                <VCard :href="action.to" flat border class="quick-action-card text-center pa-4 rounded-xl d-flex flex-column align-center gap-2" :ripple="false">
-                                    <div class="icon-wrapper pa-3 rounded-xl mb-1" :style="{ backgroundColor: action.color }">
+                                <VCard 
+                                    :href="action.to" 
+                                    flat 
+                                    class="quick-action-card-premium text-center pa-4 rounded-xl d-flex flex-column align-center gap-2" 
+                                    :ripple="false"
+                                >
+                                    <div class="icon-avatar-premium pa-3 rounded-xl mb-1" :style="{ backgroundColor: `${action.iconColor}10` }">
                                         <VIcon :icon="action.icon" :color="action.iconColor" size="32" />
                                     </div>
-                                    <span class="text-caption font-weight-bold">{{ action.label }}</span>
+                                    <span class="text-caption font-weight-bold text-high-emphasis">{{ action.label }}</span>
                                 </VCard>
                             </VCol>
                         </VRow>
@@ -181,12 +194,12 @@ const handleContact = teacher => {
                     <VCard
                         v-for="subject in searchStore.subjects.slice(0, 8)"
                         :key="subject.id"
-                        flat border
-                        class="subject-chip-card px-6 py-3 rounded-pill cursor-pointer flex-shrink-0"
-                        :class="{ 'border-primary bg-primary-lighten-5': searchStore.filters.subjectId === subject.id }"
+                        flat 
+                        class="subject-chip-card px-6 py-3 rounded-pill cursor-pointer flex-shrink-0 border"
+                        :class="searchStore.filters.subjectId === subject.id ? 'bg-primary text-white border-primary shadow-primary' : 'bg-surface border-light text-secondary'"
                         @click="handleSubjectClick(subject.id)"
                     >
-                        <span class="text-body-2 font-weight-medium">{{ subject.nameAr }}</span>
+                        <span class="text-body-2 font-weight-bold">{{ subject.nameAr }}</span>
                     </VCard>
                 </div>
             </div>
@@ -196,10 +209,10 @@ const handleContact = teacher => {
                 <!-- Let's keep the sidebar for web results refinement -->
                 <VCol cols="12" md="3" class="d-none d-md-block">
                     <div class="position-sticky" style="top: 100px;">
-                        <VCard border flat>
+                        <VCard border flat class="rounded-xl premium-sidebar">
                             <VCardItem class="pb-2">
                                 <template #prepend>
-                                    <VIcon icon="tabler-filter" color="primary" class="me-2" />
+                                    <VIcon icon="tabler-filter-search" color="primary" class="me-2" />
                                 </template>
                                 <VCardTitle class="text-h6 font-weight-bold">تصفية النتائج</VCardTitle>
                                 <template #append>
@@ -218,46 +231,51 @@ const handleContact = teacher => {
                             <VDivider />
                             
                             <VCardText class="pa-4 d-flex flex-column gap-6">
-                                <!-- Same filter components as before but polished -->
+                                <!-- Educational Path Section -->
                                 <div>
-                                    <VLabel class="mb-2 text-caption font-weight-bold text-uppercase">{{ $t('Subjects') }}</VLabel>
-                                    <VAutocomplete
-                                        v-model="searchStore.filters.subjectId"
-                                        :items="searchStore.subjects"
-                                        item-title="nameAr"
-                                        item-value="id"
-                                        placeholder="اختر المادة"
-                                        variant="outlined"
-                                        density="compact"
-                                        hide-details
-                                        clearable
-                                    />
+                                    <div class="text-caption font-weight-bold text-uppercase text-secondary mb-3 d-flex align-center">
+                                        <VIcon icon="tabler-book-2" size="16" class="me-2" />
+                                        المسار التعليمي
+                                    </div>
+                                    <div class="d-flex flex-column gap-3">
+                                        <VAutocomplete
+                                            v-model="searchStore.filters.subjectId"
+                                            :items="searchStore.subjects"
+                                            item-title="nameAr"
+                                            item-value="id"
+                                            placeholder="المادة الدراسية"
+                                            variant="outlined"
+                                            density="compact"
+                                            hide-details
+                                            clearable
+                                        />
+                                        <VAutocomplete
+                                            v-model="searchStore.filters.stageId"
+                                            :items="searchStore.stages"
+                                            item-title="nameAr"
+                                            item-value="id"
+                                            placeholder="المرحلة الدراسية"
+                                            variant="outlined"
+                                            density="compact"
+                                            hide-details
+                                            clearable
+                                        />
+                                    </div>
                                 </div>
 
+                                <!-- Location Section -->
                                 <div>
-                                    <VLabel class="mb-2 text-caption font-weight-bold text-uppercase">المرحلة</VLabel>
-                                    <VAutocomplete
-                                        v-model="searchStore.filters.stageId"
-                                        :items="searchStore.stages"
-                                        item-title="nameAr"
-                                        item-value="id"
-                                        placeholder="اختر المرحلة"
-                                        variant="outlined"
-                                        density="compact"
-                                        hide-details
-                                        clearable
-                                    />
-                                </div>
-
-                                <div>
-                                    <VLabel class="mb-2 text-caption font-weight-bold text-uppercase">الموقع</VLabel>
-                                    <div class="d-flex flex-column gap-2">
+                                    <div class="text-caption font-weight-bold text-uppercase text-secondary mb-3 d-flex align-center">
+                                        <VIcon icon="tabler-map-2" size="16" class="me-2" />
+                                        نطاق البحث
+                                    </div>
+                                    <div class="d-flex flex-column gap-3">
                                         <VAutocomplete
                                             v-model="searchStore.filters.governorateId"
                                             :items="searchStore.governorates"
                                             item-title="nameAr"
                                             item-value="id"
-                                            :placeholder="$t('CompleteProfile.Governorate')"
+                                            placeholder="المحافظة"
                                             variant="outlined"
                                             density="compact"
                                             hide-details
@@ -268,38 +286,33 @@ const handleContact = teacher => {
                                             :items="searchStore.cities"
                                             item-title="nameAr"
                                             item-value="id"
-                                            :placeholder="$t('CompleteProfile.City')"
+                                            placeholder="المدينة"
                                             variant="outlined"
                                             density="compact"
                                             hide-details
                                             clearable
                                             :disabled="!searchStore.filters.governorateId"
                                         />
-                                        <VAutocomplete
-                                            v-model="searchStore.filters.areaId"
-                                            :items="searchStore.areas"
-                                            item-title="nameAr"
-                                            item-value="id"
-                                            :placeholder="$t('CompleteProfile.Area')"
-                                            variant="outlined"
-                                            density="compact"
-                                            hide-details
-                                            clearable
-                                            :disabled="!searchStore.filters.cityId"
-                                        />
                                     </div>
                                 </div>
 
                                 <div>
-                                    <VLabel class="mb-2 text-caption font-weight-bold text-uppercase">نوع الحصة</VLabel>
+                                    <div class="text-caption font-weight-bold text-uppercase text-secondary mb-3">نوع الحصة</div>
                                     <VChipGroup v-model="searchStore.filters.lessonType" color="primary">
-                                        <VChip v-for="opt in lessonTypeOptions.filter(o => o.value)" :key="opt.value" :value="opt.value" label size="small" variant="tonal">
+                                        <VChip 
+                                            v-for="opt in lessonTypeOptions.filter(o => o.value)" 
+                                            :key="opt.value" 
+                                            :value="opt.value" 
+                                            label 
+                                            size="small" 
+                                            :variant="searchStore.filters.lessonType === opt.value ? 'flat' : 'tonal'"
+                                        >
                                             {{ opt.title }}
                                         </VChip>
                                     </VChipGroup>
                                 </div>
 
-                                <VBtn block color="primary" @click="handleSearch" :loading="searchStore.loading">
+                                <VBtn block color="secondary" @click="handleSearch" :loading="searchStore.loading" class="rounded-lg shadow-secondary">
                                     {{ $t('UpdateResults') }}
                                 </VBtn>
                             </VCardText>
@@ -309,11 +322,45 @@ const handleContact = teacher => {
 
                 <!-- Results Grid -->
                 <VCol cols="12" md="9">
-                    <div class="d-flex align-center justify-space-between mb-6">
+                    <div class="d-flex align-center justify-space-between mb-4">
                         <div class="text-body-2 text-secondary">
                             {{ $t('FoundTeachers', { count: searchStore.pagination.total }) }}
                         </div>
-                        <!-- Optional: Sort dropdown could go here -->
+                    </div>
+
+                    <!-- Quick Filters row -->
+                    <div class="d-flex gap-2 flex-wrap mb-6">
+                        <VChip
+                            :variant="searchStore.filters.lessonType === 'online' ? 'flat' : 'tonal'"
+                            size="small"
+                            class="rounded-lg"
+                            :color="searchStore.filters.lessonType === 'online' ? 'primary' : 'default'"
+                            @click="searchStore.filters.lessonType = searchStore.filters.lessonType === 'online' ? null : 'online'; handleSearch()"
+                        >
+                            <VIcon icon="tabler-video" start size="14" />
+                            أونلاين
+                        </VChip>
+                        <VChip
+                            :variant="searchStore.filters.rating === 5 ? 'flat' : 'tonal'"
+                            size="small"
+                            class="rounded-lg"
+                            :color="searchStore.filters.rating === 5 ? 'primary' : 'default'"
+                            @click="searchStore.filters.rating = searchStore.filters.rating === 5 ? null : 5; handleSearch()"
+                        >
+                            <VIcon icon="tabler-star" start size="14" />
+                            الأعلى تقييماً
+                        </VChip>
+                        <VChip
+                            v-if="hasLocation"
+                            :variant="searchStore.filters.nearby ? 'flat' : 'tonal'"
+                            size="small"
+                            class="rounded-lg"
+                            :color="searchStore.filters.nearby ? 'primary' : 'default'"
+                            @click="searchStore.filters.nearby = !searchStore.filters.nearby; handleSearch()"
+                        >
+                            <VIcon icon="tabler-map-pin" start size="14" />
+                            بالقرب مني
+                        </VChip>
                     </div>
 
                     <!-- Loader / Grid / No Results -->
@@ -325,15 +372,18 @@ const handleContact = teacher => {
                          {{ searchStore.error }}
                      </VAlert>
 
-                     <div v-else-if="!searchStore.teachers.length" class="text-center py-12">
-                         <VIcon icon="tabler-mood-sad" size="80" color="secondary" class="mb-4" />
-                         <h3 class="text-h5">{{ $t('NoResults') }}</h3>
-                         <p class="text-secondary">{{ $t('TryFilters') }}</p>
+                     <div v-else-if="!searchStore.teachers.length" class="text-center py-16 bg-surface rounded-xl border-dashed border-2 opacity-80" style="border-color: rgba(var(--v-border-color), 0.1) !important;">
+                         <VIcon icon="tabler-search-off" size="64" color="secondary" class="mb-4 opacity-20" />
+                         <h3 class="text-h5 font-weight-bold text-high-emphasis mb-2">{{ $t('NoResults') }}</h3>
+                         <p class="text-secondary mb-6">{{ $t('TryFilters') }}</p>
+                         <VBtn variant="tonal" color="primary" @click="handleClearFilters" class="rounded-pill px-8">
+                             {{ $t('ViewAll') }}
+                         </VBtn>
                      </div>
 
                      <template v-else>
                          <VRow>
-                             <VCol v-for="teacher in searchStore.teachers" :key="teacher.id" cols="12" sm="6" lg="4">
+                             <VCol v-for="teacher in searchStore.teachers" :key="teacher.id" cols="12">
                                  <TeacherCard :teacher="teacher" @favorite="handleFavorite" @contact="handleContact" />
                              </VCol>
                          </VRow>
@@ -428,58 +478,82 @@ const handleContact = teacher => {
 
 <style lang="scss" scoped>
 .parent-home {
-    .bg-surface-variant {
-        background-color: #f8f9fa !important;
+    .bg-secondary-light {
+        background-color: rgb(var(--v-theme-secondary-light)) !important;
     }
 
     .hero-section {
         position: relative;
         overflow: hidden;
+        background: linear-gradient(180deg, rgb(var(--v-theme-secondary-light)) 0%, #fff 100%);
+        border-bottom: 1.5px solid rgba(var(--v-border-color), 0.05) !important;
         
         &::before {
             content: '';
             position: absolute;
-            top: -50px;
-            right: -50px;
-            width: 300px;
-            height: 300px;
-            background: radial-gradient(circle, rgba(var(--v-theme-primary), 0.05) 0%, transparent 70%);
+            top: -100px;
+            right: -100px;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(var(--v-theme-primary), 0.04) 0%, transparent 70%);
             border-radius: 50%;
         }
     }
 
-    .greeting-banner {
-        transition: transform 0.3s ease;
-        &:hover {
-            transform: scale(1.01);
-        }
-    }
-
-    .quick-action-card {
-        transition: all 0.2s ease;
-        cursor: pointer;
+    .greeting-banner-premium {
+        background: #fff;
+        border: 1px solid rgba(var(--v-border-color), 0.05);
+        box-shadow: 0 10px 30px -10px rgba(var(--v-theme-secondary), 0.1);
+        transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
         
         &:hover {
             transform: translateY(-4px);
-            border-color: rgba(var(--v-theme-primary), 0.5) !important;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            box-shadow: 0 20px 40px -15px rgba(var(--v-theme-secondary), 0.15);
+        }
+    }
 
-            .icon-wrapper {
-                transform: scale(1.1);
+    .greeting-illustration {
+        filter: drop-shadow(0 8px 16px rgba(0,0,0,0.05));
+        transition: transform 0.4s ease;
+        
+        &:hover {
+            transform: scale(1.05) rotate(-2deg);
+        }
+    }
+
+    .quick-action-card-premium {
+        background: #fff;
+        border: 1px solid rgba(var(--v-border-color), 0.04) !important;
+        transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+        cursor: pointer;
+        
+        &:hover {
+            transform: translateY(-8px);
+            border-color: rgba(var(--v-theme-primary), 0.2) !important;
+            box-shadow: 0 12px 24px -10px rgba(var(--v-theme-primary), 0.15);
+
+            .icon-avatar-premium {
+                transform: scale(1.15) rotate(-5deg);
             }
         }
 
-        .icon-wrapper {
-            transition: transform 0.2s ease;
+        .icon-avatar-premium {
+            transition: transform 0.3s ease;
         }
     }
 
     .subject-chip-card {
         transition: all 0.2s ease;
+        border-radius: 12px !important;
         
         &:hover {
             border-color: rgba(var(--v-theme-primary), 0.4) !important;
             background-color: rgba(var(--v-theme-primary), 0.02) !important;
+        }
+        
+        &.bg-primary-lighten-5 {
+            background-color: rgb(var(--v-theme-primary-light)) !important;
+            border-color: rgb(var(--v-theme-primary)) !important;
         }
     }
 
@@ -491,10 +565,26 @@ const handleContact = teacher => {
         }
     }
 
-    .subjects-scroll {
-        cursor: grab;
-        &:active {
-            cursor: grabbing;
+    .premium-sidebar {
+        background: #fff !important;
+        border: 1px solid rgba(var(--v-border-color), 0.05) !important;
+        box-shadow: 0 4px 20px -5px rgba(0,0,0,0.05) !important;
+        
+        :deep(.v-field--variant-outlined) {
+            .v-field__outline {
+                --v-field-border-opacity: 0.1 !important;
+            }
+            &.v-field--focused .v-field__outline {
+                --v-field-border-opacity: 0.5 !important;
+            }
+        }
+    }
+
+    .v-chip.v-chip--variant-tonal {
+        transition: all 0.2s ease;
+        &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
         }
     }
 
@@ -503,13 +593,20 @@ const handleContact = teacher => {
             display: none;
         }
         :deep(.v-field) {
-            border-radius: 12px !important;
-            padding: 4px;
+            border-radius: 16px !important;
+            padding: 6px;
+            background: #fff !important;
+            box-shadow: 0 8px 24px -4px rgba(0,0,0,0.08) !important;
+            transition: box-shadow 0.3s ease;
+            
+            &.v-field--focused {
+                box-shadow: 0 12px 32px -4px rgba(var(--v-theme-primary), 0.15) !important;
+            }
         }
     }
 }
 
-.primary-lighten-5 {
-    background-color: rgba(var(--v-theme-primary), 0.05) !important;
+.shadow-primary {
+    box-shadow: 0 4px 14px 0 rgba(var(--v-theme-primary), 0.39) !important;
 }
 </style>

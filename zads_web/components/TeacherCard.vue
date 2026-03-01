@@ -92,141 +92,130 @@ const formatPrice = price => {
 
 <template>
     <VCard
-        class="teacher-card h-100"
+        class="teacher-card rounded-xl-24 overflow-hidden"
         :to="`/parent/teacher/${teacher.id}`"
-        border
         flat
     >
-        <VCardItem class="pb-2">
-            <template #prepend>
-                <div class="position-relative">
+        <VRow no-gutters>
+            <!-- Left Panel: Avatar & Rating -->
+            <VCol cols="12" md="3" class="pa-6 border-e-md d-flex flex-column align-center justify-center bg-grey-lighten-5">
+                <div class="position-relative mb-4">
                     <VAvatar
-                        size="56"
-                        :image="teacher.user?.avatarUrl"
-                        class="border-1"
+                        size="100"
+                        color="secondary-light"
+                        variant="flat"
+                        class="child-avatar-premium mb-4"
                     >
                         <VImg
                             v-if="teacher.user?.avatarUrl"
                             :src="teacher.user?.avatarUrl"
                             cover
                         />
-                        <span
-                            v-else
-                            class="text-h6 text-primary"
-                        >
+                        <span v-else class="text-h4 text-primary font-weight-bold">
                             {{ teacher.user?.name?.charAt(0) }}
                         </span>
                     </VAvatar>
                     <VChip
                         v-if="isNearby"
                         color="success"
-                        size="x-small"
-                        class="nearby-badge position-absolute"
-                        style="top: -8px; left: -8px; z-index: 1;"
+                        size="small"
+                        variant="flat"
+                        class="nearby-badge position-absolute rounded-lg"
+                        style="top: 0; left: -10px; z-index: 1;"
                     >
+                        <VIcon icon="tabler-map-pin" start size="14" />
                         {{ $t('Nearby') }}
                     </VChip>
                 </div>
-            </template>
 
-            <VCardTitle class="text-h6 font-weight-bold mb-1 d-flex align-center justify-space-between">
-                <span>{{ teacher.user?.name }}</span>
-                <div v-if="Number(teacher.avgRating) > 0" class="d-flex align-center gap-1">
-                    <VIcon icon="tabler-star-filled" size="16" color="warning" />
-                    <span class="text-body-2 font-weight-bold">{{ Number(teacher.avgRating).toFixed(1) }}</span>
+                <div v-if="Number(teacher.avgRating) > 0" class="d-flex align-center gap-1 mb-2">
+                    <VIcon icon="tabler-star-filled" size="18" color="warning" />
+                    <span class="text-h6 font-weight-bold">{{ Number(teacher.avgRating).toFixed(1) }}</span>
                 </div>
-            </VCardTitle>
 
-            <VCardSubtitle class="d-flex align-center">
-                <VIcon
-                    size="16"
-                    icon="tabler-map-pin"
-                    class="me-1 text-secondary"
-                />
-                <span class="text-body-2 text-secondary">
+                <div class="text-body-2 text-secondary d-flex align-center">
+                    <VIcon icon="tabler-map-pin" size="16" class="me-1" />
                     {{ teacher.area?.city?.nameAr || $t('NotSpecified') }}
-                </span>
-            </VCardSubtitle>
+                </div>
+            </VCol>
 
-            <template #append>
-                <VBtn
-                    icon
-                    variant="text"
-                    density="comfortable"
-                    :color="teacher.isFavorite ? 'error' : 'default'"
-                    @click.prevent="emit('favorite', teacher)"
-                >
-                    <VIcon :icon="teacher.isFavorite ? 'tabler-heart-filled' : 'tabler-heart'" />
-                </VBtn>
-            </template>
-        </VCardItem>
+            <!-- Middle Panel: Content -->
+            <VCol cols="12" md="6" class="pa-6 d-flex flex-column">
+                <div class="d-flex align-center justify-space-between mb-2">
+                    <h3 class="text-h5 font-weight-bold text-high-emphasis">
+                        {{ teacher.user?.name }}
+                    </h3>
+                    <VBtn
+                        icon
+                        variant="tonal"
+                        density="comfortable"
+                        class="rounded-lg"
+                        :color="teacher.isFavorite ? 'error' : 'secondary'"
+                        @click.prevent="emit('favorite', teacher)"
+                    >
+                        <VIcon :icon="teacher.isFavorite ? 'tabler-heart-filled' : 'tabler-heart'" />
+                    </VBtn>
+                </div>
 
-        <VCardText class="flex-grow-1 pt-2">
-            <div class="d-flex gap-2 flex-wrap mb-4">
-                <VChip
-                    v-for="subject in teacher.subjects?.slice(0, 3)"
-                    :key="subject.id"
-                    size="small"
-                    color="primary"
-                    variant="tonal"
-                    label
-                >
-                    {{ subject.subject?.nameAr }}
-                </VChip>
-                 <VChip
-                    v-if="teacher.subjects?.length > 3"
-                    size="small"
-                    variant="tonal"
-                    color="secondary"
-                    label
-                >
-                    +{{ teacher.subjects.length - 3 }}
-                </VChip>
-            </div>
-
-            <p
-                v-if="teacher.bio"
-                class="text-body-2 mb-4 text-truncate-2 text-secondary"
-                style="min-height: 40px;"
-            >
-                {{ teacher.bio }}
-            </p>
-            
-            <VDivider class="mb-4" />
-
-            <div class="d-flex align-center justify-space-between">
-                <div class="d-flex align-center gap-1">
-                    <VIcon
-                        size="18"
-                        :icon="lessonTypeIcon"
+                <div class="d-flex gap-2 flex-wrap mb-4">
+                    <VChip
+                        v-for="subject in teacher.subjects?.slice(0, 5)"
+                        :key="subject.id"
+                        size="small"
                         color="primary"
-                    />
-                    <span class="text-caption font-weight-medium">
+                        variant="tonal"
+                        class="rounded-lg font-weight-medium"
+                    >
+                        {{ subject.subject?.nameAr }}
+                    </VChip>
+                </div>
+
+                <p v-if="teacher.bio" class="text-body-1 text-secondary text-truncate-3 mb-0 flex-grow-1">
+                    {{ teacher.bio }}
+                </p>
+                
+                <div class="mt-4 pt-4 border-t d-flex align-center gap-4">
+                    <div class="d-flex align-center gap-1 text-caption text-secondary">
+                        <VIcon :icon="lessonTypeIcon" size="16" color="primary" />
                         {{ lessonTypeLabel }}
-                    </span>
+                    </div>
                 </div>
+            </VCol>
 
-                <div v-if="computedMinPrice" class="text-end">
-                    <span class="text-body-2 font-weight-bold text-success">
+            <!-- Right Panel: Actions -->
+            <VCol cols="12" md="3" class="pa-6 d-flex flex-column align-center justify-center border-s-md">
+                <div v-if="computedMinPrice" class="text-center mb-6">
+                    <div class="text-h4 font-weight-bold text-primary mb-1">
                         {{ formatPrice(computedMinPrice) }}
-                    </span>
-                    <span class="text-caption text-secondary d-block" style="line-height: 1;">
-                        / {{ $t('Lesson') }}
-                    </span>
+                    </div>
+                    <div class="text-body-2 text-secondary">
+                        لكل {{ $t('Lesson') }}
+                    </div>
                 </div>
-            </div>
-        </VCardText>
 
-        <VCardActions class="p-4 pt-0">
-            <VBtn
-                block
-                color="primary"
-                variant="flat"
-                @click.prevent.stop="showContactDialog = true"
-            >
-                {{ $t('ContactNow') }}
-            </VBtn>
-        </VCardActions>
+                <VBtn
+                    block
+                    color="secondary"
+                    variant="flat"
+                    height="48"
+                    class="rounded-pill font-weight-bold shadow-secondary mb-3"
+                    @click.prevent.stop="showContactDialog = true"
+                >
+                    {{ $t('ContactNow') }}
+                </VBtn>
+
+                <VBtn
+                    block
+                    variant="outlined"
+                    color="secondary"
+                    height="48"
+                    class="rounded-pill font-weight-bold"
+                    :to="`/parent/teacher/${teacher.id}`"
+                >
+                    عرض الملف الشخصي
+                </VBtn>
+            </VCol>
+        </VRow>
 
         <ContactRequestDialog
             v-model="showContactDialog"
@@ -238,17 +227,34 @@ const formatPrice = price => {
 
 <style lang="scss" scoped>
 .teacher-card {
-    transition: transform 0.2s, box-shadow 0.2s;
+    border-radius: 24px !important;
+    border: 1px solid rgba(var(--v-border-color), 0.12) !important;
+    border-bottom: 3px solid rgba(var(--v-theme-primary), 0.1) !important;
+    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+    box-shadow: 0 4px 12px -2px rgba(var(--v-theme-on-surface), 0.05) !important;
 
     &:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 8px 24px rgba(var(--v-theme-on-surface), 0.12);
+        transform: translateY(-8px);
+        border-color: rgba(var(--v-theme-primary), 0.2) !important;
+        border-bottom-color: rgb(var(--v-theme-primary)) !important;
+        box-shadow: 0 20px 40px -12px rgba(var(--v-theme-on-surface), 0.12) !important;
+        
+        .border-1 {
+            box-shadow: 0 0 0 2px rgb(var(--v-theme-primary));
+        }
+    }
+
+    .border-1 {
+        border: 2px solid #fff;
+        box-shadow: 0 0 0 1px rgba(var(--v-theme-primary), 0.1);
+        transition: box-shadow 0.3s ease;
     }
 }
 
 .text-truncate-2 {
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
