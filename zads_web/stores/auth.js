@@ -19,12 +19,31 @@ export const useAuthStore = defineStore('auth', {
         init() {
             const tokenCookie = useCookie('token')
             const userCookie = useCookie('user')
+            const userAbilityRules = useCookie('userAbilityRules')
 
             if (tokenCookie.value) {
                 this.token = tokenCookie.value
                 this.user = userCookie.value
-                // Set default header for API
 
+                // Re-populate rules if they are missing for some reason
+                if (this.user && !userAbilityRules.value) {
+                    const rules = []
+                    const uType = this.user.userType?.toUpperCase()
+                    if (uType === 'ADMIN') {
+                        rules.push({ action: 'manage', subject: 'all' })
+                    } else if (uType === 'PARENT') {
+                        rules.push({ action: 'read', subject: 'Parent' })
+                        rules.push({ action: 'manage', subject: 'Children' })
+                        rules.push({ action: 'manage', subject: 'Requests' })
+                    } else if (uType === 'TEACHER') {
+                        rules.push({ action: 'read', subject: 'Teacher' })
+                        rules.push({ action: 'manage', subject: 'Subjects' })
+                        rules.push({ action: 'manage', subject: 'IncomingRequests' })
+                    } else {
+                        rules.push({ action: 'read', subject: 'Auth' })
+                    }
+                    userAbilityRules.value = rules
+                }
             }
         },
 
