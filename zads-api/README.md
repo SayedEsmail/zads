@@ -76,7 +76,12 @@ teacher
 
 ## API Documentation
 
-See [TECH_PLAN.md](./TECH_PLAN.md) for complete API endpoints.
+See root docs:
+
+- `../TECH_PLAN.md` (unified technical plan)
+- `../DOCUMENTATION.md` (unified product/platform docs)
+- `../CODEBASE_OVERVIEW.md`
+- `../FEATURES_OVERVIEW.md`
 
 ### Quick Reference
 

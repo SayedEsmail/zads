@@ -70,3 +70,12 @@ pnpm preview   # Preview production build
 ## Language
 
 The dashboard is fully in **Arabic (RTL)**.
+
+## Documentation
+
+See root docs:
+
+- `../TECH_PLAN.md` (unified technical plan)
+- `../DOCUMENTATION.md` (unified product/platform docs)
+- `../CODEBASE_OVERVIEW.md`
+- `../FEATURES_OVERVIEW.md`

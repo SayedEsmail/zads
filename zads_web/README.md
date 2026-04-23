@@ -109,4 +109,9 @@ The app is fully in **Arabic (RTL)**.
 
 ---
 
-*See [TECH_PLAN.md](./TECH_PLAN.md) for detailed technical documentation.*
+See root docs:
+
+- `../TECH_PLAN.md` (unified technical plan)
+- `../DOCUMENTATION.md` (unified product/platform docs)
+- `../CODEBASE_OVERVIEW.md`
+- `../FEATURES_OVERVIEW.md`
