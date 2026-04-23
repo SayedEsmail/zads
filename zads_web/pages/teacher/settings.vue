@@ -129,7 +129,7 @@ const updateAccount = async () => {
                                         size="large"
                                         :loading="loading"
                                         prepend-icon="tabler-device-floppy"
-                                        class="rounded-pill px-8 font-weight-bold shadow-primary"
+                                        class="px-8 font-weight-bold"
                                     >
                                         {{ $t('Settings.SaveChanges') }}
                                     </VBtn>
@@ -174,29 +174,6 @@ const updateAccount = async () => {
                     color: rgba(var(--v-theme-primary), 0.7);
                 }
             }
-        }
-    }
-
-    .settings-content-container {
-        .window-card {
-            border-radius: 24px !important;
-            border: 1px solid rgba(var(--v-border-color), 0.08) !important;
-            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.04) !important;
-            background: rgba(var(--v-theme-surface), 0.9);
-            backdrop-filter: blur(10px);
-        }
-    }
-
-    .shadow-primary {
-        box-shadow: 0 8px 16px rgba(var(--v-theme-primary), 0.2) !important;
-    }
-
-    // Form Field Refinement
-    :deep(.v-field) {
-        border-radius: 12px !important;
-        
-        &.v-field--focused {
-            box-shadow: 0 4px 12px rgba(var(--v-theme-primary), 0.05);
         }
     }
 }

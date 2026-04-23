@@ -169,7 +169,7 @@ const handlePageChange = async (page) => {
 
                 <VRow v-else>
                     <VCol v-for="request in requestsStore.requests" :key="request.id" cols="12">
-                        <VCard class="mb-4 request-card-premium border-0" flat>
+                        <VCard class="mb-4 border-0" flat>
                             <VCardItem class="pa-5">
                                 <template #prepend>
                                     <VAvatar color="primary" variant="tonal" size="64" class="rounded-xl shadow-sm mr-4">
@@ -234,7 +234,7 @@ const handlePageChange = async (page) => {
                                         color="success"
                                         variant="flat"
                                         size="large"
-                                        class="rounded-pill font-weight-bold px-8 shadow-success"
+                                        class="font-weight-bold px-8"
                                         prepend-icon="tabler-check"
                                         :loading="isUpdating === request.id"
                                         :disabled="isUpdating === request.id"
@@ -287,33 +287,12 @@ const handlePageChange = async (page) => {
         }
     }
 
-    .request-card-premium {
-        border-radius: 24px !important;
-        border: 1px solid rgba(var(--v-border-color), 0.06) !important;
-        transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.03) !important;
-
-        &:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 16px 32px rgba(var(--v-theme-primary), 0.08) !important;
-            border-color: rgba(var(--v-theme-primary), 0.2) !important;
-        }
-    }
-
     .bg-primary-lighten-5 {
         background-color: rgba(var(--v-theme-primary), 0.04) !important;
     }
 
     .border-primary-light {
         border: 1px solid rgba(var(--v-theme-primary), 0.1);
-    }
-
-    .shadow-sm {
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
-    }
-
-    .shadow-success {
-        box-shadow: 0 8px 16px rgba(var(--v-theme-success), 0.2) !important;
     }
 
     .line-height-relaxed {

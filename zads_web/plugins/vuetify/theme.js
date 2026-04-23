@@ -24,7 +24,7 @@ export const themes = {
       'error': '#FF4C51',
       'on-error': '#fff',
       'error-darken-1': '#E64449',
-      'background': '#FFFFFF',
+      'background': '#F8F8F9', // Slightly off-white to make white cards pop
       'on-background': '#2F2B3D',
       'surface': '#fff',
       'on-surface': '#2F2B3D',

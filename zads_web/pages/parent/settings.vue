@@ -273,12 +273,11 @@ const updateChildSubjects = async (childId) => {
                                     </VRow>
                                     <div class="d-flex justify-end mt-4">
                                         <VBtn
-                                            type="submit"
                                             color="secondary"
                                             size="large"
                                             :loading="loading"
                                             prepend-icon="tabler-device-floppy"
-                                            class="rounded-pill px-8 font-weight-bold shadow-secondary"
+                                            class="px-8 font-weight-bold"
                                         >
                                             {{ $t('Settings.SaveChanges') }}
                                         </VBtn>
@@ -340,7 +339,7 @@ const updateChildSubjects = async (childId) => {
                                         :loading="loading"
                                         :disabled="!locationData.areaId"
                                         prepend-icon="tabler-device-floppy"
-                                        class="rounded-pill px-8 font-weight-bold shadow-secondary"
+                                        class="px-8 font-weight-bold"
                                         @click="updateLocation"
                                     >
                                         {{ $t('Settings.SaveChanges') }}
@@ -390,7 +389,7 @@ const updateChildSubjects = async (childId) => {
                                                 block
                                                 :disabled="!newChild.name || !newChild.stageId"
                                                 :loading="loading"
-                                                class="rounded-pill font-weight-bold shadow-secondary"
+                                                class="font-weight-bold"
                                                 @click="addChild"
                                             >
                                                 {{ $t('CompleteProfile.AddChild') }}
@@ -534,36 +533,8 @@ const updateChildSubjects = async (childId) => {
         }
     }
 
-    .settings-content-container {
-        .window-card {
-            border-radius: 24px;
-            border: 1px solid rgba(var(--v-border-color), 0.08);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03) !important;
-        }
-    }
-
-    .shadow-secondary {
-        box-shadow: 0 8px 16px rgba(var(--v-theme-secondary), 0.2) !important;
-    }
-
     .max-width-600 {
         max-width: 600px;
-    }
-
-    // Form Field Refinement
-    :deep(.v-field) {
-        border-radius: 12px !important;
-        background: #fdfdfd !important;
-        
-        &.v-field--focused {
-            .v-field__outline {
-                color: rgb(var(--v-theme-primary)) !important;
-            }
-        }
-    }
-
-    .border-dashed {
-        border-style: dashed !important;
     }
 }
 </style>

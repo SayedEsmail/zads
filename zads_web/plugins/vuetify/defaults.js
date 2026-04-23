@@ -21,9 +21,11 @@ export default {
   VBtn: {
     // set v-btn default color to primary
     color: 'primary',
+    rounded: 'pill', // Apply modern pill shapes to all buttons globally
   },
   VChip: {
     label: true,
+    rounded: 'pill', // Make chips pill-shaped for a softer look
   },
   VDataTable: {
     VPagination: {
@@ -42,6 +44,7 @@ export default {
   VExpansionPanel: {
     expandIcon: 'tabler-chevron-right',
     collapseIcon: 'tabler-chevron-right',
+    elevation: 0, // Softer expansion panels
   },
   VExpansionPanelTitle: {
     expandIcon: 'tabler-chevron-right',
@@ -55,6 +58,7 @@ export default {
     },
     VListItem: {
       ripple: false,
+      rounded: 'pill', // Pill-shaped list items (active states mostly)
       VAvatar: {
         size: 40,
       },
@@ -102,6 +106,7 @@ export default {
     color: 'primary',
     density: 'comfortable',
     hideDetails: 'auto',
+    rounded: 'lg', // Softer input fields
     VChip: {
       label: true,
     },
@@ -139,12 +144,14 @@ export default {
     density: 'comfortable',
     color: 'primary',
     hideDetails: 'auto',
+    rounded: 'lg', // Softer input fields
   },
   VAutocomplete: {
     variant: 'outlined',
     color: 'primary',
     density: 'comfortable',
     hideDetails: 'auto',
+    rounded: 'lg', // Softer input fields
     menuProps: {
       contentClass: 'app-autocomplete__content v-autocomplete__content',
     },
@@ -157,6 +164,7 @@ export default {
     density: 'comfortable',
     color: 'primary',
     hideDetails: 'auto',
+    rounded: 'lg', // Softer input fields
     VChip: {
       label: true,
     },
@@ -166,12 +174,14 @@ export default {
     density: 'comfortable',
     color: 'primary',
     hideDetails: 'auto',
+    rounded: 'lg', // Softer input fields
   },
   VTextarea: {
     variant: 'outlined',
     density: 'comfortable',
     color: 'primary',
     hideDetails: 'auto',
+    rounded: 'lg', // Softer input fields
   },
   VSnackbar: {
     VBtn: {
@@ -187,9 +197,11 @@ export default {
   },
   VNavigationDrawer: {
     touchless: true,
+    elevation: 1, // Soft shadow for floating effect
   },
   VCard: {
-    rounded: 'lg',
-    variant: 'outlined',
+    rounded: 'xl', // Exaggerated rounded corners for the soft premium look
+    variant: 'elevated', // Change from outlined to elevated to utilize soft shadows
+    elevation: 1, // Base soft shadow, configurable via util classes if needed
   },
 }
