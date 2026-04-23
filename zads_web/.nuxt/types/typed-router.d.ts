@@ -33,7 +33,6 @@ declare module 'vue-router/auto-routes' {
     'register': RouteRecordInfo<'register', '/register', Record<never, never>, Record<never, never>>,
     'register-parent': RouteRecordInfo<'register-parent', '/register/parent', Record<never, never>, Record<never, never>>,
     'register-teacher': RouteRecordInfo<'register-teacher', '/register/teacher', Record<never, never>, Record<never, never>>,
-    'second-page': RouteRecordInfo<'second-page', '/second-page', Record<never, never>, Record<never, never>>,
     'teacher': RouteRecordInfo<'teacher', '/teacher', Record<never, never>, Record<never, never>>,
     'teacher-browse': RouteRecordInfo<'teacher-browse', '/teacher/browse', Record<never, never>, Record<never, never>>,
     'teacher-profile': RouteRecordInfo<'teacher-profile', '/teacher/profile', Record<never, never>, Record<never, never>>,

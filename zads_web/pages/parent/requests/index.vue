@@ -140,7 +140,7 @@ const contactStatusLabels = {
                     color="primary"
                     size="large"
                     prepend-icon="tabler-plus"
-                    class="px-8 rounded-pill font-weight-bold shadow-primary"
+                    class="px-8 font-weight-bold"
                     @click="openCreateDialog"
                 >
                     {{ $t('MyTutorRequests.CreateNew') }}
@@ -150,7 +150,7 @@ const contactStatusLabels = {
                     color="primary"
                     size="large"
                     prepend-icon="tabler-search"
-                    class="px-8 rounded-pill font-weight-bold shadow-primary"
+                    class="px-8 font-weight-bold"
                     to="/parent"
                 >
                     {{ $t('RequestsPage.FindTeachersBtn') }}
@@ -237,7 +237,7 @@ const contactStatusLabels = {
 
                 <VRow v-else>
                     <VCol v-for="request in filteredTutorRequests" :key="request.id" cols="12" md="6">
-                        <VCard class="h-100 d-flex flex-column request-card-premium" :class="{ 'inactive-request': request.status !== 'active' }">
+                        <VCard class="h-100 d-flex flex-column" :class="{ 'inactive-request': request.status !== 'active' }">
                             <VCardItem class="pb-2">
                                 <template #prepend>
                                     <VAvatar :color="getStatusColor(request.status)" variant="tonal" size="48" class="rounded-xl">
@@ -363,7 +363,7 @@ const contactStatusLabels = {
 
                 <VRow v-else>
                     <VCol v-for="request in contactStore.requests" :key="request.id" cols="12" md="6">
-                        <VCard class="request-card-premium contact-card rounded-xl h-100">
+                        <VCard class="contact-card h-100">
                             <VCardItem class="pb-2">
                                 <template #prepend>
                                     <VAvatar
@@ -592,25 +592,10 @@ const contactStatusLabels = {
         }
     }
 
-    .request-card-premium {
-        border-radius: 24px;
-        border: 2px solid transparent;
-        transition: all 0.3s ease;
-        background: #fff;
-        overflow: hidden;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
-
-        &:hover {
-            border-color: rgba(var(--v-theme-primary), 0.1);
-            transform: translateY(-4px);
-            box-shadow: 0 12px 30px rgba(var(--v-theme-primary), 0.08);
-        }
-
-        &.inactive-request {
-            opacity: 0.8;
-            filter: grayscale(0.2);
-            background-color: #fcfcfc;
-        }
+    .inactive-request {
+        opacity: 0.8;
+        filter: grayscale(0.2);
+        background-color: #fcfcfc;
     }
 
     .journey-tracker {
@@ -660,14 +645,6 @@ const contactStatusLabels = {
                 background: rgb(var(--v-theme-primary));
             }
         }
-    }
-
-    .shadow-primary {
-        box-shadow: 0 8px 16px rgba(var(--v-theme-primary), 0.2) !important;
-    }
-
-    .shadow-secondary {
-        box-shadow: 0 8px 16px rgba(var(--v-theme-secondary), 0.2) !important;
     }
 
     .line-height-relaxed {

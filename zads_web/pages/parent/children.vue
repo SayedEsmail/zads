@@ -146,14 +146,14 @@ const handleDelete = async (childId) => {
                     sm="6"
                     lg="4"
                 >
-                    <VCard class="h-100 child-card-premium">
+                    <VCard class="h-100">
                         <VCardItem class="pb-2">
                             <template #prepend>
                                 <VAvatar
                                     color="primary"
                                     variant="tonal"
                                     size="56"
-                                    class="rounded-xl child-avatar-premium"
+                                    class="border"
                                 >
                                     <VIcon icon="tabler-user" size="28" />
                                 </VAvatar>
@@ -206,7 +206,7 @@ const handleDelete = async (childId) => {
                                     size="small"
                                     color="primary"
                                     variant="tonal"
-                                    class="rounded-lg font-weight-medium"
+                                    class="font-weight-medium"
                                 >
                                     {{ sub.subject?.nameAr }}
                                 </VChip>
@@ -285,32 +285,6 @@ const handleDelete = async (childId) => {
 
 <style lang="scss" scoped>
 .children-manager {
-
-    .child-card-premium {
-        border-radius: 24px !important;
-        border: 1px solid rgba(var(--v-border-color), 0.12) !important;
-        border-bottom: 3px solid rgba(var(--v-theme-primary), 0.1) !important;
-        transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
-        box-shadow: 0 4px 12px -2px rgba(var(--v-theme-on-surface), 0.05) !important;
-
-        &:hover {
-            transform: translateY(-8px);
-            border-color: rgba(var(--v-theme-primary), 0.2) !important;
-            border-bottom-color: rgb(var(--v-theme-primary)) !important;
-            box-shadow: 0 20px 40px -12px rgba(var(--v-theme-on-surface), 0.12) !important;
-            
-            .child-avatar-premium {
-                box-shadow: 0 0 0 2px rgb(var(--v-theme-primary));
-            }
-        }
-    }
-
-    .child-avatar-premium {
-        border: 2px solid #fff;
-        box-shadow: 0 0 0 1px rgba(var(--v-theme-primary), 0.1);
-        transition: box-shadow 0.3s ease;
-    }
-
     .empty-state-premium {
         border-color: rgba(var(--v-border-color), 0.1) !important;
         transition: all 0.3s ease;
@@ -321,16 +295,8 @@ const handleDelete = async (childId) => {
         }
     }
 
-    .shadow-primary {
-        box-shadow: 0 8px 16px -4px rgba(var(--v-theme-primary), 0.3) !important;
-    }
-
     .tracking-wide {
         letter-spacing: 0.5px;
-    }
-
-    .shadow-sm {
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
     }
 }
 </style>

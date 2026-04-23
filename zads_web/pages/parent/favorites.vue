@@ -69,7 +69,7 @@ const handleContact = teacher => {
         </VAlert>
 
         <!-- Empty State -->
-        <div v-else-if="!store.favoriteTeachers.length" class="text-center py-16 bg-surface rounded-xl border-dashed border-2 opacity-80 empty-state-premium">
+        <div v-else-if="!store.favoriteTeachers.length" class="text-center py-16 bg-surface rounded-xl border-dashed border-sm opacity-80">
             <VIcon
                 size="64"
                 icon="tabler-heart-off"
@@ -113,19 +113,10 @@ const handleContact = teacher => {
 
 <style lang="scss" scoped>
 .parent-favorites-page {
-
-    .shadow-primary {
-        box-shadow: 0 8px 16px rgba(var(--v-theme-primary), 0.2) !important;
-    }
-
     .teachers-list-premium {
         :deep(.teacher-card) {
             margin-bottom: 8px;
         }
-    }
-
-    .empty-state-premium {
-        border-color: rgba(var(--v-theme-primary), 0.1) !important;
     }
 }
 </style>

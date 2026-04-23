@@ -134,7 +134,7 @@ const formatPrice = (price) => {
                     color="primary"
                     size="large"
                     prepend-icon="tabler-plus"
-                    class="rounded-pill px-6 font-weight-bold shadow-primary mt-4 mt-md-0"
+                    class="px-6 font-weight-bold mt-4 mt-md-0"
                     @click="openAddDialog"
                 >
                     {{ $t('TeacherSubjects.AddSubject') }}
@@ -165,7 +165,7 @@ const formatPrice = (price) => {
 
         <VRow v-else>
             <VCol v-for="item in subjectsStore.subjects" :key="item.id" cols="12" md="6" lg="4">
-                <VCard class="h-100 subject-card-premium border-0" flat hover>
+                <VCard class="h-100 border-0" flat hover>
                     <VCardItem class="pa-5">
                         <template #prepend>
                             <VAvatar color="primary" variant="tonal" size="56" class="rounded-xl shadow-sm mr-4">
@@ -218,7 +218,7 @@ const formatPrice = (price) => {
                         <VBtn
                             color="primary"
                             variant="tonal"
-                            class="rounded-pill px-6 font-weight-bold"
+                            class="px-6 font-weight-bold"
                             prepend-icon="tabler-edit"
                             @click="openEditDialog(item)"
                         >
@@ -353,33 +353,12 @@ const formatPrice = (price) => {
 
 <style lang="scss" scoped>
 .teacher-subjects-page {
-    .subject-card-premium {
-        border-radius: 24px !important;
-        border: 1px solid rgba(var(--v-border-color), 0.06) !important;
-        transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.03) !important;
-
-        &:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 16px 32px rgba(var(--v-theme-primary), 0.08) !important;
-            border-color: rgba(var(--v-theme-primary), 0.2) !important;
-        }
-    }
-
     .bg-primary-lighten-5 {
         background-color: rgba(var(--v-theme-primary), 0.04) !important;
     }
 
     .border-primary-light {
         border: 1px solid rgba(var(--v-theme-primary), 0.1);
-    }
-
-    .shadow-sm {
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
-    }
-
-    .shadow-primary {
-        box-shadow: 0 8px 16px rgba(var(--v-theme-primary), 0.2) !important;
     }
 }
 </style>

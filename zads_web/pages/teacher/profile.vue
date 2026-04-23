@@ -166,7 +166,7 @@ const onFileSelected = async (event) => {
                     color="primary"
                     size="large"
                     prepend-icon="tabler-device-floppy"
-                    class="rounded-pill px-8 font-weight-bold shadow-primary mt-4 mt-md-0"
+                    class="px-8 font-weight-bold mt-4 mt-md-0"
                     :loading="isSaving"
                     :disabled="isSaving"
                     @click="saveProfile"
@@ -179,7 +179,7 @@ const onFileSelected = async (event) => {
         <VContainer class="mt-n8 position-relative z-index-1">
 
             <VCol cols="12" md="10" lg="8" class="mx-auto">
-                <VCard class="profile-card-premium border-0 overflow-visible mt-12" flat>
+                <VCard class="border-0 overflow-visible mt-12 bg-surface" flat>
                     <VCardText class="px-6 pb-8 pt-0">
                         <!-- Avatar Upload (Overlapping Top) -->
                         <div class="d-flex justify-center mb-8 avatar-wrapper">
@@ -187,7 +187,7 @@ const onFileSelected = async (event) => {
                                 <VAvatar
                                     color="white"
                                     size="130"
-                                    class="rounded-circle shadow-lg avatar-border"
+                                    class="rounded-circle avatar-border border-sm"
                                 >
                                     <VImg v-if="authStore.user?.avatarUrl" :src="authStore.user?.avatarUrl" />
                                     <span v-else class="text-h2 font-weight-bold text-primary">{{ authStore.user?.name?.charAt(0) || 'U' }}</span>
@@ -196,9 +196,8 @@ const onFileSelected = async (event) => {
                                 <VBtn
                                     icon="tabler-camera"
                                     color="primary"
-                                    variant="flat"
                                     size="small"
-                                    class="position-absolute shadow-sm"
+                                    class="position-absolute"
                                     style="bottom: 4px; right: 4px; z-index: 1"
                                     :loading="isUploadingImage"
                                     @click="triggerFileInput"
@@ -333,42 +332,12 @@ const onFileSelected = async (event) => {
         z-index: 1;
     }
 
-    .profile-card-premium {
-        border-radius: 24px !important;
-        border: 1px solid rgba(var(--v-border-color), 0.08) !important;
-        box-shadow: 0 12px 32px rgba(0,0,0,0.04) !important;
-        padding-top: 24px;
-        background: rgba(var(--v-theme-surface), 0.9);
-        backdrop-filter: blur(10px);
-    }
-
     .avatar-wrapper {
         margin-top: -85px; // Pull avatar up over the card edge
     }
 
     .avatar-border {
         border: 6px solid rgb(var(--v-theme-surface));
-    }
-
-    .shadow-lg {
-        box-shadow: 0 16px 32px rgba(0,0,0,0.1) !important;
-    }
-
-    .shadow-sm {
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
-    }
-
-    .shadow-primary {
-        box-shadow: 0 8px 16px rgba(var(--v-theme-primary), 0.2) !important;
-    }
-
-    :deep(.v-field--variant-outlined) {
-        border-radius: 12px;
-        transition: all 0.3s ease;
-        
-        &.v-field--focused {
-            box-shadow: 0 4px 12px rgba(var(--v-theme-primary), 0.1);
-        }
     }
 }
 </style>

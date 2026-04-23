@@ -157,7 +157,7 @@ const skipToHome = () => {
 
         <VContainer class="max-width-900 pa-0">
             <!-- Main Content Sections -->
-            <VCard class="rounded-xl elevation-2 overflow-hidden mb-6">
+            <VCard class="mb-6">
                 <!-- Section 1: Location -->
                 <div class="pa-6 pa-md-8 border-b">
                     <div class="d-flex align-center gap-4 mb-6">
@@ -370,22 +370,5 @@ const skipToHome = () => {
 </template>
 
 <style lang="scss" scoped>
-.parent-profile-page {
-
-    .shadow-secondary {
-        box-shadow: 0 8px 16px rgba(var(--v-theme-secondary), 0.2) !important;
-    }
-
-    // Form Field Refinement
-    :deep(.v-field) {
-        border-radius: 12px !important;
-        background: #fdfdfd !important;
-        
-        &.v-field--focused {
-            .v-field__outline {
-                color: rgb(var(--v-theme-primary)) !important;
-            }
-        }
-    }
-}
+/* Scoped styles removed in favor of global defaults.js and variables.scss */
 </style>
