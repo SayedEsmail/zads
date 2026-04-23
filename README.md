@@ -74,12 +74,10 @@ flutter run
 
 ## Documentation
 
-- [FULL_DOCUMENTATION.md](./FULL_DOCUMENTATION.md) - Complete Platform Documentation
-- [PRD.md](./PRD.md) - Product Requirements Document
-- [zads_web/TECH_PLAN.md](./zads_web/TECH_PLAN.md) - Web App Technical Plan
-- [zads-api/TECH_PLAN.md](./zads-api/TECH_PLAN.md) - API Technical Plan
-- [zads-dashboard/TECH_PLAN.md](./zads-dashboard/TECH_PLAN.md) - Dashboard Technical Plan
-- [zads_app/TECH_PLAN.md](./zads_app/TECH_PLAN.md) - Mobile App Technical Plan (Paused)
+- [DOCUMENTATION.md](./DOCUMENTATION.md) - Unified product + platform documentation (canonical)
+- [TECH_PLAN.md](./TECH_PLAN.md) - Unified technical plan (canonical)
+- [CODEBASE_OVERVIEW.md](./CODEBASE_OVERVIEW.md) - Repo/architecture map
+- [FEATURES_OVERVIEW.md](./FEATURES_OVERVIEW.md) - Feature map (routes/stores/endpoints)
 
 ---
 
