@@ -2,6 +2,8 @@
 
 This is a **code-grounded** map of the repo structure, entry points, and the main execution/data flows. It focuses on **source-of-truth** files and ignores generated artifacts like `zads_web/.nuxt/` unless you’re debugging build/runtime.
 
+**Product (one line):** Zads is a **local learning marketplace** (“الجيرة التعليمية”) connecting learners (including parents booking for dependants) with teachers, with flexible session modes—see **[DOCUMENTATION.md](./DOCUMENTATION.md)** for the full narrative and **[FEATURES_OVERVIEW.md](./FEATURES_OVERVIEW.md)** for how it maps to routes and APIs.
+
 ## Tech stack & entry points
 
 - **Web app (primary)**: `zads_web/` — Nuxt 3 + Vuetify 3 + Pinia + CASL + `@sidebase/nuxt-auth` + `@nuxtjs/i18n`
@@ -25,10 +27,9 @@ This is a **code-grounded** map of the repo structure, entry points, and the mai
 
 Top-level apps (per `README.md`):
 
-- `zads_web/`: parents + teachers web experience (Phase 1 focus)
+- `zads_web/`: client (learner/parent) + teacher web experience (Phase 1 focus)
 - `zads-api/`: REST API + Prisma/Postgres
 - `zads-dashboard/`: admin UI (teachers/parents/subjects/stages/requests)
-- `zads_app/`: Flutter app (paused, mentioned in root `README.md`)
 
 ## Build / dev / test (what matters)
 

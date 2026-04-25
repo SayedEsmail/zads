@@ -3,18 +3,24 @@
 This is the **single technical plan** for the whole repository (web + API + dashboard).  
 Companion docs:
 
+- `DOCUMENTATION.md` (product story + platform — **read first for “what is Zads?”**)
 - `CODEBASE_OVERVIEW.md` (repo/architecture map)
 - `FEATURES_OVERVIEW.md` (feature map grounded in routes/stores/endpoints)
-- `DOCUMENTATION.md` (unified product + platform documentation)
 
 ## 1) System overview
 
+**Product (non-technical)**  
+Zads is a local learning community (**«الجيرة التعليمية»**) connecting anyone who wants to learn with teachers in the same area, with flexible session placement (online; at learner’s home; at teacher’s home; dedicated venue). Client-facing benefits (discovery, household/dependents, tutor requests, favorites) and teacher benefits (local visibility, opportunities, pricing control, stats) are described in **`DOCUMENTATION.md`**.
+
 **Apps**
 
-- **Web app (parents + teachers)**: `zads_web/` (Nuxt 3, Vuetify 3, Pinia, i18n, CASL, `@sidebase/nuxt-auth`)
+- **Web app (clients + teachers)**: `zads_web/` (Nuxt 3, Vuetify 3, Pinia, i18n, CASL, `@sidebase/nuxt-auth`) — API role for the client area is still `parent` in code; routes under `/parent/*`
 - **API**: `zads-api/` (Node/Express, Prisma, PostgreSQL, JWT, Zod)
 - **Admin dashboard**: `zads-dashboard/` (Vue 3, Vuetify 3, Vite, Pinia, Axios)
-- **Mobile**: `zads_app/` (paused)
+- **Mobile app**: not present in this repository (web-first)
+
+**Planned**  
+A single **Next.js + TypeScript** app to replace the web + dashboard, and API/schema evolution (client/learner model, dependants, `requestTarget` / `studyMode`, online/offline pricing) — see the Cursor plan `react_migration_tasks_add84281.plan.md` in `.cursor/plans/` when available.
 
 **High-level architecture**
 
