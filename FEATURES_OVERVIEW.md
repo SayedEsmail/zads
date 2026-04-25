@@ -2,6 +2,22 @@
 
 This document maps **what the app does** to **real routes + key files** (pages, stores, and API endpoints). It focuses on the Phase 1 web app (`zads_web/`) plus the admin dashboard (`zads-dashboard/`).
 
+---
+
+## Product context (what Zads is)
+
+**Zads** is a local education community: it connects people who want to learn (for themselves or for dependants) with teachers in the **same city/area**—**«الجيرة التعليمية»**. See **[DOCUMENTATION.md](./DOCUMENTATION.md)** for the full non-technical story, benefits for clients and teachers, and the **four session modes** (online; at learner’s home; at teacher’s home; dedicated venue / center).
+
+### How the “where / how” of a session appears in code (today)
+
+- Prisma **`LessonType`** (`zads-api/prisma/schema.prisma`): `at_teacher` (at teacher’s place), `at_student` (at learner’s place), `group` (often used for group / center-style context), `any`.  
+- **Tutor requests** and **teacher subject** rows use `LessonType` and related fields to express preferred or offered formats.  
+- A clearer product split for **online vs offline** and pricing per mode is on the **platform roadmap** (see migration plan: `requestTarget`, `studyMode`, `priceOnline` / `priceOffline`).
+
+This file below stays **route- and file-accurate**; names like **Parent** and `/parent/*` are what the code uses today, while product language is moving toward **client / learner** and **dependents**.
+
+---
+
 ## Personas / roles
 
 Derived from route structure (`zads_web/pages/**`) + API role guards (`zads-api/src/middlewares/auth.js`):
