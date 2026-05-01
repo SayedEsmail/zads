@@ -94,7 +94,7 @@ const registerTeacher = async (req, res, next) => {
  */
 const registerParent = async (req, res, next) => {
     try {
-        const { phone, password, name, email, latitude, longitude } = req.body;
+        const { phone, password, name, email, latitude, longitude, clientAccountKind } = req.body;
 
         // Check if phone already exists
         const existingUser = await prisma.user.findUnique({
@@ -124,7 +124,8 @@ const registerParent = async (req, res, next) => {
                 data: {
                     userId: user.id,
                     latitude,
-                    longitude
+                    longitude,
+                    ...(clientAccountKind && { clientAccountKind })
                 }
             });
 

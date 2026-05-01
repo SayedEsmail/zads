@@ -13,6 +13,7 @@ const searchTeachers = async (req, res, next) => {
             subjectId,
             stageId,
             lessonType,
+            studyMode,
             minPrice,
             maxPrice,
             page = 1,
@@ -51,6 +52,9 @@ const searchTeachers = async (req, res, next) => {
         const subjectWhere = { isActive: true };
         if (subjectId) subjectWhere.subjectId = subjectId;
         if (stageId) subjectWhere.stageId = stageId;
+        // studyMode filter: online → priceOnline not null, offline → priceOffline not null
+        if (studyMode === 'online') subjectWhere.priceOnline = { not: null };
+        else if (studyMode === 'offline') subjectWhere.priceOffline = { not: null };
         if (minPrice) {
             subjectWhere.OR = [
                 { priceAtTeacher: { gte: parseInt(minPrice) } },
@@ -258,6 +262,8 @@ const addSubject = async (req, res, next) => {
             priceAtTeacher,
             priceAtStudent,
             priceGroup,
+            priceOnline,
+            priceOffline,
             priceNegotiable,
             durationMinutes
         } = req.body;
@@ -270,6 +276,8 @@ const addSubject = async (req, res, next) => {
                 priceAtTeacher,
                 priceAtStudent,
                 priceGroup,
+                priceOnline,
+                priceOffline,
                 priceNegotiable,
                 durationMinutes
             },
@@ -302,6 +310,8 @@ const updateSubject = async (req, res, next) => {
             priceAtTeacher,
             priceAtStudent,
             priceGroup,
+            priceOnline,
+            priceOffline,
             priceNegotiable,
             durationMinutes,
             isActive
@@ -316,6 +326,8 @@ const updateSubject = async (req, res, next) => {
                 ...(priceAtTeacher !== undefined && { priceAtTeacher }),
                 ...(priceAtStudent !== undefined && { priceAtStudent }),
                 ...(priceGroup !== undefined && { priceGroup }),
+                ...(priceOnline !== undefined && { priceOnline }),
+                ...(priceOffline !== undefined && { priceOffline }),
                 ...(priceNegotiable !== undefined && { priceNegotiable }),
                 ...(durationMinutes !== undefined && { durationMinutes }),
                 ...(isActive !== undefined && { isActive })

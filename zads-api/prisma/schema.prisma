@@ -45,6 +45,22 @@ enum LessonType {
   any
 }
 
+enum ClientAccountKind {
+  student
+  guardian
+}
+
+enum RequestTarget {
+  self
+  dependent
+}
+
+enum StudyMode {
+  online
+  offline
+  both
+}
+
 // ============================================
 // TABLES
 // ============================================
@@ -98,11 +114,12 @@ model Teacher {
 }
 
 model Parent {
-  id        String   @id @default(uuid())
-  userId    String   @unique @map("user_id")
-  areaId    String?  @map("area_id")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id                String            @id @default(uuid())
+  userId            String            @unique @map("user_id")
+  areaId            String?           @map("area_id")
+  clientAccountKind ClientAccountKind @default(guardian) @map("client_account_kind")
+  createdAt         DateTime          @default(now()) @map("created_at")
+  updatedAt         DateTime          @updatedAt @map("updated_at")
 
   user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   area            Area?            @relation(fields: [areaId], references: [id])
@@ -187,6 +204,8 @@ model TeacherSubject {
   priceAtTeacher  Int?     @map("price_at_teacher")
   priceAtStudent  Int?     @map("price_at_student")
   priceGroup      Int?     @map("price_group")
+  priceOnline     Int?     @map("price_online")
+  priceOffline    Int?     @map("price_offline")
   priceNegotiable Boolean  @default(false) @map("price_negotiable")
   durationMinutes Int      @default(60) @map("duration_minutes")
   isActive        Boolean  @default(true) @map("is_active")
@@ -245,6 +264,8 @@ model TutorRequest {
   stageId             String             @map("stage_id")
   description         String?
   preferredLessonType LessonType?        @map("preferred_lesson_type")
+  requestTarget       RequestTarget      @default(dependent) @map("request_target")
+  studyMode           StudyMode          @default(both) @map("study_mode")
   budgetMin           Int?               @map("budget_min")
   budgetMax           Int?               @map("budget_max")
   areaId              String?            @map("area_id")

@@ -17,6 +17,9 @@ const createRequest = async (req, res, next) => {
             stageId,
             description,
             preferredLessonType,
+            requestTarget,
+            studyMode,
+            parentChildId,
             budgetMin,
             budgetMax,
             latitude,
@@ -34,6 +37,9 @@ const createRequest = async (req, res, next) => {
                 stageId,
                 description,
                 preferredLessonType,
+                requestTarget: requestTarget ?? (parentChildId ? 'dependent' : 'self'),
+                studyMode: studyMode ?? 'both',
+                parentChildId: parentChildId ?? null,
                 budgetMin,
                 budgetMax,
                 latitude,
@@ -58,7 +64,7 @@ const createRequest = async (req, res, next) => {
  */
 const getTutorRequests = async (req, res, next) => {
     try {
-        const { subjectId, stageId, latitude, longitude, radiusKm = 20 } = req.query;
+        const { subjectId, stageId } = req.query;
 
         const where = {
             status: 'active',
@@ -67,6 +73,10 @@ const getTutorRequests = async (req, res, next) => {
 
         if (subjectId) where.subjectId = subjectId;
         if (stageId) where.stageId = stageId;
+        if (req.query.studyMode) where.studyMode = req.query.studyMode;
+        if (req.query.requestTarget) where.requestTarget = req.query.requestTarget;
+
+        const { latitude, longitude, radiusKm = 20 } = req.query;
 
         let requests = await prisma.tutorRequest.findMany({
             where,
@@ -185,7 +195,7 @@ const updateRequest = async (req, res, next) => {
     try {
         const parentId = req.user.parent?.id;
         const { requestId } = req.params;
-        const { description, preferredLessonType, budgetMin, budgetMax } = req.body;
+        const { description, preferredLessonType, requestTarget, studyMode, budgetMin, budgetMax } = req.body;
 
         if (!parentId) {
             return response.error(res, 'Parent profile not found', 404);
@@ -199,6 +209,8 @@ const updateRequest = async (req, res, next) => {
             data: {
                 ...(description !== undefined && { description }),
                 ...(preferredLessonType !== undefined && { preferredLessonType }),
+                ...(requestTarget !== undefined && { requestTarget }),
+                ...(studyMode !== undefined && { studyMode }),
                 ...(budgetMin !== undefined && { budgetMin }),
                 ...(budgetMax !== undefined && { budgetMax })
             },
