@@ -69,12 +69,13 @@ const updateProfile = async (req, res, next) => {
             return response.error(res, 'Parent profile not found', 404);
         }
 
-        const { areaId } = req.body;
+        const { areaId, clientAccountKind } = req.body;
 
         const updated = await prisma.parent.update({
             where: { id: parentId },
             data: {
-                ...(areaId !== undefined && { areaId })
+                ...(areaId !== undefined && { areaId }),
+                ...(clientAccountKind !== undefined && { clientAccountKind })
             },
             include: {
                 user: {
@@ -185,6 +186,8 @@ const addChild = async (req, res, next) => {
                 subjectId,
                 stageId,
                 areaId: parent?.areaId,
+                requestTarget: 'dependent',
+                studyMode: 'both',
                 description: `طلب معلم لـ ${name}`,
                 status: 'active'
             }));
