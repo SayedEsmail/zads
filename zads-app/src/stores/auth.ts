@@ -8,7 +8,6 @@ import type {
   ClientProfile,
   RegisterClientPayload,
   RegisterTeacherPayload,
-  ClientAccountKind,
 } from "@/types";
 
 interface AuthState {
@@ -95,7 +94,7 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true, error: null });
         try {
           const res = await api.put<{ data: { user: User } }>("/auth/profile", payload);
-          set({ profile: res.data.data.user as any, isLoading: false });
+          set({ profile: res.data.data.user, isLoading: false });
         } catch (err) {
           set({ error: extractError(err), isLoading: false });
           throw err;
@@ -110,7 +109,7 @@ export const useAuthStore = create<AuthState>()(
           const res = await api.post<{ data: { url: string } }>("/upload/image", formData, {
             headers: { "Content-Type": "multipart/form-data" },
           });
-          await get().updateAccount({ avatarUrl: res.data.data.url } as any);
+          await get().updateAccount({ avatarUrl: res.data.data.url });
         } catch (err) {
           set({ error: extractError(err), isLoading: false });
           throw err;
@@ -132,7 +131,7 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true, error: null });
         try {
           const res = await api.get<{ data: { user: User } }>("/auth/profile");
-          set({ profile: res.data.data.user as any, isLoading: false });
+          set({ profile: res.data.data.user, isLoading: false });
         } catch (err) {
           set({ error: extractError(err), isLoading: false });
         }

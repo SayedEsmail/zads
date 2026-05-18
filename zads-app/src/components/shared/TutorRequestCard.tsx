@@ -29,6 +29,12 @@ const TARGET_LABEL: Record<string, string> = {
   dependent: "لتابعي",
 };
 
+const REQUEST_STATUS_LABEL: Record<string, string> = {
+  active: "نشط",
+  fulfilled: "تم التنفيذ",
+  closed: "مغلق",
+};
+
 export function TutorRequestCard({
   request,
   onClose,
@@ -51,7 +57,7 @@ export function TutorRequestCard({
           "shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium",
           STATUS_STYLE[request.status] ?? "bg-muted text-muted-foreground"
         )}>
-          {t(request.status as any)}
+          {REQUEST_STATUS_LABEL[request.status] ?? request.status}
         </span>
       </div>
 

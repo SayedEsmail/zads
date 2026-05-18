@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useMemo } from "react";
 import {
   createMongoAbility,
   type MongoAbility,
@@ -24,7 +24,7 @@ export type AppAbility = MongoAbility<[Actions, Subjects]>;
 
 function defineRulesFor(userType: string): RawRuleOf<AppAbility>[] {
   switch (userType) {
-    case "ADMIN":
+    case "admin":
       return [{ action: "manage", subject: "all" }];
 
     case "parent": // API enum keeps "parent"; product label is "client/learner"
@@ -37,7 +37,7 @@ function defineRulesFor(userType: string): RawRuleOf<AppAbility>[] {
         { action: "read", subject: "Teacher" },
       ];
 
-    case "TEACHER":
+    case "teacher":
       return [
         { action: "read", subject: "Teacher" },
         { action: "manage", subject: "TeacherSubject" },
@@ -54,11 +54,9 @@ const AbilityContext = createContext<AppAbility>(createMongoAbility<[Actions, Su
 
 export function AbilityProvider({ children }: { children: React.ReactNode }) {
   const { data: session } = useSession();
-  const [ability, setAbility] = useState<AppAbility>(() => createMongoAbility<[Actions, Subjects]>([]));
-
-  useEffect(() => {
+  const ability = useMemo(() => {
     const rules = defineRulesFor(session?.userType ?? "");
-    setAbility(createMongoAbility<[Actions, Subjects]>(rules));
+    return createMongoAbility<[Actions, Subjects]>(rules);
   }, [session?.userType]);
 
   return (

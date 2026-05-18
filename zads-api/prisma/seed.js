@@ -227,8 +227,7 @@ async function main() {
         update: {},
         create: {
             userId: parentUser.id,
-            latitude: 30.0626,
-            longitude: 31.2497
+            areaId: 'area-city-cairo-nasr-city-nasr-city-district-1'
         }
     });
 

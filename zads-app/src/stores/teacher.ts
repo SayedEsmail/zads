@@ -31,7 +31,7 @@ export const useTeacherStore = create<TeacherStore>()(
       fetch: async () => {
         set({ isLoading: true, error: null });
         try {
-          const res = await api.get<{ data: { teacher: Teacher } }>("/teachers/profile");
+          const res = await api.get<{ data: { teacher: Teacher } }>("/teachers/me");
           set({ data: res.data.data.teacher, isLoading: false });
         } catch (err) {
           set({ error: extractError(err), isLoading: false });
@@ -40,7 +40,7 @@ export const useTeacherStore = create<TeacherStore>()(
 
       fetchStats: async () => {
         try {
-          const res = await api.get<{ data: TeacherStats }>("/teachers/stats");
+          const res = await api.get<{ data: TeacherStats }>("/teachers/me/stats");
           set({ stats: res.data.data });
         } catch { /* silent */ }
       },
@@ -48,7 +48,7 @@ export const useTeacherStore = create<TeacherStore>()(
       updateProfile: async (payload) => {
         set({ isLoading: true, error: null });
         try {
-          const res = await api.put<{ data: Teacher }>("/teachers/profile", payload);
+          const res = await api.put<{ data: Teacher }>("/teachers/me", payload);
           set({ data: res.data.data, isLoading: false });
         } catch (err) {
           set({ error: extractError(err), isLoading: false });

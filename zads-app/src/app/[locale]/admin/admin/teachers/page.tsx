@@ -29,7 +29,7 @@ export default function AdminTeachersPage() {
 
   useEffect(() => {
     api.get("/admin/teachers")
-      .then((r: any) => setData(r.data.data))
+      .then((r: { data: { data: Teacher[] } }) => setData(r.data.data))
       .catch((e) => setError(extractError(e)))
       .finally(() => setIsLoading(false));
   }, []);

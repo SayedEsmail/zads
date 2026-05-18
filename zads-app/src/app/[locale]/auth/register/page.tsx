@@ -21,7 +21,7 @@ function RegisterPageClient() {
 
       <div className="space-y-3">
         <Link
-          href={`/${locale}/register/client`}
+          href={`/${locale}/auth/register/client`}
           className="flex items-center gap-4 rounded-xl border border-border p-4 transition-colors hover:border-primary hover:bg-primary/5"
         >
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10">
@@ -35,7 +35,7 @@ function RegisterPageClient() {
         </Link>
 
         <Link
-          href={`/${locale}/register/teacher`}
+          href={`/${locale}/auth/register/teacher`}
           className="flex items-center gap-4 rounded-xl border border-border p-4 transition-colors hover:border-primary hover:bg-primary/5"
         >
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-secondary/10">
@@ -51,7 +51,7 @@ function RegisterPageClient() {
 
       <p className="mt-6 text-center text-sm text-muted-foreground">
         {t("haveAccount")}{" "}
-        <Link href={`/${locale}/login`} className="font-medium text-primary hover:underline">
+        <Link href={`/${locale}/auth/login`} className="font-medium text-primary hover:underline">
           {t("signInNow")}
         </Link>
       </p>

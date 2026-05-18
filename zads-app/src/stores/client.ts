@@ -21,7 +21,7 @@ export const useClientStore = create<ClientStore>()(
       fetch: async () => {
         set({ isLoading: true, error: null });
         try {
-          const res = await api.get<{ data: { parent: ClientProfile } }>("/parents/profile");
+          const res = await api.get<{ data: { parent: ClientProfile } }>("/parents/me");
           set({ data: res.data.data.parent, isLoading: false });
         } catch (err) {
           set({ error: extractError(err), isLoading: false });
@@ -31,7 +31,7 @@ export const useClientStore = create<ClientStore>()(
       updateProfile: async (payload) => {
         set({ isLoading: true, error: null });
         try {
-          const res = await api.put<{ data: ClientProfile }>("/parents/profile", payload);
+          const res = await api.put<{ data: ClientProfile }>("/parents/me", payload);
           set({ data: res.data.data, isLoading: false });
         } catch (err) {
           set({ error: extractError(err), isLoading: false });

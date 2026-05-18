@@ -7,49 +7,47 @@ import { useLocale, useTranslations } from "next-intl";
 import { signOut, useSession } from "next-auth/react";
 import {
   LayoutDashboard, Search, FileText, Heart, Users, User, Settings,
-  BookOpen, ListTodo, BarChart2, ShieldCheck, Menu, X, LogOut, GraduationCap,
+  BookOpen, ListTodo, BarChart2, Menu, X, LogOut, GraduationCap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type Role = "client" | "teacher" | "admin";
 
-interface NavItem {
-  href: string;
-  label: string;
-  icon: React.ElementType;
-}
+type Translator = (key: string) => string;
 
-function useNavItems(role: Role, locale: string, t: ReturnType<typeof useTranslations>) {
-  const base = `/${locale}`;
+function useNavItems(role: Role, locale: string, t: Translator) {
   if (role === "client") {
+    const base = `/${locale}/client/client`;
     return [
-      { href: `${base}/client`, label: t("dashboard"), icon: LayoutDashboard },
-      { href: `${base}/client/dependents`, label: t("dependents"), icon: Users },
-      { href: `${base}/client/requests`, label: t("requests"), icon: FileText },
-      { href: `${base}/client/favorites`, label: t("favorites"), icon: Heart },
-      { href: `${base}/client/profile`, label: t("profile"), icon: User },
-      { href: `${base}/client/settings`, label: t("settings"), icon: Settings },
+      { href: base, label: t("dashboard"), icon: LayoutDashboard },
+      { href: `${base}/dependents`, label: t("dependents"), icon: Users },
+      { href: `${base}/requests`, label: t("requests"), icon: FileText },
+      { href: `${base}/favorites`, label: t("favorites"), icon: Heart },
+      { href: `${base}/profile`, label: t("profile"), icon: User },
+      { href: `${base}/settings`, label: t("settings"), icon: Settings },
     ];
   }
   if (role === "teacher") {
+    const base = `/${locale}/teacher/teacher`;
     return [
-      { href: `${base}/teacher`, label: t("dashboard"), icon: LayoutDashboard },
-      { href: `${base}/teacher/browse`, label: t("browse"), icon: Search },
-      { href: `${base}/teacher/requests`, label: t("requests"), icon: FileText },
-      { href: `${base}/teacher/subjects`, label: t("subjects"), icon: BookOpen },
-      { href: `${base}/teacher/profile`, label: t("profile"), icon: User },
-      { href: `${base}/teacher/settings`, label: t("settings"), icon: Settings },
+      { href: base, label: t("dashboard"), icon: LayoutDashboard },
+      { href: `${base}/browse`, label: t("browse"), icon: Search },
+      { href: `${base}/requests`, label: t("requests"), icon: FileText },
+      { href: `${base}/subjects`, label: t("subjects"), icon: BookOpen },
+      { href: `${base}/profile`, label: t("profile"), icon: User },
+      { href: `${base}/settings`, label: t("settings"), icon: Settings },
     ];
   }
   // admin
+  const base = `/${locale}/admin/admin`;
   return [
-    { href: `${base}/admin`, label: t("admin"), icon: BarChart2 },
-    { href: `${base}/admin/teachers`, label: t("teachers"), icon: GraduationCap },
-    { href: `${base}/admin/parents`, label: t("clients"), icon: Users },
-    { href: `${base}/admin/subjects`, label: t("subjects"), icon: BookOpen },
-    { href: `${base}/admin/stages`, label: t("stages"), icon: ListTodo },
-    { href: `${base}/admin/tutor-requests`, label: t("tutorRequests"), icon: FileText },
-    { href: `${base}/admin/contact-requests`, label: t("contactRequests"), icon: FileText },
+    { href: base, label: t("admin"), icon: BarChart2 },
+    { href: `${base}/teachers`, label: t("teachers"), icon: GraduationCap },
+    { href: `${base}/parents`, label: t("clients"), icon: Users },
+    { href: `${base}/subjects`, label: t("subjects"), icon: BookOpen },
+    { href: `${base}/stages`, label: t("stages"), icon: ListTodo },
+    { href: `${base}/tutor-requests`, label: t("tutorRequests"), icon: FileText },
+    { href: `${base}/contact-requests`, label: t("contactRequests"), icon: FileText },
   ];
 }
 
@@ -62,18 +60,19 @@ export default function DashboardSidebar({ role }: Props) {
   const pathname = usePathname();
   const t = useTranslations("nav");
   const tAdmin = useTranslations("admin");
+  const tAuth = useTranslations("auth");
   const { data: session } = useSession();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   // Use nav or admin translations depending on role
   const trans = role === "admin" ? tAdmin : t;
-  const navItems = useNavItems(role, locale, trans as any);
+  const navItems = useNavItems(role, locale, trans);
 
-  const SidebarContent = () => (
+  const sidebarContent = (
     <div className="flex h-full flex-col">
       {/* Header */}
       <div className="flex items-center justify-between border-b border-border p-4">
-        <Link href={`/${locale}`} className="text-lg font-bold text-primary">
+        <Link href={`/${locale}/public`} className="text-lg font-bold text-primary">
           زاد
         </Link>
         <button className="md:hidden" onClick={() => setMobileOpen(false)}>
@@ -112,11 +111,11 @@ export default function DashboardSidebar({ role }: Props) {
       {/* Sign out */}
       <div className="border-t border-border p-3">
         <button
-          onClick={() => signOut({ callbackUrl: `/${locale}/login` })}
+          onClick={() => signOut({ callbackUrl: `/${locale}/auth/login` })}
           className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-muted-foreground hover:bg-muted hover:text-destructive"
         >
           <LogOut className="h-4 w-4" />
-          {useTranslations("auth")("logout")}
+          {tAuth("logout")}
         </button>
       </div>
     </div>
@@ -147,13 +146,13 @@ export default function DashboardSidebar({ role }: Props) {
           mobileOpen ? "translate-x-0" : "translate-x-full rtl:-translate-x-full"
         )}
       >
-        <SidebarContent />
+        {sidebarContent}
       </div>
 
       {/* Desktop sidebar */}
       <aside className="hidden w-64 shrink-0 border-e border-border bg-surface md:block">
         <div className="sticky top-0 h-screen overflow-hidden">
-          <SidebarContent />
+          {sidebarContent}
         </div>
       </aside>
     </>

@@ -11,6 +11,7 @@ import type { Dependent } from "@/types";
 
 export default function DependentsPage() {
   const t = useTranslations("client");
+  const tCommon = useTranslations("common");
   const { data, isLoading, error, fetch, add, update, remove } = useDependentsStore();
   const { subjects, stages, fetchSubjects, fetchStages } = useSearchStore();
   const [showDialog, setShowDialog] = useState(false);
@@ -134,10 +135,10 @@ export default function DependentsPage() {
             </div>
             <div className="mt-5 flex gap-3">
               <button onClick={handleSave} className="flex-1 rounded-lg bg-primary py-2.5 text-sm font-medium text-white hover:bg-primary-dark">
-                {useTranslations("common")("save")}
+                {tCommon("save")}
               </button>
               <button onClick={() => setShowDialog(false)} className="flex-1 rounded-lg border border-border py-2.5 text-sm hover:bg-muted">
-                {useTranslations("common")("cancel")}
+                {tCommon("cancel")}
               </button>
             </div>
           </div>

@@ -23,7 +23,7 @@ export const useDependentsStore = create<DependentsStore>()(
       fetch: async () => {
         set({ isLoading: true, error: null });
         try {
-          const res = await api.get<{ data: Dependent[] }>("/parents/children");
+          const res = await api.get<{ data: Dependent[] }>("/parents/me/children");
           set({ data: res.data.data, isLoading: false });
         } catch (err) {
           set({ error: extractError(err), isLoading: false });
@@ -33,7 +33,7 @@ export const useDependentsStore = create<DependentsStore>()(
       add: async (payload) => {
         set({ isLoading: true, error: null });
         try {
-          await api.post("/parents/children", payload);
+          await api.post("/parents/me/children", payload);
           await get().fetch();
         } catch (err) {
           set({ error: extractError(err), isLoading: false });
@@ -44,7 +44,7 @@ export const useDependentsStore = create<DependentsStore>()(
       update: async (id, payload) => {
         set({ isLoading: true, error: null });
         try {
-          await api.put(`/parents/children/${id}`, payload);
+          await api.put(`/parents/me/children/${id}`, payload);
           await get().fetch();
         } catch (err) {
           set({ error: extractError(err), isLoading: false });
@@ -55,7 +55,7 @@ export const useDependentsStore = create<DependentsStore>()(
       remove: async (id) => {
         set({ isLoading: true, error: null });
         try {
-          await api.delete(`/parents/children/${id}`);
+          await api.delete(`/parents/me/children/${id}`);
           set((s) => ({
             data: s.data?.filter((d) => d.id !== id) ?? null,
             isLoading: false,

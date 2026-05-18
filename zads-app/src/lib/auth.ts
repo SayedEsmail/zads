@@ -31,7 +31,7 @@ declare module "next-auth/jwt" {
   }
 }
 
-const API_BASE = process.env.API_BASE_URL ?? "http://localhost:3001";
+const API_BASE = process.env.API_BASE_URL ?? "http://localhost:3000";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
@@ -98,7 +98,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
 
   pages: {
-    signIn: "/login",
+    signIn: "/en/auth/login",
   },
 
   session: {
