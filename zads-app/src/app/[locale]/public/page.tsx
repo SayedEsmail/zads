@@ -48,13 +48,13 @@ export default function LandingPage() {
         </p>
         <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
           <Link
-            href={`/${locale}/register`}
+            href={`/${locale}/auth/register`}
             className="rounded-xl bg-primary px-8 py-3 text-base font-semibold text-white hover:bg-primary-dark"
           >
             {t("startNow")}
           </Link>
           <Link
-            href={`/${locale}/how-it-works`}
+            href={`/${locale}/public/how-it-works`}
             className="rounded-xl border border-border px-8 py-3 text-base font-medium hover:bg-muted"
           >
             {t("exploreTeachers")}
@@ -106,7 +106,7 @@ export default function LandingPage() {
           {locale === "ar" ? "جاهز للبدء؟" : "Ready to start?"}
         </h2>
         <Link
-          href={`/${locale}/register`}
+          href={`/${locale}/auth/register`}
           className="inline-block rounded-xl bg-secondary px-8 py-3 text-base font-semibold text-white hover:bg-secondary-dark"
         >
           {t("startNow")}

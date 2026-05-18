@@ -54,7 +54,7 @@ export function TeacherCard({
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-2">
           <Link
-            href={`/${locale}/client/teacher/${teacher.id}`}
+            href={`/${locale}/client/client/teacher/${teacher.id}`}
             className="font-semibold hover:text-primary line-clamp-1"
           >
             {user?.name}

@@ -2,27 +2,32 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { DataTable } from "@/components/admin/DataTable";
 import api from "@/lib/api";
-import type { ColumnDef } from "@tanstack/react-table";
-import type { Teacher } from "@/types";
 import { extractError } from "@/lib/utils";
 import { ErrorBanner } from "@/components/shared/ErrorBanner";
 
+type DashboardStats = {
+  teachers: { total: number; active: number; newLast7Days: number };
+  parents: { total: number; newLast7Days: number };
+  contactRequests: { total: number; pending: number };
+};
+
 export default function AdminDashboardPage() {
   const t = useTranslations("admin");
-  const [stats, setStats] = useState({ totalTeachers: 0, totalClients: 0, totalRequests: 0, activeSubjects: 0 });
+  const [stats, setStats] = useState<DashboardStats | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    api.get("/admin/stats").then((r: any) => setStats(r.data.data)).catch((e) => setError(extractError(e)));
+    api.get<{ data: DashboardStats }>("/admin/dashboard")
+      .then((res) => setStats(res.data.data))
+      .catch((e) => setError(extractError(e)));
   }, []);
 
   const statCards = [
-    { label: t("totalTeachers"), value: stats.totalTeachers, color: "text-primary" },
-    { label: t("totalClients"), value: stats.totalClients, color: "text-secondary" },
-    { label: t("totalRequests"), value: stats.totalRequests, color: "text-success" },
-    { label: t("activeSubjects"), value: stats.activeSubjects, color: "text-info" },
+    { label: t("totalTeachers"), value: stats?.teachers.total ?? 0, color: "text-primary" },
+    { label: t("totalClients"), value: stats?.parents.total ?? 0, color: "text-secondary" },
+    { label: t("totalRequests"), value: stats?.contactRequests.total ?? 0, color: "text-success" },
+    { label: t("pendingRequests"), value: stats?.contactRequests.pending ?? 0, color: "text-info" },
   ];
 
   return (

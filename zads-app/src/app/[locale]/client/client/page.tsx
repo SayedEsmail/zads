@@ -17,6 +17,7 @@ export default function ClientDashboardPage() {
   const locale = useLocale();
   const t = useTranslations("client");
   const tNav = useTranslations("nav");
+  const tCommon = useTranslations("common");
 
   const clientStore = useClientStore();
   const tutorStore = useTutorRequestsStore();
@@ -36,21 +37,21 @@ export default function ClientDashboardPage() {
       label: t("dependents"),
       value: dependentsStore.data?.length ?? 0,
       icon: Users,
-      href: `/${locale}/client/dependents`,
+      href: `/${locale}/client/client/dependents`,
       color: "bg-primary/10 text-primary",
     },
     {
       label: t("tutorRequests"),
       value: tutorStore.data?.filter((r) => r.status === "active").length ?? 0,
       icon: FileText,
-      href: `/${locale}/client/requests`,
+      href: `/${locale}/client/client/requests`,
       color: "bg-secondary/10 text-secondary",
     },
     {
       label: tNav("favorites"),
       value: 0,
       icon: Heart,
-      href: `/${locale}/client/favorites`,
+      href: `/${locale}/client/client/favorites`,
       color: "bg-destructive/10 text-destructive",
     },
   ];
@@ -89,7 +90,7 @@ export default function ClientDashboardPage() {
 
       {/* Search teachers CTA */}
       <Link
-        href={`/${locale}/client/teacher`}
+        href={`/${locale}/client/client/teacher`}
         className="flex items-center gap-3 rounded-xl border border-dashed border-primary/30 bg-primary/5 p-4 hover:bg-primary/10"
       >
         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
@@ -105,8 +106,8 @@ export default function ClientDashboardPage() {
       <section>
         <div className="mb-3 flex items-center justify-between">
           <h2 className="font-semibold">{t("tutorRequests")}</h2>
-          <Link href={`/${locale}/client/requests`} className="text-xs text-primary hover:underline">
-            {useTranslations("common")("viewAll")}
+          <Link href={`/${locale}/client/client/requests`} className="text-xs text-primary hover:underline">
+            {tCommon("viewAll")}
           </Link>
         </div>
         {tutorStore.isLoading ? (

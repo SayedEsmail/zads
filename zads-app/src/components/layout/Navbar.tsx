@@ -23,25 +23,25 @@ export default function Navbar() {
   };
 
   const getDashboardHref = () => {
-    if (!session) return `/${locale}/login`;
+    if (!session) return `/${locale}/auth/login`;
     const type = session.userType;
-    if (type === "parent") return `/${locale}/client`;
-    if (type === "TEACHER") return `/${locale}/teacher`;
-    if (type === "ADMIN") return `/${locale}/admin`;
-    return `/${locale}`;
+    if (type === "parent") return `/${locale}/client/client`;
+    if (type === "teacher") return `/${locale}/teacher/teacher`;
+    if (type === "admin") return `/${locale}/admin/admin`;
+    return `/${locale}/public`;
   };
 
   const navLinks = [
-    { href: `/${locale}`, label: t("home") },
-    { href: `/${locale}/about`, label: t("about") },
-    { href: `/${locale}/how-it-works`, label: t("howItWorks") },
+    { href: `/${locale}/public`, label: t("home") },
+    { href: `/${locale}/public/about`, label: t("about") },
+    { href: `/${locale}/public/how-it-works`, label: t("howItWorks") },
   ];
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-surface/95 backdrop-blur supports-[backdrop-filter]:bg-surface/60">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
         {/* Logo */}
-        <Link href={`/${locale}`} className="text-xl font-bold text-primary">
+        <Link href={`/${locale}/public`} className="text-xl font-bold text-primary">
           زاد
         </Link>
 
@@ -75,7 +75,7 @@ export default function Navbar() {
                 {t("dashboard")}
               </Link>
               <button
-                onClick={() => signOut({ callbackUrl: `/${locale}/login` })}
+                onClick={() => signOut({ callbackUrl: `/${locale}/auth/login` })}
                 className="rounded-lg border border-border px-3 py-1.5 text-sm hover:bg-muted"
               >
                 {tAuth("logout")}
@@ -84,13 +84,13 @@ export default function Navbar() {
           ) : (
             <div className="hidden items-center gap-2 md:flex">
               <Link
-                href={`/${locale}/login`}
+                href={`/${locale}/auth/login`}
                 className="rounded-lg border border-border px-3 py-1.5 text-sm font-medium hover:bg-muted"
               >
                 {tAuth("login")}
               </Link>
               <Link
-                href={`/${locale}/register`}
+                href={`/${locale}/auth/register`}
                 className="rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-white hover:bg-primary-dark"
               >
                 {tAuth("register")}
@@ -123,16 +123,16 @@ export default function Navbar() {
                 <Link href={getDashboardHref()} className="text-sm font-medium text-primary" onClick={() => setMenuOpen(false)}>
                   {t("dashboard")}
                 </Link>
-                <button onClick={() => signOut({ callbackUrl: `/${locale}/login` })} className="text-start text-sm text-muted-foreground">
+                <button onClick={() => signOut({ callbackUrl: `/${locale}/auth/login` })} className="text-start text-sm text-muted-foreground">
                   {tAuth("logout")}
                 </button>
               </>
             ) : (
               <>
-                <Link href={`/${locale}/login`} className="text-sm font-medium" onClick={() => setMenuOpen(false)}>
+                <Link href={`/${locale}/auth/login`} className="text-sm font-medium" onClick={() => setMenuOpen(false)}>
                   {tAuth("login")}
                 </Link>
-                <Link href={`/${locale}/register`} className="text-sm font-medium text-primary" onClick={() => setMenuOpen(false)}>
+                <Link href={`/${locale}/auth/register`} className="text-sm font-medium text-primary" onClick={() => setMenuOpen(false)}>
                   {tAuth("register")}
                 </Link>
               </>

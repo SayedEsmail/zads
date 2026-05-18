@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import api from "@/lib/api";
 import { extractError, initialSlice } from "./_convention";
-import type { TeacherSubject, LessonType } from "@/types";
+import type { TeacherSubject } from "@/types";
 
 interface AddSubjectPayload {
   subjectId: string;
@@ -34,7 +34,7 @@ export const useTeacherSubjectsStore = create<TeacherSubjectsStore>()(
       fetch: async () => {
         set({ isLoading: true, error: null });
         try {
-          const res = await api.get<{ data: TeacherSubject[] }>("/teachers/subjects");
+          const res = await api.get<{ data: TeacherSubject[] }>("/teachers/me/subjects");
           set({ data: res.data.data, isLoading: false });
         } catch (err) {
           set({ error: extractError(err), isLoading: false });
@@ -44,7 +44,7 @@ export const useTeacherSubjectsStore = create<TeacherSubjectsStore>()(
       addSubject: async (payload) => {
         set({ isLoading: true, error: null });
         try {
-          await api.post("/teachers/subjects", payload);
+          await api.post("/teachers/me/subjects", payload);
           await get().fetch();
         } catch (err) {
           set({ error: extractError(err), isLoading: false });
@@ -55,7 +55,7 @@ export const useTeacherSubjectsStore = create<TeacherSubjectsStore>()(
       updateSubject: async (id, payload) => {
         set({ isLoading: true, error: null });
         try {
-          await api.put(`/teachers/subjects/${id}`, payload);
+          await api.put(`/teachers/me/subjects/${id}`, payload);
           await get().fetch();
         } catch (err) {
           set({ error: extractError(err), isLoading: false });

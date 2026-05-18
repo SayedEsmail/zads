@@ -8,18 +8,18 @@ const intlMiddleware = createMiddleware(routing);
 // Routes that require authentication and a specific role
 const PROTECTED: Array<{ pattern: RegExp; role: string | string[] }> = [
   { pattern: /^\/[^/]+\/client(\/.*)?$/, role: "parent" },   // API enum: parent = client/learner
-  { pattern: /^\/[^/]+\/teacher(\/.*)?$/, role: "TEACHER" },
-  { pattern: /^\/[^/]+\/admin(\/.*)?$/, role: "ADMIN" },
+  { pattern: /^\/[^/]+\/teacher(\/.*)?$/, role: "teacher" },
+  { pattern: /^\/[^/]+\/admin(\/.*)?$/, role: "admin" },
 ];
 
 // Auth routes: redirect to role home if already authenticated
-const AUTH_PATHS = /^\/[^/]+\/(login|register|forgot-password)(\/.*)?$/;
+const AUTH_PATHS = /^\/[^/]+\/auth\/(login|register|forgot-password)(\/.*)?$/;
 
 function getRoleHome(locale: string, userType: string): string {
-  if (userType === "parent") return `/${locale}/client`;
-  if (userType === "TEACHER") return `/${locale}/teacher`;
-  if (userType === "ADMIN") return `/${locale}/admin`;
-  return `/${locale}`;
+  if (userType === "parent") return `/${locale}/client/client`;
+  if (userType === "teacher") return `/${locale}/teacher/teacher`;
+  if (userType === "admin") return `/${locale}/admin/admin`;
+  return `/${locale}/public`;
 }
 
 export async function proxy(request: NextRequest) {
@@ -37,6 +37,10 @@ export async function proxy(request: NextRequest) {
   // Extract locale from path (first segment)
   const locale = pathname.split("/")[1] || routing.defaultLocale;
 
+  if (routing.locales.includes(locale as "en" | "ar") && pathname === `/${locale}`) {
+    return NextResponse.redirect(new URL(`/${locale}/public`, request.url));
+  }
+
   // Decode JWT from NextAuth session cookie (Edge-compatible, no CASL)
   const token = await getToken({
     req: request,
@@ -53,7 +57,7 @@ export async function proxy(request: NextRequest) {
   for (const { pattern, role } of PROTECTED) {
     if (pattern.test(pathname)) {
       if (!token) {
-        const loginUrl = new URL(`/${locale}/login`, request.url);
+        const loginUrl = new URL(`/${locale}/auth/login`, request.url);
         loginUrl.searchParams.set("callbackUrl", pathname);
         return NextResponse.redirect(loginUrl);
       }
@@ -69,7 +73,7 @@ export async function proxy(request: NextRequest) {
 
   // Legacy /parent/* → /client/* redirect
   if (/^\/[^/]+\/parent(\/.*)?$/.test(pathname)) {
-    const newPath = pathname.replace(/\/parent/, "/client");
+    const newPath = pathname.replace(/\/parent/, "/client/client");
     return NextResponse.redirect(new URL(newPath, request.url), 301);
   }
 

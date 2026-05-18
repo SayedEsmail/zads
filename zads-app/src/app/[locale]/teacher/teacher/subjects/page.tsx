@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Plus, Trash2, Edit2 } from "lucide-react";
+import { Plus, Edit2 } from "lucide-react";
 import { useTeacherSubjectsStore } from "@/stores/teacher-subjects";
 import { useSearchStore } from "@/stores/search";
 import { PageSkeleton } from "@/components/shared/PageSkeleton";
@@ -11,6 +11,7 @@ import { formatPrice } from "@/lib/utils";
 
 export default function TeacherSubjectsPage() {
   const t = useTranslations("teacher");
+  const tCommon = useTranslations("common");
   const subjectStore = useTeacherSubjectsStore();
   const { subjects, stages, fetchSubjects, fetchStages } = useSearchStore();
   const [showDialog, setShowDialog] = useState(false);
@@ -134,10 +135,10 @@ export default function TeacherSubjectsPage() {
             </div>
             <div className="mt-5 flex gap-3">
               <button onClick={handleSave} className="flex-1 rounded-lg bg-primary py-2.5 text-sm font-medium text-white hover:bg-primary-dark">
-                {useTranslations("common")("save")}
+                {tCommon("save")}
               </button>
               <button onClick={() => setShowDialog(false)} className="flex-1 rounded-lg border border-border py-2.5 text-sm hover:bg-muted">
-                {useTranslations("common")("cancel")}
+                {tCommon("cancel")}
               </button>
             </div>
           </div>

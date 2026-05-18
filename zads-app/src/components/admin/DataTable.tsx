@@ -12,11 +12,10 @@ import {
 } from "@tanstack/react-table";
 import { useState } from "react";
 import { ChevronUp, ChevronDown, ChevronsUpDown, ChevronLeft, ChevronRight } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 interface DataTableProps<TData> {
   data: TData[];
-  columns: ColumnDef<TData, any>[];
+  columns: ColumnDef<TData, unknown>[];
   searchPlaceholder?: string;
   isLoading?: boolean;
 }

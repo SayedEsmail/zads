@@ -2,7 +2,7 @@ import axios from "axios";
 import { getSession, signOut } from "next-auth/react";
 
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3001/api",
+  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000/api",
   headers: {
     "Content-Type": "application/json",
   },
@@ -23,7 +23,7 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     if (error.response?.status === 401) {
-      await signOut({ redirect: true, callbackUrl: "/login" });
+      await signOut({ redirect: true, callbackUrl: "/en/auth/login" });
     }
     return Promise.reject(error);
   }
