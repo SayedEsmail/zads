@@ -16,6 +16,13 @@ const schema = z.object({
 });
 type FormValues = z.infer<typeof schema>;
 
+function getRoleHome(locale: string, userType: string | null): string {
+  if (userType === "parent") return `/${locale}/client/client`;
+  if (userType === "teacher") return `/${locale}/teacher/teacher`;
+  if (userType === "admin") return `/${locale}/admin/admin`;
+  return `/${locale}/public`;
+}
+
 export default function LoginPage() {
   const t = useTranslations("auth");
   const locale = useLocale();
@@ -29,9 +36,11 @@ export default function LoginPage() {
   } = useForm<FormValues>({ resolver: zodResolver(schema) });
 
   const onSubmit = async (data: FormValues) => {
-    await login(data.phone, data.password);
-    // Middleware handles redirect after session is set
-    router.refresh();
+    const userType = await login(data.phone, data.password);
+    if (userType) {
+      router.replace(getRoleHome(locale, userType));
+      router.refresh();
+    }
   };
 
   return (

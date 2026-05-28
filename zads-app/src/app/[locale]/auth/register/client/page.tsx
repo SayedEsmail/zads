@@ -53,6 +53,7 @@ export default function RegisterClientPage() {
       password: data.password,
       clientAccountKind: data.clientAccountKind,
     });
+    router.replace(`/${locale}/client/client`);
     router.refresh();
   };
 

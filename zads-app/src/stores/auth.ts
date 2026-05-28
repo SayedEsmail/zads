@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import { signIn, signOut } from "next-auth/react";
+import { getSession, signIn, signOut } from "next-auth/react";
 import api from "@/lib/api";
 import { extractError, initialSlice } from "./_convention";
 import type {
@@ -17,7 +17,7 @@ interface AuthState {
   error: string | null;
 
   // Actions
-  login: (phone: string, password: string) => Promise<void>;
+  login: (phone: string, password: string) => Promise<string | null>;
   registerClient: (payload: RegisterClientPayload) => Promise<void>;
   registerTeacher: (payload: RegisterTeacherPayload) => Promise<void>;
   logout: () => Promise<void>;
@@ -44,11 +44,15 @@ export const useAuthStore = create<AuthState>()(
           });
           if (result?.error) {
             set({ error: "Invalid phone or password", isLoading: false });
+            return null;
           } else {
+            const session = await getSession();
             set({ isLoading: false });
+            return session?.userType ?? null;
           }
         } catch (err) {
           set({ error: extractError(err), isLoading: false });
+          return null;
         }
       },
 
