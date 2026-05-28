@@ -45,6 +45,7 @@ export default function RegisterTeacherPage() {
       email: data.email || undefined,
       bio: data.bio || undefined,
     });
+    router.replace(`/${locale}/teacher/teacher`);
     router.refresh();
   };
 
