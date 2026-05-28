@@ -8,60 +8,49 @@ For the full product story and how it maps to code, read **[DOCUMENTATION.md](./
 
 ---
 
-## Development strategy
+## Development Strategy
 
-> **Phase 1 (current):** Web-first for faster adoption.  
-> The **mobile app** is not maintained in this repository.
+The codebase is structured as a unified monorepo containing the active frontend application and the backend API.
 
 ---
 
 ## Projects
 
-| Project | Description | Tech stack | Status |
+| Project | Description | Tech Stack | Status |
 |---------|-------------|------------|--------|
-| [zads_web](./zads_web/) | Web app (clients + teachers) | Nuxt 3, Vuetify 3, Pinia | Active |
+| [zads-app](./zads-app/) | Unified Web App (Clients, Teachers, and Admin) | Next.js 16 (App Router), Tailwind CSS 4, shadcn/ui, Zustand, next-intl | Active |
 | [zads-api](./zads-api/) | Backend API | Node.js, Express, Prisma, PostgreSQL | Active |
-| [zads-dashboard](./zads-dashboard/) | Admin dashboard | Vue 3, Vuetify 3, Vite | Active |
+| [legacy/](./legacy/) | Legacy Vue 3 / Nuxt 3 project components | Vue 3, Nuxt 3, Vuetify 3 | Deprecated |
 
 ---
 
-## Quick start
+## Quick Start
 
 ### 1. Start the API
 
 ```bash
 cd zads-api
-npm install
+pnpm install
 cp .env.example .env
 # Edit .env with your database credentials
 npx prisma migrate dev
 npx prisma db seed
-npm run dev
+pnpm run dev
 ```
 
-API: `http://localhost:3000`
+API will be available at: `http://localhost:3000` (base: `http://localhost:3000/api`)
 
-### 2. Start the web app (primary)
+### 2. Start the Web App (Unified Portal)
 
 ```bash
-cd zads_web
+cd zads-app
 pnpm install
-cp .env.example .env
-pnpm dev
+cp .env.local.example .env.local
+# Edit .env.local with NEXTAUTH_SECRET and API_BASE_URL if needed
+pnpm run dev
 ```
 
-Web: see `zads_web/nuxt.config.ts` for `devServer.port` (often `4000`; old docs may say `3001`).
-
-### 3. Start the dashboard
-
-```bash
-cd zads-dashboard
-pnpm install
-cp .env.example .env
-pnpm dev
-```
-
-Dashboard: `http://localhost:5173`
+Web App will be available at: `http://localhost:3001` (redirects automatically to `http://localhost:3001/ar` or `/en`)
 
 ---
 
@@ -72,34 +61,37 @@ Dashboard: `http://localhost:5173`
 - [CODEBASE_OVERVIEW.md](./CODEBASE_OVERVIEW.md) — Repo / architecture map
 - [FEATURES_OVERVIEW.md](./FEATURES_OVERVIEW.md) — Features vs routes, stores, API
 
-**Planned work:** a single **Next.js + TypeScript** app to replace `zads_web` + `zads-dashboard` is described in the Cursor plan `react_migration_tasks_add84281.plan.md` (under your `.cursor/plans` folder, if present).
-
 ---
 
-## Default credentials (after seed)
+## Default Credentials (After Seed)
 
-- **Admin phone:** 01000000000  
-- **Admin password:** admin123  
+- **Admin Phone:** `01000000000`  
+  **Password:** `admin123`  
+
+- **Teacher Phone:** `01111111111`  
+  **Password:** `teacher123`  
+
+- **Parent Phone:** `01222222222`  
+  **Password:** `parent123`  
 
 ---
 
 ## Architecture
 
 ```
-┌─────────────────┐     ┌─────────────────┐
-│   Web (Nuxt)     │     │  Dashboard (Vue) │
-│   ⭐ active       │     │  ⭐ active        │
-└────────┬────────┘     └────────┬────────┘
-         │                      │
-         └──────────┬───────────┘
-                    ▼
-            ┌───────────────┐
-            │  REST (API)  │
-            └───────┬──────┘
-                    ▼
-            ┌───────────────┐
-            │  PostgreSQL  │
-            └──────────────┘
+┌─────────────────────────────────┐
+│        Web App (Next.js)        │
+│    (Learner, Teacher, Admin)    │
+└────────────────┬────────────────┘
+                 │
+                 ▼
+        ┌─────────────────┐
+        │   REST (API)    │
+        └────────┬────────┘
+                 ▼
+        ┌─────────────────┐
+        │   PostgreSQL    │
+        └─────────────────┘
 ```
 
 ---
