@@ -1,9 +1,9 @@
 # Zads Deployment Guide
 
-This guide covers the fastest free/staging-friendly deployment path for the current monorepo:
+This guide covers the fastest no-card-friendly deployment path for the current monorepo:
 
 - Frontend: `zads-app` on Vercel
-- API: `zads-api` on Render
+- API: `zads-api` on Vercel as a separate project
 - Database: Neon Postgres
 - Domain: `zads.app` from Name.com
 
@@ -12,12 +12,11 @@ Quick links:
 | Tool | Link |
 | --- | --- |
 | Vercel Dashboard | https://vercel.com/dashboard |
-| Render Dashboard | https://dashboard.render.com/ |
 | Neon Console | https://console.neon.tech/ |
 | Name.com Account | https://www.name.com/account |
 | GitHub | https://github.com/ |
 
-> Important: this setup is good for staging, demos, and early testing. For real production traffic, upgrade the API to an always-on paid instance and review Vercel/Render plan terms.
+> Important: this setup is good for staging, demos, and early testing. Vercel serverless functions are not a permanent filesystem, so production uploads should move to Cloudinary, Firebase Storage, S3, or similar.
 
 ---
 
@@ -53,27 +52,59 @@ DATABASE_URL="postgresql://...neon.tech/...?..."
 DIRECT_URL="postgresql://...neon.tech/...?..."
 ```
 
+Security note: if a Neon connection string was ever shared in chat, logs, screenshots, or commits, rotate/reset the database password in Neon and update all environments with the new URLs.
+
 ---
 
-## 3. Deploy API On Render
+## 3. Apply Database Migrations
 
-Open: https://dashboard.render.com/
+Run migrations from your local machine or a trusted CI environment before deploying the API:
 
-Create a Render Web Service connected to the GitHub repo.
+```bash
+cd zads-api
+pnpm install
+pnpm run db:generate
+pnpm run db:migrate:prod
+pnpm run db:seed
+```
 
-### Render Settings
+Verify migration status:
+
+```bash
+npx prisma migrate status
+```
+
+Expected result:
+
+```text
+Database schema is up to date!
+```
+
+---
+
+## 4. Deploy API On Vercel
+
+Open: https://vercel.com/dashboard
+
+Create a new Vercel project from the GitHub repository.
+
+### API Vercel Settings
 
 | Field | Value |
 | --- | --- |
+| Project name | `zads-api` |
+| Framework Preset | Other |
 | Root Directory | `zads-api` |
-| Runtime | Node |
-| Build Command | `pnpm install && pnpm run db:generate` |
-| Start Command | `pnpm start` |
+| Install Command | `pnpm install` |
+| Build Command | `pnpm run db:generate` |
+| Output Directory | Leave empty |
 | Branch | `main` |
+
+The API uses [zads-api/vercel.json](./zads-api/vercel.json) to route all requests to `src/app.js` through `@vercel/node`.
 
 ### API Environment Variables
 
-Set these in Render:
+Set these in the Vercel API project:
 
 ```env
 DATABASE_URL=your_neon_pooled_url
@@ -81,28 +112,31 @@ DIRECT_URL=your_neon_direct_url
 JWT_SECRET=generate_a_long_random_secret
 JWT_EXPIRES_IN=7d
 NODE_ENV=production
-PORT=10000
 CORS_ORIGIN=https://zads.app
 ```
 
-If using Firebase Admin locally, do not commit the service account JSON. For hosted production, prefer provider-managed secrets or environment-based credentials.
+Do not set `PORT` on Vercel. Vercel provides the serverless runtime and does not need the app to bind to a port.
 
-### Run Migrations And Seed
+### API Domain
 
-After the first successful Render deploy, open the Render shell or run equivalent deployment commands and execute:
+In the API Vercel project, add this custom domain:
 
-```bash
-pnpm run db:migrate:prod
-pnpm run db:seed
+```text
+api.zads.app
 ```
 
-Verify:
+Vercel will show the exact DNS records required. Add those records in Name.com DNS.
+
+### API Verification
+
+After deployment and DNS propagation, verify:
 
 ```text
 https://api.zads.app/health
+https://api.zads.app/api/subjects
 ```
 
-Expected response shape:
+Expected health response shape:
 
 ```json
 {
@@ -113,25 +147,26 @@ Expected response shape:
 
 ---
 
-## 4. Deploy Frontend On Vercel
+## 5. Deploy Frontend On Vercel
 
 Open: https://vercel.com/dashboard
 
-Import the same GitHub repo into Vercel.
+Create a second Vercel project from the same GitHub repository.
 
-### Vercel Settings
+### Frontend Vercel Settings
 
 | Field | Value |
 | --- | --- |
+| Project name | `zads-app` |
 | Framework Preset | Next.js |
 | Root Directory | `zads-app` |
-| Build Command | `pnpm run build` |
 | Install Command | `pnpm install` |
+| Build Command | `pnpm run build` |
 | Branch | `main` |
 
 ### Frontend Environment Variables
 
-Set these in Vercel:
+Set these in the Vercel frontend project:
 
 ```env
 NEXT_PUBLIC_API_BASE_URL=https://api.zads.app/api
@@ -145,15 +180,13 @@ Use the same random value for `NEXTAUTH_SECRET` and `AUTH_SECRET` unless there i
 
 ---
 
-## 5. Connect The Domain From Name.com
+## 6. Connect The Domain From Name.com
 
 Open: https://www.name.com/account
 
-### Vercel Domains
+### Frontend Domains
 
-Open: https://vercel.com/dashboard
-
-In Vercel, add:
+In the frontend Vercel project, add:
 
 ```text
 zads.app
@@ -162,33 +195,31 @@ www.zads.app
 
 Vercel will show the exact DNS records required. Add those records in Name.com DNS.
 
-### Render API Domain
+### API Domain
 
-Open: https://dashboard.render.com/
-
-In Render, add custom domain:
+In the API Vercel project, add:
 
 ```text
 api.zads.app
 ```
 
-Render will show a CNAME target. Add it in Name.com DNS.
+Vercel will show the exact DNS records required. Add those records in Name.com DNS.
 
 ### DNS Checklist
 
-In Name.com, configure records according to the exact provider instructions:
+In Name.com, configure records according to the exact Vercel instructions:
 
 | Host | Provider | Purpose |
 | --- | --- | --- |
-| `@` | Vercel | Apex web app |
-| `www` | Vercel | WWW web app |
-| `api` | Render | Express API |
+| `@` | Vercel frontend project | Apex web app |
+| `www` | Vercel frontend project | WWW web app |
+| `api` | Vercel API project | Express API |
 
 DNS can take a few minutes to several hours to fully propagate.
 
 ---
 
-## 6. Production Checks
+## 7. Production Checks
 
 After DNS and deploys are ready, verify:
 
@@ -196,6 +227,7 @@ After DNS and deploys are ready, verify:
 https://zads.app
 https://www.zads.app
 https://api.zads.app/health
+https://api.zads.app/api/subjects
 ```
 
 Then test:
@@ -209,27 +241,28 @@ Then test:
 
 ---
 
-## 7. Known Free-Tier Limits
+## 8. Known Free-Tier Limits
 
 - Vercel Hobby is intended for personal/non-commercial usage.
-- Render free web services can spin down after inactivity, causing cold starts.
-- Render free local filesystem is not a reliable place for permanent uploads.
+- Vercel serverless functions are request/response functions, not always-on servers.
+- Vercel serverless local filesystem is not a reliable place for permanent uploads.
 - Neon Free is excellent for staging and light usage, but monitor compute/storage limits.
 
 For production, consider:
 
-1. Upgrade Render API to an always-on paid instance.
-2. Use Cloudinary, Firebase Storage, S3, or similar for uploads.
-3. Upgrade Vercel if the project is commercial or exceeds Hobby limits.
-4. Keep Neon usage monitored and upgrade when traffic becomes consistent.
+1. Use Cloudinary, Firebase Storage, S3, or similar for uploads.
+2. Upgrade Vercel if the project is commercial or exceeds Hobby limits.
+3. Keep Neon usage monitored and upgrade when traffic becomes consistent.
+4. Consider an always-on API host later if serverless cold starts or timeouts become a problem.
 
 ---
 
-## 8. Security Checklist
+## 9. Security Checklist
 
 Before production:
 
 - Rotate/revoke any Firebase service account key that was ever committed to Git history.
+- Rotate/reset the Neon password if a connection string was ever exposed.
 - Keep `zads-api/serviceAccountKey.json` untracked and ignored.
 - Use strong unique values for `JWT_SECRET`, `NEXTAUTH_SECRET`, and `AUTH_SECRET`.
 - Do not expose `.env` files or real credentials in Git.
@@ -238,13 +271,14 @@ Before production:
 
 ---
 
-## 9. Useful Local Verification Commands
+## 10. Useful Local Verification Commands
 
 From `zads-api`:
 
 ```bash
 pnpm run db:generate
 npx prisma validate
+npx prisma migrate status
 pnpm run db:migrate:prod
 ```
 
