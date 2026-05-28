@@ -78,10 +78,7 @@ teacher
 
 See root docs:
 
-- `../TECH_PLAN.md` (unified technical plan)
-- `../DOCUMENTATION.md` (unified product/platform docs)
-- `../CODEBASE_OVERVIEW.md`
-- `../FEATURES_OVERVIEW.md`
+- `../DOCUMENTATION.md` (unified technical and product handbook)
 
 ### Quick Reference
 
