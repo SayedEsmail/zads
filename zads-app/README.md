@@ -45,11 +45,11 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:3000 → redirects to /en
+Open http://localhost:3001 → redirects to /en
 
 ## API
 
-Points to `zads-api` at `NEXT_PUBLIC_API_BASE_URL` (default: `http://localhost:3001/api`).
+Points to `zads-api` at `NEXT_PUBLIC_API_BASE_URL` (default: `http://localhost:3000/api`).
 Auth flow: NextAuth credentials provider calls `/api/auth/login`, wraps JWT in session cookie.
 
 ## P0-13 RTL Test

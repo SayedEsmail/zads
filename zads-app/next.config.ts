@@ -1,9 +1,13 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
+import { fileURLToPath } from "node:url";
 
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const nextConfig: NextConfig = {
+  turbopack: {
+    root: fileURLToPath(new URL("../", import.meta.url)),
+  },
   // Allow images from API server
   images: {
     remotePatterns: [

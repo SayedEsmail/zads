@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Sans_Arabic } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -7,13 +6,6 @@ import { routing } from "@/i18n/routing";
 import { SessionProvider } from "next-auth/react";
 import { Toaster } from "@/components/ui/sonner";
 import "../globals.css";
-
-const ibmPlexArabic = IBM_Plex_Sans_Arabic({
-  subsets: ["arabic", "latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  variable: "--font-ibm-plex-arabic",
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: "Zad — Local Learning Platform",
@@ -48,7 +40,12 @@ export default async function LocaleLayout({
   const dir = DIR_MAP[locale as Locale] ?? "ltr";
 
   return (
-    <html lang={locale} dir={dir} className={ibmPlexArabic.variable}>
+    <html lang={locale} dir={dir}>
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+      </head>
       <body className="min-h-screen flex flex-col bg-background text-foreground antialiased">
         <SessionProvider>
           <NextIntlClientProvider messages={messages}>
