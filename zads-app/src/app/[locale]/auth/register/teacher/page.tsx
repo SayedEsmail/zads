@@ -101,7 +101,7 @@ export default function RegisterTeacherPage() {
 
       <p className="mt-6 text-center text-sm text-muted-foreground">
         {t("haveAccount")}{" "}
-        <Link href={`/${locale}/login`} className="font-medium text-primary hover:underline">
+        <Link href={`/${locale}/auth/login`} className="font-medium text-primary hover:underline">
           {t("signInNow")}
         </Link>
       </p>

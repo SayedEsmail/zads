@@ -56,10 +56,7 @@ Web App will be available at: `http://localhost:3001` (redirects automatically t
 
 ## Documentation
 
-- [DOCUMENTATION.md](./DOCUMENTATION.md) — Product + platform (canonical)
-- [TECH_PLAN.md](./TECH_PLAN.md) — Unified technical plan
-- [CODEBASE_OVERVIEW.md](./CODEBASE_OVERVIEW.md) — Repo / architecture map
-- [FEATURES_OVERVIEW.md](./FEATURES_OVERVIEW.md) — Features vs routes, stores, API
+- [DOCUMENTATION.md](./DOCUMENTATION.md) — Unified handbook containing product overview, technical design, architecture map, and feature routes.
 
 ---
 

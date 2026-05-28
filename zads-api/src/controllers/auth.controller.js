@@ -17,8 +17,7 @@ const registerTeacher = async (req, res, next) => {
             bio,
             experienceYears,
             qualification,
-            latitude,
-            longitude,
+            areaId,
             lessonTypes
         } = req.body;
 
@@ -52,8 +51,7 @@ const registerTeacher = async (req, res, next) => {
                     bio,
                     experienceYears,
                     qualification,
-                    latitude,
-                    longitude,
+                    areaId,
                     lessonTypes: lessonTypes || ['at_teacher', 'at_student']
                 }
             });
@@ -78,8 +76,7 @@ const registerTeacher = async (req, res, next) => {
             },
             teacher: {
                 id: result.teacher.id,
-                latitude: result.teacher.latitude,
-                longitude: result.teacher.longitude
+                areaId: result.teacher.areaId
             },
             token
         }, 'Teacher registered successfully');
@@ -94,7 +91,7 @@ const registerTeacher = async (req, res, next) => {
  */
 const registerParent = async (req, res, next) => {
     try {
-        const { phone, password, name, email, latitude, longitude, clientAccountKind } = req.body;
+        const { phone, password, name, email, areaId, clientAccountKind } = req.body;
 
         // Check if phone already exists
         const existingUser = await prisma.user.findUnique({
@@ -123,8 +120,7 @@ const registerParent = async (req, res, next) => {
             const parent = await tx.parent.create({
                 data: {
                     userId: user.id,
-                    latitude,
-                    longitude,
+                    areaId,
                     ...(clientAccountKind && { clientAccountKind })
                 }
             });
@@ -148,7 +144,9 @@ const registerParent = async (req, res, next) => {
                 userType: result.user.userType
             },
             parent: {
-                id: result.parent.id
+                id: result.parent.id,
+                areaId: result.parent.areaId,
+                clientAccountKind: result.parent.clientAccountKind
             },
             token
         }, 'Parent registered successfully');
