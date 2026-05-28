@@ -22,8 +22,7 @@ const createRequest = async (req, res, next) => {
             parentChildId,
             budgetMin,
             budgetMax,
-            latitude,
-            longitude
+            areaId
         } = req.body;
 
         // Set expiry to 30 days from now
@@ -42,8 +41,7 @@ const createRequest = async (req, res, next) => {
                 parentChildId: parentChildId ?? null,
                 budgetMin,
                 budgetMax,
-                latitude,
-                longitude,
+                areaId,
                 expiresAt
             },
             include: {
@@ -64,7 +62,7 @@ const createRequest = async (req, res, next) => {
  */
 const getTutorRequests = async (req, res, next) => {
     try {
-        const { subjectId, stageId } = req.query;
+        const { subjectId, stageId, areaId } = req.query;
 
         const where = {
             status: 'active',
@@ -73,12 +71,11 @@ const getTutorRequests = async (req, res, next) => {
 
         if (subjectId) where.subjectId = subjectId;
         if (stageId) where.stageId = stageId;
+        if (areaId) where.areaId = areaId;
         if (req.query.studyMode) where.studyMode = req.query.studyMode;
         if (req.query.requestTarget) where.requestTarget = req.query.requestTarget;
 
-        const { latitude, longitude, radiusKm = 20 } = req.query;
-
-        let requests = await prisma.tutorRequest.findMany({
+        const requests = await prisma.tutorRequest.findMany({
             where,
             include: {
                 parent: {
@@ -91,23 +88,6 @@ const getTutorRequests = async (req, res, next) => {
             },
             orderBy: { createdAt: 'desc' }
         });
-
-        // Filter by location if provided
-        if (latitude && longitude) {
-            const lat = parseFloat(latitude);
-            const lng = parseFloat(longitude);
-            const radius = parseFloat(radiusKm);
-
-            requests = requests.filter(req => {
-                if (!req.latitude || !req.longitude) return true;
-                const distance = calculateDistance(
-                    lat, lng,
-                    parseFloat(req.latitude),
-                    parseFloat(req.longitude)
-                );
-                return distance <= radius;
-            });
-        }
 
         return response.success(res, requests);
 

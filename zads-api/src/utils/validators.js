@@ -11,8 +11,7 @@ const registerTeacherSchema = z.object({
     bio: z.string().optional(),
     experienceYears: z.number().int().min(0).max(50).optional(),
     qualification: z.string().optional(),
-    latitude: z.number().min(-90).max(90),
-    longitude: z.number().min(-180).max(180),
+    areaId: z.string().optional().nullable(),
     lessonTypes: z.array(z.enum(['at_teacher', 'at_student', 'group'])).optional()
 });
 
@@ -21,8 +20,8 @@ const registerParentSchema = z.object({
     password: z.string().min(6, 'Password must be at least 6 characters'),
     name: z.string().min(2, 'Name must be at least 2 characters'),
     email: z.string().email().optional().nullable(),
-    latitude: z.number().min(-90).max(90).optional(),
-    longitude: z.number().min(-180).max(180).optional()
+    areaId: z.string().optional().nullable(),
+    clientAccountKind: z.enum(['student', 'guardian']).optional()
 });
 
 const loginSchema = z.object({
