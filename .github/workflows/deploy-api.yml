@@ -1,4 +1,4 @@
-name: Deploy Backend API (zads-api)
+name: zads-api
 
 on:
   push:
@@ -8,6 +8,9 @@ on:
       - 'zads-api/**'
       - '.github/workflows/deploy-api.yml'
   workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
 
 jobs:
   build-and-test:
@@ -49,20 +52,19 @@ jobs:
 
       - name: Lint Checks
         run: pnpm --filter zads-api run lint
-        continue-on-error: true # Suppress non-blocking styling errors to ensure build succeeds
+        continue-on-error: true # Suppress non-blocking styling warnings
 
   deploy:
     name: Deploy API Server
     needs: build-and-test
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    # Clean check: only run the deploy step if the user has configured SSH host secrets in their repo settings
+    if: github.ref == 'refs/heads/main' && secrets.SERVER_HOST != ''
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # Standard VPS deployment via SSH. Installs updates, runs Prisma migrations, and reloads PM2 process.
-      # You can replace this section with your Docker registry build and push action as required.
       - name: Deploy to VPS Server via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
