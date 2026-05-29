@@ -27,7 +27,11 @@ const getGovernorates = async (req, res, next) => {
  */
 const getCitiesByGovernorate = async (req, res, next) => {
     try {
-        const { governorateId } = req.params;
+        const governorateId = req.params.governorateId || req.query.governorateId;
+
+        if (!governorateId) {
+            return response.error(res, 'Governorate ID is required', 400);
+        }
 
         const cities = await prisma.city.findMany({
             where: {
@@ -53,7 +57,11 @@ const getCitiesByGovernorate = async (req, res, next) => {
  */
 const getAreasByCity = async (req, res, next) => {
     try {
-        const { cityId } = req.params;
+        const cityId = req.params.cityId || req.query.cityId;
+
+        if (!cityId) {
+            return response.error(res, 'City ID is required', 400);
+        }
 
         const areas = await prisma.area.findMany({
             where: {
