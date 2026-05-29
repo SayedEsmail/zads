@@ -44,7 +44,7 @@ export async function proxy(request: NextRequest) {
   // Decode JWT from NextAuth session cookie (Edge-compatible, no CASL)
   const token = await getToken({
     req: request,
-    secret: process.env.NEXTAUTH_SECRET,
+    secret: process.env.AUTH_SECRET,
   });
 
   // If on an auth page and already logged in → redirect to role home
