@@ -34,6 +34,7 @@ declare module "next-auth/jwt" {
 const API_BASE = process.env.API_BASE_URL ?? "http://localhost:3000";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  trustHost: true,
   providers: [
     CredentialsProvider({
       name: "credentials",
