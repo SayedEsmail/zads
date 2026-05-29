@@ -59,14 +59,14 @@ jobs:
     name: Deploy to Production
     needs: build-and-test
     runs-on: ubuntu-latest
-    # Clean check: only run the deploy step if the user has configured Vercel secrets in their repo settings
-    if: github.ref == 'refs/heads/main' && secrets.VERCEL_TOKEN != ''
+    if: github.ref == 'refs/heads/main'
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
       - name: Deploy to Vercel
+        if: secrets.VERCEL_TOKEN != ''
         uses: amondnet/vercel-action@v25
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
