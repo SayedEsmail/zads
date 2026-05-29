@@ -17,7 +17,7 @@ export default function DependentsPage() {
   const { subjects, stages, fetchSubjects, fetchStages } = useSearchStore();
   const [showDialog, setShowDialog] = useState(false);
   const [editing, setEditing] = useState<Dependent | null>(null);
-  const [form, setForm] = useState({ name: "", stageId: "", subjectIds: [] as string[] });
+  const [form, setForm] = useState({ name: "", stageId: "", subjectIds: [] as string[], schoolType: "" });
 
   useEffect(() => {
     fetch();
@@ -25,8 +25,8 @@ export default function DependentsPage() {
     fetchStages();
   }, []);
 
-  const openAdd = () => { setEditing(null); setForm({ name: "", stageId: "", subjectIds: [] }); setShowDialog(true); };
-  const openEdit = (d: Dependent) => { setEditing(d); setForm({ name: d.name, stageId: d.stageId, subjectIds: d.subjects?.map(s => s.subject.id) ?? [] }); setShowDialog(true); };
+  const openAdd = () => { setEditing(null); setForm({ name: "", stageId: "", subjectIds: [], schoolType: "" }); setShowDialog(true); };
+  const openEdit = (d: Dependent) => { setEditing(d); setForm({ name: d.name, stageId: d.stageId, subjectIds: d.subjects?.map(s => s.subject.id) ?? [], schoolType: d.schoolType ?? "" }); setShowDialog(true); };
 
   const handleSave = async () => {
     if (editing) {
@@ -71,7 +71,9 @@ export default function DependentsPage() {
               <div className="flex items-start justify-between">
                 <div>
                   <p className="font-semibold">{dep.name}</p>
-                  <p className="text-sm text-muted-foreground">{dep.stage?.nameAr}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {dep.stage?.nameAr} {dep.schoolType && `• ${t(dep.schoolType)}`}
+                  </p>
                   <div className="mt-2 flex flex-wrap gap-1.5">
                     {dep.subjects?.map(({ subject }) => (
                       <span key={subject.id} className="rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">
@@ -111,7 +113,9 @@ export default function DependentsPage() {
                 onValueChange={(val) => setForm((f) => ({ ...f, stageId: val }))}
               >
                 <SelectTrigger className="w-full rounded-lg border border-slate-200 px-3 py-5 text-sm focus:ring-2 focus:ring-primary/20 h-auto bg-white">
-                  <SelectValue placeholder={t("stage")} />
+                  <SelectValue placeholder={t("stage")}>
+                    {stages.find((s) => s.id === form.stageId)?.nameAr || t("stage")}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {stages.map((s) => (
@@ -119,6 +123,22 @@ export default function DependentsPage() {
                       {s.nameAr}
                     </SelectItem>
                   ))}
+                </SelectContent>
+              </Select>
+              <Select 
+                value={form.schoolType} 
+                onValueChange={(val) => setForm((f) => ({ ...f, schoolType: val }))}
+              >
+                <SelectTrigger className="w-full rounded-lg border border-slate-200 px-3 py-5 text-sm focus:ring-2 focus:ring-primary/20 h-auto bg-white">
+                  <SelectValue placeholder={t("schoolType")}>
+                    {form.schoolType ? t(form.schoolType) : t("schoolType")}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="governmental">{t("governmental")}</SelectItem>
+                  <SelectItem value="experimental">{t("experimental")}</SelectItem>
+                  <SelectItem value="private">{t("private")}</SelectItem>
+                  <SelectItem value="international">{t("international")}</SelectItem>
                 </SelectContent>
               </Select>
               <div>

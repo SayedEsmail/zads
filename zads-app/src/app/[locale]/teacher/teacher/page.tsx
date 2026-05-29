@@ -5,7 +5,6 @@ import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
 import { Search, FileText } from "lucide-react";
 import { useTeacherStore } from "@/stores/teacher";
-import { useTutorRequestsStore } from "@/stores/tutor-requests";
 import { useContactRequestsStore } from "@/stores/contact-requests";
 import { PageSkeleton } from "@/components/shared/PageSkeleton";
 import { ErrorBanner } from "@/components/shared/ErrorBanner";
@@ -16,13 +15,11 @@ export default function TeacherDashboardPage() {
   const tCommon = useTranslations("common");
   const teacherStore = useTeacherStore();
   const contactStore = useContactRequestsStore();
-  const tutorStore = useTutorRequestsStore();
 
   useEffect(() => {
     teacherStore.fetch();
     teacherStore.fetchStats();
     contactStore.fetchIncoming();
-    tutorStore.fetch();
   }, []);
 
   if (teacherStore.isLoading && !teacherStore.data) return <PageSkeleton />;

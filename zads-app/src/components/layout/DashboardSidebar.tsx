@@ -24,7 +24,6 @@ function useNavItems(role: Role, locale: string, t: Translator) {
       { href: `${base}/requests`, label: t("requests"), icon: FileText },
       { href: `${base}/favorites`, label: t("favorites"), icon: Heart },
       { href: `${base}/profile`, label: t("profile"), icon: User },
-      { href: `${base}/settings`, label: t("settings"), icon: Settings },
     ];
   }
   if (role === "teacher") {
@@ -35,7 +34,6 @@ function useNavItems(role: Role, locale: string, t: Translator) {
       { href: `${base}/requests`, label: t("requests"), icon: FileText },
       { href: `${base}/subjects`, label: t("subjects"), icon: BookOpen },
       { href: `${base}/profile`, label: t("profile"), icon: User },
-      { href: `${base}/settings`, label: t("settings"), icon: Settings },
     ];
   }
   // admin

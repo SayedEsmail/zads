@@ -5,16 +5,27 @@ const { locationsData } = require('./locations-data');
 const prisma = new PrismaClient();
 
 async function seedLocations() {
-    console.log('📍 Seeding locations...');
+    console.log('📍 Cleaning up existing location data...');
+    // Safe disconnect to avoid foreign key restrict errors
+    await prisma.tutorRequest.updateMany({ data: { areaId: null } });
+    await prisma.teacher.updateMany({ data: { areaId: null } });
+    await prisma.parent.updateMany({ data: { areaId: null } });
+
+    // Delete existing areas, cities, and governorates
+    await prisma.area.deleteMany({});
+    await prisma.city.deleteMany({});
+    await prisma.governorate.deleteMany({});
+    console.log('🗑️  Existing location data cleared!');
+
+    console.log('📍 Seeding new Egyptian locations...');
 
     let govOrder = 0;
     for (const gov of locationsData) {
         govOrder++;
-        const governorate = await prisma.governorate.upsert({
-            where: { id: `gov-${gov.name.en.toLowerCase().replace(/\s+/g, '-')}` },
-            update: {},
-            create: {
-                id: `gov-${gov.name.en.toLowerCase().replace(/\s+/g, '-')}`,
+        const govId = `gov-${gov.name.en.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-')}`;
+        const governorate = await prisma.governorate.create({
+            data: {
+                id: govId,
                 nameAr: gov.name.ar,
                 nameEn: gov.name.en,
                 sortOrder: govOrder
@@ -24,11 +35,10 @@ async function seedLocations() {
         let cityOrder = 0;
         for (const city of gov.cities) {
             cityOrder++;
-            const createdCity = await prisma.city.upsert({
-                where: { id: `city-${gov.name.en.toLowerCase().replace(/\s+/g, '-')}-${city.name.en.toLowerCase().replace(/\s+/g, '-')}` },
-                update: {},
-                create: {
-                    id: `city-${gov.name.en.toLowerCase().replace(/\s+/g, '-')}-${city.name.en.toLowerCase().replace(/\s+/g, '-')}`,
+            const cityId = `city-${gov.name.en.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-')}-${city.name.en.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-')}`;
+            const createdCity = await prisma.city.create({
+                data: {
+                    id: cityId,
                     governorateId: governorate.id,
                     nameAr: city.name.ar,
                     nameEn: city.name.en,
@@ -39,11 +49,10 @@ async function seedLocations() {
             let areaOrder = 0;
             for (const area of city.areas) {
                 areaOrder++;
-                await prisma.area.upsert({
-                    where: { id: `area-${createdCity.id}-${area.name.en.toLowerCase().replace(/\s+/g, '-')}` },
-                    update: {},
-                    create: {
-                        id: `area-${createdCity.id}-${area.name.en.toLowerCase().replace(/\s+/g, '-')}`,
+                const areaId = `area-${createdCity.id}-${area.name.en.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-')}`;
+                await prisma.area.create({
+                    data: {
+                        id: areaId,
                         cityId: createdCity.id,
                         nameAr: area.name.ar,
                         nameEn: area.name.en,
@@ -54,7 +63,7 @@ async function seedLocations() {
         }
     }
 
-    console.log('✅ Locations seeded!');
+    console.log('✅ New locations seeded successfully!');
 }
 
 async function main() {
@@ -114,6 +123,46 @@ async function main() {
             where: { id: 'subj-french' },
             update: {},
             create: { id: 'subj-french', nameAr: 'اللغة الفرنسية', nameEn: 'French', icon: 'flag-fr', sortOrder: 10 }
+        }),
+        prisma.subject.upsert({
+            where: { id: 'subj-social-studies' },
+            update: {},
+            create: { id: 'subj-social-studies', nameAr: 'الدراسات الاجتماعية', nameEn: 'Social Studies', icon: 'users', sortOrder: 11 }
+        }),
+        prisma.subject.upsert({
+            where: { id: 'subj-philosophy' },
+            update: {},
+            create: { id: 'subj-philosophy', nameAr: 'الفلسفة والمنطق', nameEn: 'Philosophy & Logic', icon: 'brain', sortOrder: 12 }
+        }),
+        prisma.subject.upsert({
+            where: { id: 'subj-psychology' },
+            update: {},
+            create: { id: 'subj-psychology', nameAr: 'علم النفس والاجتماع', nameEn: 'Psychology & Sociology', icon: 'smile', sortOrder: 13 }
+        }),
+        prisma.subject.upsert({
+            where: { id: 'subj-geology' },
+            update: {},
+            create: { id: 'subj-geology', nameAr: 'الجيولوجيا', nameEn: 'Geology', icon: 'mountain', sortOrder: 14 }
+        }),
+        prisma.subject.upsert({
+            where: { id: 'subj-computer' },
+            update: {},
+            create: { id: 'subj-computer', nameAr: 'الحاسب الآلي', nameEn: 'Computer Science', icon: 'monitor', sortOrder: 15 }
+        }),
+        prisma.subject.upsert({
+            where: { id: 'subj-german' },
+            update: {},
+            create: { id: 'subj-german', nameAr: 'اللغة الألمانية', nameEn: 'German', icon: 'flag-de', sortOrder: 16 }
+        }),
+        prisma.subject.upsert({
+            where: { id: 'subj-italian' },
+            update: {},
+            create: { id: 'subj-italian', nameAr: 'اللغة الإيطالية', nameEn: 'Italian', icon: 'flag-it', sortOrder: 17 }
+        }),
+        prisma.subject.upsert({
+            where: { id: 'subj-religion' },
+            update: {},
+            create: { id: 'subj-religion', nameAr: 'التربية الدينية', nameEn: 'Religious Education', icon: 'book-open', sortOrder: 18 }
         })
     ]);
 
@@ -181,7 +230,7 @@ async function main() {
             bio: 'مدرس رياضيات بخبرة 10 سنوات في تدريس المرحلة الثانوية',
             experienceYears: 10,
             qualification: 'بكالوريوس تربية - قسم رياضيات',
-            areaId: 'area-city-cairo-nasr-city-nasr-city-district-1',  // Nasr City
+            areaId: 'area-city-cairo-nasr-city-first-district',  // Nasr City
             lessonTypes: ['at_teacher', 'at_student', 'group']
         }
     });
@@ -227,7 +276,7 @@ async function main() {
         update: {},
         create: {
             userId: parentUser.id,
-            areaId: 'area-city-cairo-nasr-city-nasr-city-district-1'
+            areaId: 'area-city-cairo-nasr-city-first-district'
         }
     });
 
