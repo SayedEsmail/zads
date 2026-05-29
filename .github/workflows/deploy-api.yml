@@ -74,4 +74,5 @@ jobs:
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID_API }}
           vercel-args: '--prod'
+          vercel-version: 'latest'
           working-directory: ./zads-api
