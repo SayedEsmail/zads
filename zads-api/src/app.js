@@ -88,10 +88,11 @@ app.use(errorMiddleware);
 // ==============================================
 
 const PORT = process.env.PORT || 3000;
+const HOST = process.env.HOST || '127.0.0.1';
 
 if (require.main === module) {
-    app.listen(PORT, () => {
-        console.log(`🚀 Mo3alemy API running on port ${PORT}`);
+    app.listen(PORT, HOST, () => {
+        console.log(`🚀 Mo3alemy API running at http://${HOST}:${PORT}`);
         console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
     });
 }
