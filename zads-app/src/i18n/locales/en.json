@@ -40,7 +40,9 @@
     "offline": "Offline",
     "atTeacher": "At Teacher",
     "atStudent": "At Student",
-    "optional": "optional"
+    "optional": "optional",
+    "personalInfo": "Personal Info",
+    "securitySettings": "Security Settings"
   },
   "auth": {
     "login": "Sign In",
@@ -175,6 +177,11 @@
     "editDependent": "Edit Dependent",
     "dependentName": "Name",
     "stage": "Stage",
+    "schoolType": "Education Type",
+    "governmental": "Governmental",
+    "experimental": "Experimental",
+    "private": "Private",
+    "international": "International",
     "subjects": "Subjects",
     "guardianAccountKindDesc": "Guardian Account — You can add dependents and create requests for them",
     "findTeacher": "Find a Teacher",
@@ -190,7 +197,12 @@
     "noResultsWithFilters": "No results found. Try changing filters.",
     "tutor": "Student",
     "guardian": "Guardian",
-    "settingsDesc": "Detailed client settings editing is still under migration. This page is currently connected to account data from the API."
+    "settingsDesc": "Detailed client settings editing is still under migration. This page is currently connected to account data from the API.",
+    "setupAlertTitle": "One step remaining! Complete your account setup",
+    "setupAlertDesc": "Please complete the following requirements to find the best teachers and coordinate with them easily:",
+    "setupLocation": "Set your geographic location (Governorate, City, and Area)",
+    "setupGuardian": "Add at least one child and specify their subjects",
+    "setupStudent": "Add the subjects you want to learn (Create a tutor request for yourself)"
   },
   "teacher": {
     "dashboard": "Teacher Dashboard",

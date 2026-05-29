@@ -146,7 +146,7 @@ const addChild = async (req, res, next) => {
             return response.error(res, 'Parent profile not found', 404);
         }
 
-        const { name, stageId, subjectIds } = req.body;
+        const { name, stageId, subjectIds, schoolType } = req.body;
 
         if (!name || !stageId) {
             return response.error(res, 'Name and stage are required', 400);
@@ -164,6 +164,7 @@ const addChild = async (req, res, next) => {
                 parentId,
                 name,
                 stageId,
+                schoolType,
                 subjects: subjectIds?.length > 0 ? {
                     create: subjectIds.map(subjectId => ({ subjectId }))
                 } : undefined
@@ -225,14 +226,15 @@ const updateChild = async (req, res, next) => {
             return response.error(res, 'Child not found', 404);
         }
 
-        const { name, stageId, subjectIds } = req.body;
+        const { name, stageId, subjectIds, schoolType } = req.body;
 
         // Update child
         const child = await prisma.parentChild.update({
             where: { id: childId },
             data: {
                 ...(name && { name }),
-                ...(stageId && { stageId })
+                ...(stageId && { stageId }),
+                ...(schoolType !== undefined && { schoolType })
             }
         });
 

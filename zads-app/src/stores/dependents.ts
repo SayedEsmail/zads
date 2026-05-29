@@ -9,8 +9,8 @@ interface DependentsStore {
   isLoading: boolean;
   error: string | null;
   fetch: () => Promise<void>;
-  add: (payload: { name: string; stageId: string; subjectIds?: string[] }) => Promise<void>;
-  update: (id: string, payload: { name?: string; stageId?: string; subjectIds?: string[] }) => Promise<void>;
+  add: (payload: { name: string; stageId: string; subjectIds?: string[]; schoolType?: string }) => Promise<void>;
+  update: (id: string, payload: { name?: string; stageId?: string; subjectIds?: string[]; schoolType?: string }) => Promise<void>;
   remove: (id: string) => Promise<void>;
   reset: () => void;
 }

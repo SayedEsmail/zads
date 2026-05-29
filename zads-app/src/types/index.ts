@@ -93,6 +93,7 @@ export interface Dependent {
   parentId: string;
   name: string;
   stageId: string;
+  schoolType?: string | null;
   createdAt: string;
   updatedAt: string;
   // Relations

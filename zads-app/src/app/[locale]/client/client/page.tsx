@@ -32,6 +32,12 @@ export default function ClientDashboardPage() {
   if (clientStore.isLoading && !clientStore.data) return <PageSkeleton />;
   if (clientStore.error) return <ErrorBanner error={clientStore.error} onRetry={clientStore.fetch} />;
 
+  const isLocationComplete = !!clientStore.data?.areaId;
+  const isAccountKind = clientStore.data?.clientAccountKind;
+  const hasDependents = !!(dependentsStore.data && dependentsStore.data.length > 0);
+  const hasSelfRequests = !!(tutorStore.data && tutorStore.data.filter(r => r.requestTarget === "self" && r.status === "active").length > 0);
+  const showCompletionBanner = !isLocationComplete || (isAccountKind === "guardian" ? !hasDependents : !hasSelfRequests);
+
   const stats = [
     {
       label: t("dependents"),
@@ -75,6 +81,50 @@ export default function ClientDashboardPage() {
           )}
         </div>
       </div>
+
+      {/* Profile Completion Alert Banner */}
+      {showCompletionBanner && (
+        <div className="rounded-[1.25rem] border border-amber-200 bg-amber-50/70 backdrop-blur-md p-5 text-amber-950 shadow-[0_4px_20px_-4px_rgba(245,158,11,0.08)] space-y-3.5 animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className="flex items-start gap-3">
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-700 font-bold text-sm">!</span>
+            <div>
+              <h3 className="font-bold text-base text-amber-950">{t("setupAlertTitle")}</h3>
+              <p className="text-xs text-amber-800 mt-0.5">{t("setupAlertDesc")}</p>
+            </div>
+          </div>
+          
+          <ul className="space-y-2 text-xs font-semibold px-9">
+            <li className="flex items-center gap-2">
+              <span className={`h-4.5 w-4.5 rounded-full flex items-center justify-center border text-[10px] ${
+                isLocationComplete ? "bg-emerald-100 border-emerald-300 text-emerald-700 font-bold" : "border-amber-300 bg-white text-transparent"
+              }`}>✓</span>
+              <Link href={`/${locale}/client/client/profile`} className={`hover:underline ${isLocationComplete ? "text-slate-400 line-through font-normal" : "text-primary"}`}>
+                {t("setupLocation")}
+              </Link>
+            </li>
+            
+            {isAccountKind === "guardian" ? (
+              <li className="flex items-center gap-2">
+                <span className={`h-4.5 w-4.5 rounded-full flex items-center justify-center border text-[10px] ${
+                  hasDependents ? "bg-emerald-100 border-emerald-300 text-emerald-700 font-bold" : "border-amber-300 bg-white text-transparent"
+                }`}>✓</span>
+                <Link href={`/${locale}/client/client/dependents`} className={`hover:underline ${hasDependents ? "text-slate-400 line-through font-normal" : "text-primary"}`}>
+                  {t("setupGuardian")}
+                </Link>
+              </li>
+            ) : (
+              <li className="flex items-center gap-2">
+                <span className={`h-4.5 w-4.5 rounded-full flex items-center justify-center border text-[10px] ${
+                  hasSelfRequests ? "bg-emerald-100 border-emerald-300 text-emerald-700 font-bold" : "border-amber-300 bg-white text-transparent"
+                }`}>✓</span>
+                <Link href={`/${locale}/client/client/requests`} className={`hover:underline ${hasSelfRequests ? "text-slate-400 line-through font-normal" : "text-primary"}`}>
+                  {t("setupStudent")}
+                </Link>
+              </li>
+            )}
+          </ul>
+        </div>
+      )}
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4">
