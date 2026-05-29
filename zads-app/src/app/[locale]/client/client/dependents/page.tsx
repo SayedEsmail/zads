@@ -110,7 +110,7 @@ export default function DependentsPage() {
               />
               <Select 
                 value={form.stageId} 
-                onValueChange={(val) => setForm((f) => ({ ...f, stageId: val }))}
+                onValueChange={(val) => setForm((f) => ({ ...f, stageId: val || "" }))}
               >
                 <SelectTrigger className="w-full rounded-lg border border-slate-200 px-3 py-5 text-sm focus:ring-2 focus:ring-primary/20 h-auto bg-white">
                   <SelectValue placeholder={t("stage")}>
@@ -127,7 +127,7 @@ export default function DependentsPage() {
               </Select>
               <Select 
                 value={form.schoolType} 
-                onValueChange={(val) => setForm((f) => ({ ...f, schoolType: val }))}
+                onValueChange={(val) => setForm((f) => ({ ...f, schoolType: val || "" }))}
               >
                 <SelectTrigger className="w-full rounded-lg border border-slate-200 px-3 py-5 text-sm focus:ring-2 focus:ring-primary/20 h-auto bg-white">
                   <SelectValue placeholder={t("schoolType")}>

@@ -163,6 +163,15 @@ const getTeacherById = async (req, res, next) => {
                         avatarUrl: true
                     }
                 },
+                area: {
+                    include: {
+                        city: {
+                            include: {
+                                governorate: true
+                            }
+                        }
+                    }
+                },
                 subjects: {
                     where: { isActive: true },
                     include: {
