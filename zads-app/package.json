@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 3001",
+    "dev": "NEXT_TELEMETRY_DISABLED=1 NODE_OPTIONS=--max-old-space-size=2048 next dev -H 127.0.0.1 -p 3001 --webpack --disable-source-maps",
     "build": "next build",
     "start": "next start -p 3001",
     "lint": "eslint"
