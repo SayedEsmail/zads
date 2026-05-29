@@ -1,4 +1,4 @@
-name: Deploy Frontend (zads-app)
+name: zads-app
 
 on:
   push:
@@ -8,6 +8,9 @@ on:
       - 'zads-app/**'
       - '.github/workflows/deploy-app.yml'
   workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
 
 jobs:
   build-and-test:
@@ -56,14 +59,13 @@ jobs:
     name: Deploy to Production
     needs: build-and-test
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    # Clean check: only run the deploy step if the user has configured Vercel secrets in their repo settings
+    if: github.ref == 'refs/heads/main' && secrets.VERCEL_TOKEN != ''
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # Standard Vercel deployment action for Next.js apps.
-      # You can replace this section with your own hosting (e.g. VPS SSH or Docker) action.
       - name: Deploy to Vercel
         uses: amondnet/vercel-action@v25
         with:
