@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Plus, Edit2, Trash2 } from "lucide-react";
+import { Plus, Edit2, Trash2, Users } from "lucide-react";
 import { useDependentsStore } from "@/stores/dependents";
 import { useSearchStore } from "@/stores/search";
 import { PageSkeleton } from "@/components/shared/PageSkeleton";
 import { ErrorBanner } from "@/components/shared/ErrorBanner";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { Dependent } from "@/types";
 
 export default function DependentsPage() {
@@ -54,16 +55,19 @@ export default function DependentsPage() {
       <ErrorBanner error={error} onRetry={fetch} />
 
       {!data || data.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-border p-8 text-center">
-          <p className="text-muted-foreground">{t("noDependentsYet")}</p>
-          <button onClick={openAdd} className="mt-3 text-sm text-primary hover:underline">
+        <div className="rounded-[1.25rem] border border-dashed border-slate-200 bg-slate-50 p-10 text-center">
+          <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
+            <Users className="w-8 h-8 text-slate-300" />
+          </div>
+          <p className="text-muted-foreground font-medium">{t("noDependentsYet")}</p>
+          <button onClick={openAdd} className="mt-4 text-sm font-bold text-primary hover:text-blue-700 hover:underline">
             {t("addDependent")}
           </button>
         </div>
       ) : (
         <div className="space-y-3">
           {data.map((dep) => (
-            <div key={dep.id} className="rounded-xl border border-border bg-surface p-4">
+            <div key={dep.id} className="rounded-[1.25rem] border border-slate-100 bg-white shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] p-4">
               <div className="flex items-start justify-between">
                 <div>
                   <p className="font-semibold">{dep.name}</p>
@@ -93,7 +97,7 @@ export default function DependentsPage() {
       {/* Simple dialog */}
       {showDialog && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 sm:items-center" onClick={() => setShowDialog(false)}>
-          <div className="w-full max-w-md rounded-t-2xl bg-surface p-6 sm:rounded-2xl" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-md rounded-t-2xl bg-white p-6 sm:rounded-2xl" onClick={(e) => e.stopPropagation()}>
             <h2 className="mb-4 font-semibold">{editing ? t("editDependent") : t("addDependent")}</h2>
             <div className="space-y-3">
               <input
@@ -102,14 +106,21 @@ export default function DependentsPage() {
                 onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
                 className="w-full rounded-lg border border-border px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
-              <select
-                value={form.stageId}
-                onChange={(e) => setForm((f) => ({ ...f, stageId: e.target.value }))}
-                className="w-full rounded-lg border border-border px-3 py-2.5 text-sm focus:outline-none"
+              <Select 
+                value={form.stageId} 
+                onValueChange={(val) => setForm((f) => ({ ...f, stageId: val }))}
               >
-                <option value="">{t("stage")}</option>
-                {stages.map((s) => <option key={s.id} value={s.id}>{s.nameAr}</option>)}
-              </select>
+                <SelectTrigger className="w-full rounded-lg border border-slate-200 px-3 py-5 text-sm focus:ring-2 focus:ring-primary/20 h-auto bg-white">
+                  <SelectValue placeholder={t("stage")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {stages.map((s) => (
+                    <SelectItem key={s.id} value={s.id}>
+                      {s.nameAr}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <div>
                 <p className="mb-2 text-sm font-medium">{t("subjects")}</p>
                 <div className="flex flex-wrap gap-2">

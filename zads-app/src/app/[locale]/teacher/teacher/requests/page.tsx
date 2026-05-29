@@ -29,7 +29,7 @@ export default function TeacherRequestsPage() {
       ) : (
         <div className="space-y-3">
           {incoming.map((request) => (
-            <div key={request.id} className="rounded-xl border border-border bg-surface p-4">
+            <div key={request.id} className="rounded-[1.25rem] border border-slate-100 bg-white shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] p-4">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <p className="font-medium">{request.parent?.user.name}</p>

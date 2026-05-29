@@ -26,7 +26,7 @@ export default function ClientProfilePage() {
     <div className="max-w-2xl mx-auto space-y-4">
       <h1 className="text-xl font-bold">{tNav("profile")}</h1>
       <ErrorBanner error={auth.error || client.error} />
-      <div className="rounded-xl border border-border bg-surface p-5">
+      <div className="rounded-[1.25rem] border border-slate-100 bg-white shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] p-5">
         <dl className="space-y-3 text-sm">
           <div className="flex justify-between gap-4">
             <dt className="text-muted-foreground">{tAuth("fullName")}</dt>

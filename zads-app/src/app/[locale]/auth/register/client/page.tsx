@@ -74,9 +74,9 @@ export default function RegisterClientPage() {
           <input
             {...register("name")}
             type="text"
-            className="w-full rounded-lg border border-border px-3 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+            className="w-full rounded-[1.25rem] border border-border bg-white px-4 py-3.5 text-sm font-medium focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
           />
-          {errors.name && <p className="mt-1 text-xs text-destructive">{errors.name.message}</p>}
+          {errors.name && <p className="mt-1.5 px-1 text-xs font-medium text-destructive">{errors.name.message}</p>}
         </div>
 
         {/* Phone */}
@@ -87,9 +87,9 @@ export default function RegisterClientPage() {
             type="tel"
             dir="ltr"
             placeholder="05xxxxxxxx"
-            className="w-full rounded-lg border border-border px-3 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+            className="w-full rounded-[1.25rem] border border-border bg-white px-4 py-3.5 text-sm font-medium focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
           />
-          {errors.phone && <p className="mt-1 text-xs text-destructive">{errors.phone.message}</p>}
+          {errors.phone && <p className="mt-1.5 px-1 text-xs font-medium text-destructive">{errors.phone.message}</p>}
         </div>
 
         {/* Password */}
@@ -99,9 +99,9 @@ export default function RegisterClientPage() {
             {...register("password")}
             type="password"
             placeholder="••••••••"
-            className="w-full rounded-lg border border-border px-3 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+            className="w-full rounded-[1.25rem] border border-border bg-white px-4 py-3.5 text-sm font-medium focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
           />
-          {errors.password && <p className="mt-1 text-xs text-destructive">{errors.password.message}</p>}
+          {errors.password && <p className="mt-1.5 px-1 text-xs font-medium text-destructive">{errors.password.message}</p>}
         </div>
 
         {/* Confirm Password */}
@@ -111,26 +111,26 @@ export default function RegisterClientPage() {
             {...register("confirmPassword")}
             type="password"
             placeholder="••••••••"
-            className="w-full rounded-lg border border-border px-3 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+            className="w-full rounded-[1.25rem] border border-border bg-white px-4 py-3.5 text-sm font-medium focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
           />
           {errors.confirmPassword && (
-            <p className="mt-1 text-xs text-destructive">{errors.confirmPassword.message}</p>
+            <p className="mt-1.5 px-1 text-xs font-medium text-destructive">{errors.confirmPassword.message}</p>
           )}
         </div>
 
         {/* Account Kind segmented control */}
         <div>
           <label className="mb-2 block text-sm font-medium">{t("accountKind")}</label>
-          <div className="grid grid-cols-2 overflow-hidden rounded-lg border border-border">
+          <div className="grid grid-cols-2 overflow-hidden rounded-[1.25rem] border border-border bg-white p-1">
             {(["student", "guardian"] as ClientAccountKind[]).map((kind) => (
               <button
                 key={kind}
                 type="button"
                 onClick={() => setValue("clientAccountKind", kind)}
-                className={`py-2.5 text-sm font-medium transition-colors ${
+                className={`rounded-[1rem] py-3 text-sm font-medium transition-all ${
                   accountKind === kind
-                    ? "bg-primary text-white"
-                    : "bg-surface text-foreground hover:bg-muted"
+                    ? "bg-primary text-white shadow-sm"
+                    : "bg-transparent text-muted-foreground hover:bg-slate-50 hover:text-foreground"
                 }`}
               >
                 {t(kind)}
@@ -142,7 +142,7 @@ export default function RegisterClientPage() {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-dark disabled:opacity-60"
+          className="mt-4 w-full rounded-[1.25rem] bg-primary py-4 text-sm font-bold text-white shadow-lg shadow-primary/20 transition-all hover:bg-primary-dark hover:shadow-primary/30 hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
         >
           {isLoading ? "..." : t("registerClient")}
         </button>

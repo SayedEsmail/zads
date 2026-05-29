@@ -79,7 +79,7 @@ export default function TeacherSearchPage() {
 
       {/* Filters panel */}
       {showFilters && (
-        <div className="grid grid-cols-2 gap-3 rounded-xl border border-border bg-surface p-4 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 rounded-[1.25rem] border border-slate-100 bg-white shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] p-4 sm:grid-cols-4">
           <select
             value={filters.subjectId}
             onChange={(e) => setFilters((f) => ({ ...f, subjectId: e.target.value }))}

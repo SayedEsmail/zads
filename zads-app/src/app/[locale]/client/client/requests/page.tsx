@@ -98,7 +98,7 @@ export default function RequestsPage() {
           {contactStore.isLoading ? <PageSkeleton /> : (
             <div className="space-y-3">
               {(contactStore.sent ?? []).map((r) => (
-                <div key={r.id} className="rounded-xl border border-border bg-surface p-4">
+                <div key={r.id} className="rounded-[1.25rem] border border-slate-100 bg-white shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] p-4">
                   <div className="flex items-center justify-between">
                     <p className="font-medium">{r.teacher?.user.name}</p>
                     <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${r.status === "accepted" ? "bg-success/10 text-success" : r.status === "rejected" ? "bg-destructive/10 text-destructive" : "bg-muted text-muted-foreground"}`}>
@@ -119,7 +119,7 @@ export default function RequestsPage() {
       {/* Create tutor request dialog */}
       {showCreate && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 sm:items-center" onClick={() => setShowCreate(false)}>
-          <div className="w-full max-w-md rounded-t-2xl bg-surface p-6 sm:rounded-2xl" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-md rounded-t-2xl bg-white p-6 sm:rounded-2xl" onClick={(e) => e.stopPropagation()}>
             <h2 className="mb-4 font-semibold">{t("newTutorRequest")}</h2>
             <div className="space-y-3">
               <select value={form.subjectId} onChange={(e) => setForm((f) => ({ ...f, subjectId: e.target.value }))} className="w-full rounded-lg border border-border px-3 py-2.5 text-sm focus:outline-none">

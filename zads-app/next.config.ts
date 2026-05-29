@@ -33,6 +33,17 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+
+  // Proxy /api/* to the Express backend
+  // We exclude NextAuth routes so they hit our local API, but allow /api/auth/profile to proxy to backend
+  async rewrites() {
+    return [
+      {
+        source: "/api/:path((?!auth/(?:callback|csrf|error|providers|session|signin|signout|verify-request)).*)",
+        destination: "https://api.zads.app/api/:path*",
+      },
+    ];
+  },
 };
 
 export default withNextIntl(nextConfig);
