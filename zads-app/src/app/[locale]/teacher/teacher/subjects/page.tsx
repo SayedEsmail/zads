@@ -12,6 +12,7 @@ import { formatPrice } from "@/lib/utils";
 export default function TeacherSubjectsPage() {
   const t = useTranslations("teacher");
   const tCommon = useTranslations("common");
+  const tRequest = useTranslations("request");
   const subjectStore = useTeacherSubjectsStore();
   const { subjects, stages, fetchSubjects, fetchStages } = useSearchStore();
   const [showDialog, setShowDialog] = useState(false);
@@ -61,15 +62,15 @@ export default function TeacherSubjectsPage() {
 
       {(!subjectStore.data || subjectStore.data.length === 0) ? (
         <div className="rounded-xl border border-dashed border-border p-8 text-center">
-          <p className="text-muted-foreground">لا توجد مواد مضافة بعد</p>
+          <p className="text-muted-foreground">{t("noSubjectsYet")}</p>
         </div>
       ) : (
         <div className="overflow-hidden rounded-xl border border-border">
           <table className="w-full text-sm">
             <thead className="bg-muted/50">
               <tr>
-                <th className="px-4 py-3 text-start font-medium">المادة</th>
-                <th className="px-4 py-3 text-start font-medium">المرحلة</th>
+                <th className="px-4 py-3 text-start font-medium">{tCommon("subject")}</th>
+                <th className="px-4 py-3 text-start font-medium">{tCommon("stage")}</th>
                 <th className="px-4 py-3 text-start font-medium">{t("priceOnline")}</th>
                 <th className="px-4 py-3 text-start font-medium">{t("priceOffline")}</th>
                 <th className="px-4 py-3"></th>
@@ -103,11 +104,11 @@ export default function TeacherSubjectsPage() {
             <h2 className="mb-4 font-semibold">{editingId ? t("editSubject") : t("addSubject")}</h2>
             <div className="space-y-3">
               <select value={form.subjectId} onChange={(e) => setForm((f) => ({ ...f, subjectId: e.target.value }))} className="w-full rounded-lg border border-border px-3 py-2.5 text-sm focus:outline-none">
-                <option value="">اختر المادة</option>
+                <option value="">{tRequest("selectSubject")}</option>
                 {subjects.map((s) => <option key={s.id} value={s.id}>{s.nameAr}</option>)}
               </select>
               <select value={form.stageId} onChange={(e) => setForm((f) => ({ ...f, stageId: e.target.value }))} className="w-full rounded-lg border border-border px-3 py-2.5 text-sm focus:outline-none">
-                <option value="">اختر المرحلة</option>
+                <option value="">{tRequest("selectStage")}</option>
                 {stages.map((s) => <option key={s.id} value={s.id}>{s.nameAr}</option>)}
               </select>
               <div className="grid grid-cols-2 gap-3">
@@ -129,7 +130,7 @@ export default function TeacherSubjectsPage() {
                 </div>
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium">مدة الجلسة (دقيقة)</label>
+                <label className="mb-1 block text-xs font-medium">{t("durationMinutes")}</label>
                 <input type="number" value={form.durationMinutes} onChange={(e) => setForm((f) => ({ ...f, durationMinutes: e.target.value }))} className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:outline-none" />
               </div>
             </div>

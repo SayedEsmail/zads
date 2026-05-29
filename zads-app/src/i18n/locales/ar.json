@@ -8,14 +8,38 @@
     "delete": "حذف",
     "edit": "تعديل",
     "add": "إضافة",
-    "close": "إغلاق",
+    "close": "إإلاق",
     "confirm": "تأكيد",
     "back": "رجوع",
     "next": "التالي",
     "search": "بحث",
     "filter": "فلتر",
     "noResults": "لا توجد نتائج",
-    "viewAll": "عرض الكل"
+    "viewAll": "عرض الكل",
+    "copyright": "© {year} زاد. جميع الحقوق محفوظة.",
+    "qualification": "المؤهل العلمي",
+    "experienceYears": "سنوات الخبرة",
+    "governorate": "المحافظة",
+    "city": "المدينة",
+    "area": "المنطقة",
+    "welcome": "أهلاً بك",
+    "accept": "قبول",
+    "reject": "رفض",
+    "change": "تغيير",
+    "avatarInstruction": "انقر على الصورة لتغييرها",
+    "verified": "موثق",
+    "unverified": "غير موثق",
+    "duration": "{minutes} دقيقة",
+    "subject": "المادة",
+    "stage": "المرحلة",
+    "selectGovernorate": "اختر المحافظة",
+    "selectCity": "اختر المدينة",
+    "selectArea": "اختر المنطقة",
+    "studyMode": "طريقة التعلم",
+    "online": "أونلاين",
+    "offline": "أوفلاين",
+    "atTeacher": "عند المعلم",
+    "atStudent": "عند الطالب"
   },
   "auth": {
     "login": "تسجيل الدخول",
@@ -40,7 +64,11 @@
     "student": "فردي (لنفسي)",
     "guardian": "ولي أمر (لأبنائي)",
     "registerClient": "إنشاء حساب عميل",
-    "registerTeacher": "إنشاء حساب معلم"
+    "registerTeacher": "إنشاء حساب معلم",
+    "resetLinkSent": "تحقق من بريدك الإلكتروني للحصول على رابط إعادة تعيين كلمة المرور.",
+    "sendResetLink": "إرسال رابط إعادة التعيين",
+    "backToSignIn": "العودة لتسجيل الدخول",
+    "bio": "نبذة عني (اختياري)"
   },
   "nav": {
     "home": "الرئيسية",
@@ -63,7 +91,75 @@
     "startNow": "ابدأ الآن",
     "exploreTeachers": "اكتشف المدرسين",
     "featuresTitle": "لماذا زاد؟",
-    "howItWorksTitle": "كيف يعمل زاد؟"
+    "howItWorksTitle": "كيف يعمل زاد؟",
+    "features": {
+      "local": {
+        "title": "في منطقتك",
+        "desc": "اعثر على مدرسين قريبين منك بسهولة"
+      },
+      "onlineOffline": {
+        "title": "أونلاين وأوفلاين",
+        "desc": "احجز دروساً أونلاين أو وجهاً لوجه"
+      },
+      "verified": {
+        "title": "مدرسون موثوقون",
+        "desc": "مدرسون بتقييمات حقيقية وخبرة موثّقة"
+      },
+      "family": {
+        "title": "لنفسك أو لتابعيك",
+        "desc": "احجز دروساً لنفسك أو لأبنائك في نفس الحساب"
+      }
+    },
+    "steps": {
+      "find": {
+        "title": "ابحث عن معلم",
+        "desc": "استخدم الفلاتر لتحديد المادة والمنطقة وطريقة التعلم"
+      },
+      "connect": {
+        "title": "تواصل وانسّق",
+        "desc": "تواصل مع المعلم مباشرةً وحدد الموعد المناسب"
+      },
+      "start": {
+        "title": "ابدأ التعلم",
+        "desc": "ابدأ رحلتك التعليمية أونلاين أو أوجهاً لوجه"
+      }
+    },
+    "readyToStart": "جاهز للبدء؟"
+  },
+  "about": {
+    "title": "من نحن",
+    "intro": "زاد هو منصة تعليمية محلية تربط المتعلمين بالمدرسين في نفس المنطقة. نؤمن أن التعليم الجيد يبدأ من الجوار — حيث يلتقي المدرس والطالب بسهولة، سواء أونلاين أو وجهاً لوجه.",
+    "missionTitle": "رسالتنا",
+    "missionDesc": "جعل التعليم المحلي سهل الوصول والتنسيق لكل أسرة وكل متعلم، بغض النظر عن مستواه أو مادته أو طريقة تعلمه المفضلة.",
+    "whyUsTitle": "ما يميزنا",
+    "whyUs": {
+      "geo": "بحث جغرافي دقيق — العثور على مدرس في نفس الحي أو المدينة",
+      "flex": "دروس أونلاين وأوفلاين — المرونة في اختيار الطريقة",
+      "account": "حساب واحد للمتعلم ولجميع تابعيه",
+      "ratings": "تقييمات حقيقية من طلاب سابقين"
+    }
+  },
+  "howItWorks": {
+    "title": "كيف يعمل زاد؟",
+    "subtitle": "أربع خطوات بسيطة تفصلك عن بداية رحلتك التعليمية",
+    "steps": {
+      "account": {
+        "title": "أنشئ حسابك",
+        "desc": "سجّل كعميل (لنفسك أو لأبنائك) أو كمعلم. يستغرق التسجيل أقل من دقيقة."
+      },
+      "find": {
+        "title": "ابحث عن معلم",
+        "desc": "استخدم فلاتر المادة والمرحلة والمنطقة وطريقة التعلم (أونلاين / أوفلاين) للعثور على المعلم المثالي."
+      },
+      "connect": {
+        "title": "تواصل وانسّق",
+        "desc": "تواصل مع المعلم مباشرةً عبر المنصة، وحدد الموعد والتفاصيل."
+      },
+      "start": {
+        "title": "ابدأ رحلتك",
+        "desc": "ابدأ دروسك واستفد من تجربة تعليمية محلية وشخصية."
+      }
+    }
   },
   "client": {
     "dashboard": "لوحة التحكم",
@@ -77,7 +173,22 @@
     "editDependent": "تعديل التابع",
     "dependentName": "الاسم",
     "stage": "المرحلة الدراسية",
-    "subjects": "المواد"
+    "subjects": "المواد",
+    "guardianAccountKindDesc": "حساب ولي أمر — يمكنك إضافة تابعين وإنشاء طلبات لهم",
+    "findTeacher": "ابحث عن معلم",
+    "findTeacherDesc": "اعثر على مدرسين في منطقتك أونلاين أو أوفلاين",
+    "noRequestsYet": "لا توجد طلبات حتى الآن",
+    "noDependentsYet": "لا يوجد تابعون حتى الآن",
+    "noFavoritesYet": "لا يوجد معلمون في المفضلة",
+    "searchPlaceholder": "ابحث بالاسم أو المادة...",
+    "allSubjects": "كل المواد",
+    "allStages": "كل المراحل",
+    "allGovernorates": "كل المحافظات",
+    "teachersCount": "{count} معلم",
+    "noResultsWithFilters": "لا توجد نتائج. جرّب تغيير الفلاتر.",
+    "tutor": "طالب",
+    "guardian": "ولي أمر",
+    "settingsDesc": "تعديل بيانات العميل التفصيلي ما زال ضمن أعمال النقل. هذه الصفحة متصلة حاليا ببيانات الحساب من الـ API."
   },
   "teacher": {
     "dashboard": "لوحة تحكم المعلم",
@@ -97,7 +208,16 @@
     "priceAtStudent": "السعر عند الطالب",
     "priceGroup": "سعر المجموعة",
     "addSubject": "إضافة مادة",
-    "editSubject": "تعديل المادة"
+    "editSubject": "تعديل المادة",
+    "welcome": "أهلاً بك",
+    "incomingContacts": "طلبات التواصل الواردة",
+    "noIncomingRequests": "لا توجد طلبات واردة",
+    "settingsTitle": "إعدادات المعلم",
+    "settingsDesc": "هذه الصفحة تعرض بيانات الحساب الأساسية حاليا. تعديل الإعدادات التفصيلي ما زال ضمن أعمال النقل.",
+    "noSubjectsYet": "لا توجد مواد مضافة بعد",
+    "durationMinutes": "مدة الجلسة (دقيقة)",
+    "nearbyRequests": "طلبات الطلاب القريبة",
+    "noRequestsAvailable": "لا توجد طلبات متاحة حاليا."
   },
   "request": {
     "tutorRequest": "طلب معلم",
@@ -118,7 +238,22 @@
     "description": "الوصف",
     "createRequest": "إنشاء طلب",
     "closeRequest": "إغلاق الطلب",
-    "deleteRequest": "حذف الطلب"
+    "deleteRequest": "حذف الطلب",
+    "newRequest": "طلب جديد",
+    "noRequests": "لا توجد طلبات",
+    "accepted": "مقبول",
+    "rejected": "مرفوض",
+    "pending": "انتظار",
+    "noContactRequests": "لا توجد طلبات تواصل",
+    "newTutorRequest": "طلب معلم جديد",
+    "selectSubject": "اختر المادة",
+    "selectStage": "اختر المرحلة",
+    "selectDependent": "اختر التابع",
+    "descriptionPlaceholder": "وصف الطلب (اختياري)",
+    "submitRequest": "إرسال الطلب",
+    "budgetLabel": "الميزانية: {min} – {max} ج",
+    "targetSelf": "لنفسي",
+    "targetDependent": "لتابعي"
   },
   "admin": {
     "dashboard": "لوحة الإدارة",
@@ -131,7 +266,27 @@
     "totalTeachers": "إجمالي المعلمين",
     "totalClients": "إجمالي العملاء",
     "totalRequests": "إجمالي الطلبات",
-    "activeSubjects": "المواد النشطة"
+    "activeSubjects": "المواد النشطة",
+    "pendingRequests": "الطلبات المعلقة",
+    "admin": "الإدارة",
+    "name": "الاسم",
+    "phone": "الهاتف",
+    "email": "البريد",
+    "status": "الحالة",
+    "arabicName": "الاسم العربي",
+    "englishName": "الاسم الإنجليزي",
+    "order": "الترتيب",
+    "active": "نشط",
+    "inactive": "متوقف",
+    "searchClient": "ابحث عن عميل...",
+    "searchTeacher": "ابحث عن معلم...",
+    "searchRequest": "ابحث في الطلبات...",
+    "searchStage": "ابحث عن مرحلة...",
+    "searchSubject": "ابحث عن مادة...",
+    "total": "الإجمالي",
+    "teacherNotFound": "المعلم غير موجود",
+    "contact": "تواصل",
+    "noSubjects": "لا توجد مواد مضافة."
   },
   "errors": {
     "required": "هذا الحقل مطلوب",

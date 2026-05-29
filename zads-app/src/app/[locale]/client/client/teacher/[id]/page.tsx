@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { MapPin, Star } from "lucide-react";
+import { useTranslations } from "next-intl";
 import api from "@/lib/api";
 import { ErrorBanner } from "@/components/shared/ErrorBanner";
 import { PageSkeleton } from "@/components/shared/PageSkeleton";
@@ -11,6 +12,9 @@ import type { Teacher } from "@/types";
 
 export default function TeacherDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const tTeacher = useTranslations("teacher");
+  const tCommon = useTranslations("common");
+  const tAdmin = useTranslations("admin");
   const [teacher, setTeacher] = useState<Teacher | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -41,7 +45,7 @@ export default function TeacherDetailPage() {
   if (!teacher) {
     return (
       <div className="max-w-3xl mx-auto">
-        <ErrorBanner error={error ?? "Teacher not found"} />
+        <ErrorBanner error={error ?? tAdmin("teacherNotFound")} />
       </div>
     );
   }
@@ -70,7 +74,7 @@ export default function TeacherDetailPage() {
           </div>
           {teacher.isVerified && (
             <span className="rounded-full bg-success/10 px-3 py-1 text-xs font-medium text-success">
-              موثق
+              {tCommon("verified")}
             </span>
           )}
         </div>
@@ -80,13 +84,13 @@ export default function TeacherDetailPage() {
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           {teacher.qualification && (
             <div className="rounded-lg bg-muted/40 p-3">
-              <p className="text-xs text-muted-foreground">المؤهل</p>
+              <p className="text-xs text-muted-foreground">{tCommon("qualification")}</p>
               <p className="font-medium">{teacher.qualification}</p>
             </div>
           )}
           {teacher.experienceYears != null && (
             <div className="rounded-lg bg-muted/40 p-3">
-              <p className="text-xs text-muted-foreground">سنوات الخبرة</p>
+              <p className="text-xs text-muted-foreground">{tCommon("experienceYears")}</p>
               <p className="font-medium">{teacher.experienceYears}</p>
             </div>
           )}
@@ -94,9 +98,9 @@ export default function TeacherDetailPage() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="font-semibold">المواد والأسعار</h2>
+        <h2 className="font-semibold">{tTeacher("subjects")}</h2>
         {(teacher.subjects ?? []).length === 0 ? (
-          <p className="rounded-xl border border-border p-5 text-sm text-muted-foreground">لا توجد مواد مضافة.</p>
+          <p className="rounded-xl border border-border p-5 text-sm text-muted-foreground">{tAdmin("noSubjects")}</p>
         ) : (
           teacher.subjects?.map((item) => (
             <div key={item.id} className="rounded-xl border border-border bg-surface p-4">
@@ -105,13 +109,13 @@ export default function TeacherDetailPage() {
                   <p className="font-medium">{item.subject?.nameAr}</p>
                   <p className="text-sm text-muted-foreground">{item.stage?.nameAr}</p>
                 </div>
-                <p className="text-xs text-muted-foreground">{item.durationMinutes} دقيقة</p>
+                <p className="text-xs text-muted-foreground">{tCommon("duration", { minutes: item.durationMinutes })}</p>
               </div>
               <div className="mt-3 flex flex-wrap gap-2 text-xs">
-                {item.priceOnline != null && <span className="rounded-full bg-primary/10 px-2.5 py-1 text-primary">أونلاين {formatPrice(item.priceOnline)}</span>}
-                {item.priceOffline != null && <span className="rounded-full bg-secondary/10 px-2.5 py-1 text-secondary">أوفلاين {formatPrice(item.priceOffline)}</span>}
-                {item.priceAtTeacher != null && <span className="rounded-full bg-muted px-2.5 py-1">عند المعلم {formatPrice(item.priceAtTeacher)}</span>}
-                {item.priceAtStudent != null && <span className="rounded-full bg-muted px-2.5 py-1">عند الطالب {formatPrice(item.priceAtStudent)}</span>}
+                {item.priceOnline != null && <span className="rounded-full bg-primary/10 px-2.5 py-1 text-primary">{tCommon("online")} {formatPrice(item.priceOnline)}</span>}
+                {item.priceOffline != null && <span className="rounded-full bg-secondary/10 px-2.5 py-1 text-secondary">{tCommon("offline")} {formatPrice(item.priceOffline)}</span>}
+                {item.priceAtTeacher != null && <span className="rounded-full bg-muted px-2.5 py-1">{tCommon("atTeacher")} {formatPrice(item.priceAtTeacher)}</span>}
+                {item.priceAtStudent != null && <span className="rounded-full bg-muted px-2.5 py-1">{tCommon("atStudent")} {formatPrice(item.priceAtStudent)}</span>}
               </div>
             </div>
           ))

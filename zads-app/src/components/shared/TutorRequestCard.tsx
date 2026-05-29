@@ -18,23 +18,6 @@ const STATUS_STYLE: Record<string, string> = {
   closed: "bg-muted text-muted-foreground",
 };
 
-const STUDY_MODE_LABEL: Record<string, string> = {
-  online: "أونلاين",
-  offline: "أوفلاين",
-  both: "أونلاين + أوفلاين",
-};
-
-const TARGET_LABEL: Record<string, string> = {
-  self: "لنفسي",
-  dependent: "لتابعي",
-};
-
-const REQUEST_STATUS_LABEL: Record<string, string> = {
-  active: "نشط",
-  fulfilled: "تم التنفيذ",
-  closed: "مغلق",
-};
-
 export function TutorRequestCard({
   request,
   onClose,
@@ -42,6 +25,27 @@ export function TutorRequestCard({
   showActions = true,
 }: TutorRequestCardProps) {
   const t = useTranslations("request");
+
+  // Dynamically resolve study mode, target label, and status using translation keys
+  const getStudyModeLabel = (mode: string) => {
+    if (mode === "online") return t("online");
+    if (mode === "offline") return t("offline");
+    if (mode === "both") return t("both");
+    return mode;
+  };
+
+  const getTargetLabel = (target: string) => {
+    if (target === "self") return t("targetSelf");
+    if (target === "dependent") return t("targetDependent");
+    return target;
+  };
+
+  const getStatusLabel = (status: string) => {
+    if (status === "active") return t("active");
+    if (status === "fulfilled") return t("fulfilled");
+    if (status === "closed") return t("closed");
+    return status;
+  };
 
   return (
     <div className="rounded-xl border border-border bg-surface p-4">
@@ -57,17 +61,17 @@ export function TutorRequestCard({
           "shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium",
           STATUS_STYLE[request.status] ?? "bg-muted text-muted-foreground"
         )}>
-          {REQUEST_STATUS_LABEL[request.status] ?? request.status}
+          {getStatusLabel(request.status)}
         </span>
       </div>
 
       {/* Badges row */}
       <div className="mt-2 flex flex-wrap gap-1.5">
         <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
-          {STUDY_MODE_LABEL[request.studyMode] ?? request.studyMode}
+          {getStudyModeLabel(request.studyMode)}
         </span>
         <span className="rounded-full bg-secondary/10 px-2.5 py-0.5 text-xs font-medium text-secondary">
-          {TARGET_LABEL[request.requestTarget] ?? request.requestTarget}
+          {getTargetLabel(request.requestTarget)}
         </span>
         {request.parentChild && (
           <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs text-muted-foreground">
@@ -84,7 +88,7 @@ export function TutorRequestCard({
       {/* Budget */}
       {(request.budgetMin || request.budgetMax) && (
         <p className="mt-1.5 text-xs text-muted-foreground">
-          الميزانية: {request.budgetMin ?? "—"} – {request.budgetMax ?? "—"} ج
+          {t("budgetLabel", { min: request.budgetMin ?? "—", max: request.budgetMax ?? "—" })}
         </p>
       )}
 

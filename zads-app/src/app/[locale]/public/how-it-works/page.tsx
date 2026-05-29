@@ -1,32 +1,22 @@
-import { useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 
 export default function HowItWorksPage() {
-  const locale = useLocale();
-  const isAr = locale === "ar";
+  const t = useTranslations("howItWorks");
 
-  const steps = isAr
-    ? [
-        { n: "1", title: "أنشئ حسابك", desc: "سجّل كعميل (لنفسك أو لأبنائك) أو كمعلم. يستغرق التسجيل أقل من دقيقة." },
-        { n: "2", title: "ابحث عن معلم", desc: "استخدم فلاتر المادة والمرحلة والمنطقة وطريقة التعلم (أونلاين / أوفلاين) للعثور على المعلم المثالي." },
-        { n: "3", title: "تواصل وانسّق", desc: "تواصل مع المعلم مباشرةً عبر المنصة، وحدد الموعد والتفاصيل." },
-        { n: "4", title: "ابدأ رحلتك", desc: "ابدأ دروسك واستفد من تجربة تعليمية محلية وشخصية." },
-      ]
-    : [
-        { n: "1", title: "Create your account", desc: "Sign up as a client (for yourself or your children) or as a teacher. Registration takes less than a minute." },
-        { n: "2", title: "Find a tutor", desc: "Use filters for subject, stage, area, and study mode (online/offline) to find the perfect match." },
-        { n: "3", title: "Connect & Coordinate", desc: "Message the tutor directly through the platform and set up your schedule." },
-        { n: "4", title: "Start your journey", desc: "Begin your sessions and enjoy a personal, local learning experience." },
-      ];
+  const steps = [
+    { n: "1", title: t("steps.account.title"), desc: t("steps.account.desc") },
+    { n: "2", title: t("steps.find.title"), desc: t("steps.find.desc") },
+    { n: "3", title: t("steps.connect.title"), desc: t("steps.connect.desc") },
+    { n: "4", title: t("steps.start.title"), desc: t("steps.start.desc") },
+  ];
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-12">
       <h1 className="mb-4 text-3xl font-bold text-primary">
-        {isAr ? "كيف يعمل زاد؟" : "How Zad Works"}
+        {t("title")}
       </h1>
       <p className="mb-10 text-muted-foreground">
-        {isAr
-          ? "أربع خطوات بسيطة تفصلك عن بداية رحلتك التعليمية"
-          : "Four simple steps to start your learning journey"}
+        {t("subtitle")}
       </p>
 
       <div className="space-y-5">

@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { MapPin, Star, Heart, MessageCircle } from "lucide-react";
 import { cn, getInitials, formatPrice } from "@/lib/utils";
 import type { Teacher, TeacherSubject } from "@/types";
@@ -25,6 +25,8 @@ export function TeacherCard({
   variant = "full",
 }: TeacherCardProps) {
   const locale = useLocale();
+  const tCommon = useTranslations("common");
+  const tAdmin = useTranslations("admin");
   const user = teacher.user;
   const area = teacher.area;
 
@@ -113,10 +115,10 @@ export function TeacherCard({
         {subjects && subjects.length > 0 && variant === "full" && (
           <div className="mt-1.5 flex gap-3 text-xs text-muted-foreground">
             {subjects[0].priceOnline != null && (
-              <span>أونلاين: <strong className="text-foreground">{formatPrice(subjects[0].priceOnline)}</strong></span>
+              <span>{tCommon("online")}: <strong className="text-foreground">{formatPrice(subjects[0].priceOnline)}</strong></span>
             )}
             {subjects[0].priceOffline != null && (
-              <span>أوفلاين: <strong className="text-foreground">{formatPrice(subjects[0].priceOffline)}</strong></span>
+              <span>{tCommon("offline")}: <strong className="text-foreground">{formatPrice(subjects[0].priceOffline)}</strong></span>
             )}
           </div>
         )}
@@ -129,7 +131,7 @@ export function TeacherCard({
           className="shrink-0 flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-white hover:bg-primary-dark"
         >
           <MessageCircle className="h-3.5 w-3.5" />
-          <span className="hidden sm:inline">تواصل</span>
+          <span className="hidden sm:inline">{tAdmin("contact")}</span>
         </button>
       )}
     </div>

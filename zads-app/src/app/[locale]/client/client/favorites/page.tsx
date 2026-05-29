@@ -27,9 +27,9 @@ export default function FavoritesPage() {
       {!data || data.length === 0 ? (
         <div className="rounded-xl border border-dashed border-border p-8 text-center">
           <Heart className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
-          <p className="text-muted-foreground">لا يوجد معلمون في المفضلة</p>
+          <p className="text-muted-foreground">{t("noFavoritesYet")}</p>
           <Link href={`/${locale}/client/client/teacher`} className="mt-3 block text-sm text-primary hover:underline">
-            ابحث عن معلم
+            {t("findTeacher")}
           </Link>
         </div>
       ) : (

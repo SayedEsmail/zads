@@ -3,13 +3,14 @@ import { useLocale, useTranslations } from "next-intl";
 
 export default function Footer() {
   const t = useTranslations("nav");
+  const tCommon = useTranslations("common");
   const locale = useLocale();
 
   return (
     <footer className="border-t border-border bg-surface">
       <div className="mx-auto max-w-6xl px-4 py-8">
         <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
-          <p className="text-xl font-bold text-primary">زاد</p>
+          <img src="/logo.svg" alt="Zads Logo" className="h-8 w-auto object-contain" />
 
           <nav className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
             <Link href={`/${locale}`} className="hover:text-primary">{t("home")}</Link>
@@ -18,7 +19,7 @@ export default function Footer() {
           </nav>
 
           <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} زاد. All rights reserved.
+            {tCommon("copyright", { year: new Date().getFullYear() })}
           </p>
         </div>
       </div>

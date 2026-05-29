@@ -3,17 +3,17 @@
 import { useEffect } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
-import { BarChart2, FileText, Search } from "lucide-react";
+import { Search, FileText } from "lucide-react";
 import { useTeacherStore } from "@/stores/teacher";
 import { useTutorRequestsStore } from "@/stores/tutor-requests";
 import { useContactRequestsStore } from "@/stores/contact-requests";
 import { PageSkeleton } from "@/components/shared/PageSkeleton";
 import { ErrorBanner } from "@/components/shared/ErrorBanner";
-import { TutorRequestCard } from "@/components/shared/TutorRequestCard";
 
 export default function TeacherDashboardPage() {
   const locale = useLocale();
   const t = useTranslations("teacher");
+  const tCommon = useTranslations("common");
   const teacherStore = useTeacherStore();
   const contactStore = useContactRequestsStore();
   const tutorStore = useTutorRequestsStore();
@@ -34,7 +34,7 @@ export default function TeacherDashboardPage() {
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Header */}
       <div className="rounded-2xl bg-gradient-to-l from-secondary/5 to-secondary/10 p-5">
-        <p className="text-sm text-muted-foreground">أهلاً بك</p>
+        <p className="text-sm text-muted-foreground">{t("welcome")}</p>
         <p className="text-xl font-bold text-secondary">{teacherStore.data?.user?.name} 🎓</p>
       </div>
 
@@ -75,7 +75,7 @@ export default function TeacherDashboardPage() {
 
       {/* Incoming contact requests */}
       <section>
-        <h2 className="mb-3 font-semibold">طلبات التواصل الواردة</h2>
+        <h2 className="mb-3 font-semibold">{t("incomingContacts")}</h2>
         <div className="space-y-3">
           {(contactStore.incoming ?? []).slice(0, 5).map((r) => (
             <div key={r.id} className="flex items-center justify-between rounded-xl border border-border bg-surface p-4">
@@ -88,19 +88,19 @@ export default function TeacherDashboardPage() {
                   onClick={() => contactStore.updateStatus(r.id, "accepted")}
                   className="rounded-lg bg-success/10 px-3 py-1.5 text-xs font-medium text-success hover:bg-success/20"
                 >
-                  قبول
+                  {tCommon("accept")}
                 </button>
                 <button
                   onClick={() => contactStore.updateStatus(r.id, "rejected")}
                   className="rounded-lg bg-destructive/10 px-3 py-1.5 text-xs font-medium text-destructive hover:bg-destructive/20"
                 >
-                  رفض
+                  {tCommon("reject")}
                 </button>
               </div>
             </div>
           ))}
           {(contactStore.incoming ?? []).length === 0 && (
-            <p className="text-sm text-muted-foreground">لا توجد طلبات واردة</p>
+            <p className="text-sm text-muted-foreground">{t("noIncomingRequests")}</p>
           )}
         </div>
       </section>

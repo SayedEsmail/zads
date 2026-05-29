@@ -41,8 +41,8 @@ export default function Navbar() {
     <header className="sticky top-0 z-50 border-b border-border bg-surface/95 backdrop-blur supports-[backdrop-filter]:bg-surface/60">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
         {/* Logo */}
-        <Link href={`/${locale}/public`} className="text-xl font-bold text-primary">
-          زاد
+        <Link href={`/${locale}/public`} className="flex items-center">
+          <img src="/logo.svg" alt="Zads Logo" className="h-10 md:h-12 w-auto object-contain" />
         </Link>
 
         {/* Desktop nav */}

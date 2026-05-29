@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { useTeacherStore } from "@/stores/teacher";
 import { useSearchStore } from "@/stores/search";
@@ -13,7 +12,8 @@ import Image from "next/image";
 
 export default function TeacherProfilePage() {
   const t = useTranslations("teacher");
-  const { data: session } = useSession();
+  const tAuth = useTranslations("auth");
+  const tCommon = useTranslations("common");
   const teacherStore = useTeacherStore();
   const authStore = useAuthStore();
   const { governorates, cities, areas, fetchGovernorates, fetchCities, fetchAreas } = useSearchStore();
@@ -71,13 +71,13 @@ export default function TeacherProfilePage() {
             </div>
           )}
           <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 hover:opacity-100 transition-opacity">
-            <span className="text-xs text-white">تغيير</span>
+            <span className="text-xs text-white">{tCommon("change")}</span>
           </div>
         </div>
         <div>
           <p className="font-semibold">{user?.name}</p>
           <p className="text-sm text-muted-foreground">{user?.phone}</p>
-          <p className="text-xs text-muted-foreground mt-0.5">انقر على الصورة لتغييرها</p>
+          <p className="text-xs text-muted-foreground mt-0.5">{tCommon("avatarInstruction")}</p>
         </div>
         <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
       </div>
@@ -86,44 +86,44 @@ export default function TeacherProfilePage() {
 
       <form onSubmit={handleUpdate} className="space-y-4">
         <div>
-          <label className="mb-1.5 block text-sm font-medium">نبذة عني</label>
+          <label className="mb-1.5 block text-sm font-medium">{tAuth("bio")}</label>
           <textarea name="bio" defaultValue={teacher?.bio ?? ""} rows={3} className="w-full rounded-lg border border-border px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
         </div>
         <div>
-          <label className="mb-1.5 block text-sm font-medium">المؤهل العلمي</label>
+          <label className="mb-1.5 block text-sm font-medium">{tCommon("qualification")}</label>
           <input name="qualification" type="text" defaultValue={teacher?.qualification ?? ""} className="w-full rounded-lg border border-border px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
         </div>
         <div>
-          <label className="mb-1.5 block text-sm font-medium">سنوات الخبرة</label>
+          <label className="mb-1.5 block text-sm font-medium">{tCommon("experienceYears")}</label>
           <input name="experienceYears" type="number" min="0" defaultValue={teacher?.experienceYears ?? ""} className="w-full rounded-lg border border-border px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" />
         </div>
         <div>
-          <label className="mb-1.5 block text-sm font-medium">المحافظة</label>
+          <label className="mb-1.5 block text-sm font-medium">{tCommon("governorate")}</label>
           <select name="governorateId" onChange={(e) => fetchCities(e.target.value)} className="w-full rounded-lg border border-border px-3 py-2.5 text-sm focus:outline-none">
-            <option value="">اختر المحافظة</option>
+            <option value="">{tCommon("selectGovernorate")}</option>
             {governorates.map((g) => <option key={g.id} value={g.id}>{g.nameAr}</option>)}
           </select>
         </div>
         {cities.length > 0 && (
           <div>
-            <label className="mb-1.5 block text-sm font-medium">المدينة</label>
+            <label className="mb-1.5 block text-sm font-medium">{tCommon("city")}</label>
             <select name="cityId" onChange={(e) => fetchAreas(e.target.value)} className="w-full rounded-lg border border-border px-3 py-2.5 text-sm focus:outline-none">
-              <option value="">اختر المدينة</option>
+              <option value="">{tCommon("selectCity")}</option>
               {cities.map((c) => <option key={c.id} value={c.id}>{c.nameAr}</option>)}
             </select>
           </div>
         )}
         {areas.length > 0 && (
           <div>
-            <label className="mb-1.5 block text-sm font-medium">المنطقة</label>
+            <label className="mb-1.5 block text-sm font-medium">{tCommon("area")}</label>
             <select name="areaId" defaultValue={teacher?.areaId ?? ""} className="w-full rounded-lg border border-border px-3 py-2.5 text-sm focus:outline-none">
-              <option value="">اختر المنطقة</option>
+              <option value="">{tCommon("selectArea")}</option>
               {areas.map((a) => <option key={a.id} value={a.id}>{a.nameAr}</option>)}
             </select>
           </div>
         )}
         <button type="submit" disabled={teacherStore.isLoading} className="rounded-lg bg-primary px-6 py-2.5 text-sm font-medium text-white hover:bg-primary-dark disabled:opacity-60">
-          {teacherStore.isLoading ? "..." : "حفظ التغييرات"}
+          {teacherStore.isLoading ? "..." : tCommon("save")}
         </button>
       </form>
     </div>

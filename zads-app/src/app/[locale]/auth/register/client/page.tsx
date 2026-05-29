@@ -58,9 +58,9 @@ export default function RegisterClientPage() {
   };
 
   return (
-    <div className="rounded-2xl border border-border bg-surface p-8 shadow-sm">
-      <div className="mb-6 text-center">
-        <h1 className="text-3xl font-bold text-primary">زاد</h1>
+    <div className="w-full bg-surface p-4 sm:p-8">
+      <div className="mb-6 flex flex-col items-center justify-center">
+        <img src="/logo.svg" alt="Zads Logo" className="h-16 w-auto object-contain" />
       </div>
 
       <h2 className="mb-6 text-xl font-semibold">{t("registerClient")}</h2>

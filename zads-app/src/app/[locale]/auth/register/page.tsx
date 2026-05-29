@@ -11,9 +11,9 @@ function RegisterPageClient() {
   const locale = useLocale();
 
   return (
-    <div className="rounded-2xl border border-border bg-surface p-8 shadow-sm">
-      <div className="mb-8 text-center">
-        <h1 className="text-3xl font-bold text-primary">زاد</h1>
+    <div className="w-full bg-surface p-4 sm:p-8">
+      <div className="mb-8 flex flex-col items-center justify-center">
+        <img src="/logo.svg" alt="Zads Logo" className="h-16 w-auto object-contain" />
       </div>
 
       <h2 className="mb-2 text-xl font-semibold">{t("register")}</h2>
@@ -27,11 +27,11 @@ function RegisterPageClient() {
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10">
             <User2 className="h-5 w-5 text-primary" />
           </div>
-          <div className="flex-1 text-end">
+          <div className="flex-1 text-start">
             <p className="font-semibold">{t("clientRole")}</p>
             <p className="mt-0.5 text-sm text-muted-foreground">{t("clientRoleDesc")}</p>
           </div>
-          <span className="text-muted-foreground">›</span>
+          <span className="text-muted-foreground inline-block rtl:rotate-180 font-mono text-lg">›</span>
         </Link>
 
         <Link
@@ -41,11 +41,11 @@ function RegisterPageClient() {
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-secondary/10">
             <GraduationCap className="h-5 w-5 text-secondary" />
           </div>
-          <div className="flex-1 text-end">
+          <div className="flex-1 text-start">
             <p className="font-semibold">{t("teacherRole")}</p>
             <p className="mt-0.5 text-sm text-muted-foreground">{t("teacherRoleDesc")}</p>
           </div>
-          <span className="text-muted-foreground">›</span>
+          <span className="text-muted-foreground inline-block rtl:rotate-180 font-mono text-lg">›</span>
         </Link>
       </div>
 
