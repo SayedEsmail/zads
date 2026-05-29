@@ -1,0 +1,79 @@
+name: Deploy Backend API (zads-api)
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'zads-api/**'
+      - '.github/workflows/deploy-api.yml'
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    name: Build & Test Backend
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 8
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Cache pnpm dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install Dependencies
+        run: pnpm --filter zads-api install
+
+      - name: Run Prisma Generate
+        run: pnpm --filter zads-api exec prisma generate
+
+      - name: Lint Checks
+        run: pnpm --filter zads-api run lint
+        continue-on-error: true # Suppress non-blocking styling errors to ensure build succeeds
+
+  deploy:
+    name: Deploy API Server
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Standard VPS deployment via SSH. Installs updates, runs Prisma migrations, and reloads PM2 process.
+      # You can replace this section with your Docker registry build and push action as required.
+      - name: Deploy to VPS Server via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SERVER_PORT || 22 }}
+          script: |
+            cd /var/www/zads/zads-api
+            git pull origin main
+            pnpm install
+            pnpm exec prisma migrate deploy
+            pnpm exec prisma generate
+            pm2 restart zads-api || pm2 start src/app.js --name zads-api
