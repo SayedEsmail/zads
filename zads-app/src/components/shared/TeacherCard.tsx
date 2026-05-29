@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { MapPin, Star, Heart, MessageCircle } from "lucide-react";
 import { cn, getInitials, formatPrice } from "@/lib/utils";
@@ -25,13 +26,21 @@ export function TeacherCard({
   variant = "full",
 }: TeacherCardProps) {
   const locale = useLocale();
+  const router = useRouter();
   const tCommon = useTranslations("common");
   const tAdmin = useTranslations("admin");
   const user = teacher.user;
   const area = teacher.area;
 
+  const handleCardClick = () => {
+    router.push(`/${locale}/client/client/teacher/${teacher.id}`);
+  };
+
   return (
-    <div className="group flex items-start gap-4 rounded-[1.25rem] border border-slate-100 bg-white p-5 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_30px_-10px_rgba(0,0,0,0.1)] hover:border-blue-100">
+    <div 
+      onClick={handleCardClick}
+      className="group flex items-start gap-4 rounded-[1.25rem] border border-slate-100 bg-white p-5 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_30px_-10px_rgba(0,0,0,0.1)] hover:border-blue-100 cursor-pointer text-start"
+    >
       {/* Avatar */}
       <div className="shrink-0">
         {user?.avatarUrl ? (
@@ -57,14 +66,18 @@ export function TeacherCard({
         <div className="flex items-start justify-between gap-2">
           <Link
             href={`/${locale}/client/client/teacher/${teacher.id}`}
+            onClick={(e) => e.stopPropagation()}
             className="font-semibold hover:text-primary line-clamp-1"
           >
             {user?.name}
           </Link>
           {onToggleFavorite && (
             <button
-              onClick={() => onToggleFavorite(teacher.id)}
-              className="shrink-0 text-muted-foreground hover:text-destructive"
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleFavorite(teacher.id);
+              }}
+              className="shrink-0 text-muted-foreground hover:text-destructive relative z-10"
               aria-label="Toggle favorite"
             >
               <Heart className={cn("h-4 w-4", isFavorite && "fill-destructive text-destructive")} />
@@ -127,8 +140,11 @@ export function TeacherCard({
       {/* Contact button */}
       {onContact && (
         <button
-          onClick={() => onContact(teacher.id)}
-          className="shrink-0 flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-white hover:bg-primary-dark"
+          onClick={(e) => {
+            e.stopPropagation();
+            onContact(teacher.id);
+          }}
+          className="shrink-0 flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-white hover:bg-primary-dark relative z-10"
         >
           <MessageCircle className="h-3.5 w-3.5" />
           <span className="hidden sm:inline">{tAdmin("contact")}</span>

@@ -66,7 +66,10 @@ const getTutorRequests = async (req, res, next) => {
 
         const where = {
             status: 'active',
-            expiresAt: { gt: new Date() }
+            OR: [
+                { expiresAt: null },
+                { expiresAt: { gt: new Date() } }
+            ]
         };
 
         if (subjectId) where.subjectId = subjectId;
@@ -84,10 +87,50 @@ const getTutorRequests = async (req, res, next) => {
                     }
                 },
                 subject: true,
-                stage: true
+                stage: true,
+                area: {
+                    include: {
+                        city: {
+                            include: {
+                                governorate: true
+                            }
+                        }
+                    }
+                }
             },
             orderBy: { createdAt: 'desc' }
         });
+
+        // Proximity Sorting based on logged-in teacher's location
+        const teacherAreaId = req.user?.teacher?.areaId;
+        if (teacherAreaId) {
+            const teacherArea = await prisma.area.findUnique({
+                where: { id: teacherAreaId },
+                include: { city: true }
+            });
+
+            if (teacherArea) {
+                requests.sort((a, b) => {
+                    // Priority 1: Same neighborhood/area
+                    const aSameArea = a.areaId === teacherAreaId ? 1 : 0;
+                    const bSameArea = b.areaId === teacherAreaId ? 1 : 0;
+                    if (aSameArea !== bSameArea) return bSameArea - aSameArea;
+
+                    // Priority 2: Same city
+                    const aSameCity = a.area?.cityId === teacherArea.cityId ? 1 : 0;
+                    const bSameCity = b.area?.cityId === teacherArea.cityId ? 1 : 0;
+                    if (aSameCity !== bSameCity) return bSameCity - aSameCity;
+
+                    // Priority 3: Same governorate
+                    const aSameGov = a.area?.city?.governorateId === teacherArea.city?.governorateId ? 1 : 0;
+                    const bSameGov = b.area?.city?.governorateId === teacherArea.city?.governorateId ? 1 : 0;
+                    if (aSameGov !== bSameGov) return bSameGov - aSameGov;
+
+                    // Default to creation date descending
+                    return new Date(b.createdAt) - new Date(a.createdAt);
+                });
+            }
+        }
 
         return response.success(res, requests);
 

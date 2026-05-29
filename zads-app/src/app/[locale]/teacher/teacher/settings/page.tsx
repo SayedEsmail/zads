@@ -9,7 +9,7 @@ export default function TeacherSettingsPage() {
   const locale = useLocale();
 
   useEffect(() => {
-    router.replace(`/${locale}/teacher/profile`);
+    router.replace(`/${locale}/teacher/teacher/profile`);
   }, [router, locale]);
 
   return null;

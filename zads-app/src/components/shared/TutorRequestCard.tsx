@@ -74,8 +74,13 @@ export function TutorRequestCard({
           {getTargetLabel(request.requestTarget)}
         </span>
         {request.parentChild && (
-          <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs text-muted-foreground">
+          <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
             {request.parentChild.name}
+          </span>
+        )}
+        {request.area && (
+          <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 flex items-center gap-1 border border-emerald-100/50">
+            📍 {request.area.city?.governorate?.nameAr} • {request.area.city?.nameAr} • {request.area.nameAr}
           </span>
         )}
       </div>

@@ -7,11 +7,11 @@ import type { TeacherSubject } from "@/types";
 interface AddSubjectPayload {
   subjectId: string;
   stageId: string;
-  priceOnline?: number;
-  priceOffline?: number;
-  priceAtTeacher?: number;
-  priceAtStudent?: number;
-  priceGroup?: number;
+  priceOnline?: number | null;
+  priceOffline?: number | null;
+  priceAtTeacher?: number | null;
+  priceAtStudent?: number | null;
+  priceGroup?: number | null;
   priceNegotiable?: boolean;
   durationMinutes?: number;
 }

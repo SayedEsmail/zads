@@ -20,8 +20,9 @@ function useNavItems(role: Role, locale: string, t: Translator) {
     const base = `/${locale}/client/client`;
     return [
       { href: base, label: t("dashboard"), icon: LayoutDashboard },
+      { href: `${base}/teacher`, label: t("searchTeachers"), icon: Search },
       { href: `${base}/dependents`, label: t("dependents"), icon: Users },
-      { href: `${base}/requests`, label: t("requests"), icon: FileText },
+      { href: `${base}/requests`, label: t("requestsClient"), icon: FileText },
       { href: `${base}/favorites`, label: t("favorites"), icon: Heart },
       { href: `${base}/profile`, label: t("profile"), icon: User },
     ];
@@ -30,8 +31,8 @@ function useNavItems(role: Role, locale: string, t: Translator) {
     const base = `/${locale}/teacher/teacher`;
     return [
       { href: base, label: t("dashboard"), icon: LayoutDashboard },
-      { href: `${base}/browse`, label: t("browse"), icon: Search },
-      { href: `${base}/requests`, label: t("requests"), icon: FileText },
+      { href: `${base}/browse`, label: t("browseTeacher"), icon: Search },
+      { href: `${base}/requests`, label: t("requestsTeacher"), icon: FileText },
       { href: `${base}/subjects`, label: t("subjects"), icon: BookOpen },
       { href: `${base}/profile`, label: t("profile"), icon: User },
     ];
