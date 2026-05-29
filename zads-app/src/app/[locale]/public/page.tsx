@@ -4,36 +4,35 @@ import { MapPin, Wifi, Clock, Star } from "lucide-react";
 
 export default function LandingPage() {
   const t = useTranslations("landing");
-  const tAuth = useTranslations("auth");
   const locale = useLocale();
 
   const features = [
     {
       icon: MapPin,
-      title: locale === "ar" ? "في منطقتك" : "Local Teachers",
-      desc: locale === "ar" ? "اعثر على مدرسين قريبين منك بسهولة" : "Find tutors near you, in your neighborhood",
+      title: t("features.local.title"),
+      desc: t("features.local.desc"),
     },
     {
       icon: Wifi,
-      title: locale === "ar" ? "أونلاين وأوفلاين" : "Online & Offline",
-      desc: locale === "ar" ? "احجز دروساً أونلاين أو وجهاً لوجه" : "Book lessons online or face-to-face",
+      title: t("features.onlineOffline.title"),
+      desc: t("features.onlineOffline.desc"),
     },
     {
       icon: Star,
-      title: locale === "ar" ? "مدرسون موثوقون" : "Verified Tutors",
-      desc: locale === "ar" ? "مدرسون بتقييمات حقيقية وخبرة موثّقة" : "Tutors with real ratings and verified experience",
+      title: t("features.verified.title"),
+      desc: t("features.verified.desc"),
     },
     {
       icon: Clock,
-      title: locale === "ar" ? "لنفسك أو لتابعيك" : "For You & Your Family",
-      desc: locale === "ar" ? "احجز دروساً لنفسك أو لأبنائك في نفس الحساب" : "Book for yourself or your dependents under one account",
+      title: t("features.family.title"),
+      desc: t("features.family.desc"),
     },
   ];
 
   const steps = [
-    { n: "1", title: locale === "ar" ? "ابحث عن معلم" : "Find a Teacher", desc: locale === "ar" ? "استخدم الفلاتر لتحديد المادة والمنطقة وطريقة التعلم" : "Use filters to find the right tutor by subject, area, and mode" },
-    { n: "2", title: locale === "ar" ? "تواصل وانسّق" : "Connect & Coordinate", desc: locale === "ar" ? "تواصل مع المعلم مباشرةً وحدد الموعد المناسب" : "Contact the tutor directly and set up your first session" },
-    { n: "3", title: locale === "ar" ? "ابدأ التعلم" : "Start Learning", desc: locale === "ar" ? "ابدأ رحلتك التعليمية أونلاين أو أوجهاً لوجه" : "Begin your learning journey online or in-person" },
+    { n: "1", title: t("steps.find.title"), desc: t("steps.find.desc") },
+    { n: "2", title: t("steps.connect.title"), desc: t("steps.connect.desc") },
+    { n: "3", title: t("steps.start.title"), desc: t("steps.start.desc") },
   ];
 
   return (
@@ -103,7 +102,7 @@ export default function LandingPage() {
       {/* Final CTA */}
       <section className="px-4 py-12 text-center">
         <h2 className="mb-4 text-2xl font-bold">
-          {locale === "ar" ? "جاهز للبدء؟" : "Ready to start?"}
+          {t("readyToStart")}
         </h2>
         <Link
           href={`/${locale}/auth/register`}

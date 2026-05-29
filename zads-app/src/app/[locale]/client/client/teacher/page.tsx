@@ -12,6 +12,8 @@ import type { StudyMode } from "@/types";
 export default function TeacherSearchPage() {
   const locale = useLocale();
   const t = useTranslations("request");
+  const tClient = useTranslations("client");
+  const tCommon = useTranslations("common");
   const {
     teachers, totalTeachers, isLoadingTeachers, error,
     subjects, stages, governorates,
@@ -46,7 +48,7 @@ export default function TeacherSearchPage() {
 
   return (
     <div className="max-w-3xl mx-auto space-y-4">
-      <h1 className="text-xl font-bold">البحث عن معلم</h1>
+      <h1 className="text-xl font-bold">{tClient("findTeacher")}</h1>
 
       {/* Search bar */}
       <div className="flex gap-2">
@@ -55,7 +57,7 @@ export default function TeacherSearchPage() {
           <input
             value={filters.query}
             onChange={(e) => setFilters((f) => ({ ...f, query: e.target.value }))}
-            placeholder="ابحث بالاسم أو المادة..."
+            placeholder={tClient("searchPlaceholder")}
             className="w-full rounded-lg border border-border ps-9 pe-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
             onKeyDown={(e) => e.key === "Enter" && handleSearch()}
           />
@@ -65,13 +67,13 @@ export default function TeacherSearchPage() {
           className={`flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-sm transition-colors ${showFilters ? "bg-primary text-white border-primary" : "hover:bg-muted"}`}
         >
           <SlidersHorizontal className="h-4 w-4" />
-          فلتر
+          {tCommon("filter")}
         </button>
         <button
           onClick={handleSearch}
           className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-dark"
         >
-          بحث
+          {tCommon("search")}
         </button>
       </div>
 
@@ -83,7 +85,7 @@ export default function TeacherSearchPage() {
             onChange={(e) => setFilters((f) => ({ ...f, subjectId: e.target.value }))}
             className="rounded-lg border border-border px-2.5 py-2 text-sm focus:outline-none"
           >
-            <option value="">كل المواد</option>
+            <option value="">{tClient("allSubjects")}</option>
             {subjects.map((s) => <option key={s.id} value={s.id}>{s.nameAr}</option>)}
           </select>
           <select
@@ -91,7 +93,7 @@ export default function TeacherSearchPage() {
             onChange={(e) => setFilters((f) => ({ ...f, stageId: e.target.value }))}
             className="rounded-lg border border-border px-2.5 py-2 text-sm focus:outline-none"
           >
-            <option value="">كل المراحل</option>
+            <option value="">{tClient("allStages")}</option>
             {stages.map((s) => <option key={s.id} value={s.id}>{s.nameAr}</option>)}
           </select>
           <select
@@ -99,7 +101,7 @@ export default function TeacherSearchPage() {
             onChange={(e) => setFilters((f) => ({ ...f, governorateId: e.target.value }))}
             className="rounded-lg border border-border px-2.5 py-2 text-sm focus:outline-none"
           >
-            <option value="">كل المحافظات</option>
+            <option value="">{tClient("allGovernorates")}</option>
             {governorates.map((g) => <option key={g.id} value={g.id}>{g.nameAr}</option>)}
           </select>
           <select
@@ -107,7 +109,7 @@ export default function TeacherSearchPage() {
             onChange={(e) => setFilters((f) => ({ ...f, studyMode: e.target.value as StudyMode | "" }))}
             className="rounded-lg border border-border px-2.5 py-2 text-sm focus:outline-none"
           >
-            <option value="">طريقة التعلم</option>
+            <option value="">{t("studyMode")}</option>
             <option value="online">{t("online")}</option>
             <option value="offline">{t("offline")}</option>
             <option value="both">{t("both")}</option>
@@ -116,7 +118,7 @@ export default function TeacherSearchPage() {
       )}
 
       {/* Results */}
-      <p className="text-sm text-muted-foreground">{totalTeachers} معلم</p>
+      <p className="text-sm text-muted-foreground">{tClient("teachersCount", { count: totalTeachers })}</p>
 
       {isLoadingTeachers ? (
         <PageSkeleton rows={4} />
@@ -134,7 +136,7 @@ export default function TeacherSearchPage() {
             />
           ))}
           {teachers.length === 0 && (
-            <p className="py-8 text-center text-muted-foreground">لا توجد نتائج. جرّب تغيير الفلاتر.</p>
+            <p className="py-8 text-center text-muted-foreground">{tClient("noResultsWithFilters")}</p>
           )}
         </div>
       )}

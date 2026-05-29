@@ -41,7 +41,7 @@ export default function DependentsPage() {
   return (
     <div className="max-w-2xl mx-auto space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">{t("dependents")} (التابعون)</h1>
+        <h1 className="text-xl font-bold">{t("dependents")}</h1>
         <button
           onClick={openAdd}
           className="flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary-dark"
@@ -55,7 +55,7 @@ export default function DependentsPage() {
 
       {!data || data.length === 0 ? (
         <div className="rounded-xl border border-dashed border-border p-8 text-center">
-          <p className="text-muted-foreground">لا يوجد تابعون حتى الآن</p>
+          <p className="text-muted-foreground">{t("noDependentsYet")}</p>
           <button onClick={openAdd} className="mt-3 text-sm text-primary hover:underline">
             {t("addDependent")}
           </button>

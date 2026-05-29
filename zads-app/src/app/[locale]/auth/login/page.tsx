@@ -44,11 +44,10 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="rounded-2xl border border-border bg-surface p-8 shadow-sm">
+    <div className="w-full bg-surface p-4 sm:p-8">
       {/* Logo */}
-      <div className="mb-8 text-center">
-        <h1 className="text-3xl font-bold text-primary">زاد</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Zad</p>
+      <div className="mb-8 flex flex-col items-center justify-center">
+        <img src="/logo.svg" alt="Zads Logo" className="h-16 w-auto object-contain" />
       </div>
 
       <h2 className="mb-6 text-xl font-semibold">{t("login")}</h2>

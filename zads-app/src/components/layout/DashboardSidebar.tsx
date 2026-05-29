@@ -2,12 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { signOut, useSession } from "next-auth/react";
 import {
   LayoutDashboard, Search, FileText, Heart, Users, User, Settings,
-  BookOpen, ListTodo, BarChart2, Menu, X, LogOut, GraduationCap,
+  BookOpen, ListTodo, BarChart2, Menu, X, LogOut, GraduationCap, Globe,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -58,6 +58,7 @@ interface Props {
 export default function DashboardSidebar({ role }: Props) {
   const locale = useLocale();
   const pathname = usePathname();
+  const router = useRouter();
   const t = useTranslations("nav");
   const tAdmin = useTranslations("admin");
   const tAuth = useTranslations("auth");
@@ -68,14 +69,17 @@ export default function DashboardSidebar({ role }: Props) {
   const trans = role === "admin" ? tAdmin : t;
   const navItems = useNavItems(role, locale, trans);
 
+  const otherLocale = locale === "ar" ? "en" : "ar";
+  const switchLocale = () => {
+    const newPath = pathname.replace(`/${locale}`, `/${otherLocale}`);
+    router.push(newPath);
+  };
+
   const sidebarContent = (
     <div className="flex h-full flex-col">
-      {/* Header */}
-      <div className="flex items-center justify-between border-b border-border p-4">
-        <Link href={`/${locale}/public`} className="text-lg font-bold text-primary">
-          زاد
-        </Link>
-        <button className="md:hidden" onClick={() => setMobileOpen(false)}>
+      {/* Header close button for Mobile Drawer only */}
+      <div className="flex items-center justify-end border-b border-border p-4 md:hidden">
+        <button onClick={() => setMobileOpen(false)} aria-label="Close menu">
           <X className="h-5 w-5" />
         </button>
       </div>
@@ -123,13 +127,31 @@ export default function DashboardSidebar({ role }: Props) {
 
   return (
     <>
-      {/* Mobile toggle button */}
-      <button
-        className="fixed bottom-4 end-4 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-primary text-white shadow-lg md:hidden"
-        onClick={() => setMobileOpen(true)}
-      >
-        <Menu className="h-5 w-5" />
-      </button>
+      {/* Global Top Header (Desktop & Mobile) */}
+      <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-border bg-surface px-6 shadow-sm shrink-0">
+        <Link href={`/${locale}/public`} className="flex items-center">
+          <img src="/logo.svg" alt="Zads Logo" className="h-10 md:h-12 w-auto object-contain" />
+        </Link>
+        <div className="flex items-center gap-3">
+          {/* Language Switcher */}
+          <button
+            onClick={switchLocale}
+            className="flex items-center gap-1 rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium hover:bg-muted text-foreground transition-colors"
+            title="Switch language / تغيير اللغة"
+          >
+            <Globe className="h-3.5 w-3.5" />
+            <span>{otherLocale.toUpperCase()}</span>
+          </button>
+          
+          <button
+            onClick={() => setMobileOpen(true)}
+            className="rounded-lg border border-border p-2 hover:bg-muted text-foreground md:hidden"
+            aria-label="Open menu"
+          >
+            <Menu className="h-5 w-5" />
+          </button>
+        </div>
+      </header>
 
       {/* Mobile overlay */}
       {mobileOpen && (
@@ -149,9 +171,9 @@ export default function DashboardSidebar({ role }: Props) {
         {sidebarContent}
       </div>
 
-      {/* Desktop sidebar */}
-      <aside className="hidden w-64 shrink-0 border-e border-border bg-surface md:block">
-        <div className="sticky top-0 h-screen overflow-hidden">
+      {/* Desktop sidebar (Fixed below top header) */}
+      <aside className="hidden w-64 border-e border-border bg-surface md:block fixed top-16 start-0 bottom-0 z-20">
+        <div className="h-full overflow-y-auto">
           {sidebarContent}
         </div>
       </aside>

@@ -15,7 +15,31 @@
     "search": "Search",
     "filter": "Filter",
     "noResults": "No results found",
-    "viewAll": "View all"
+    "viewAll": "View all",
+    "copyright": "© {year} Zads. All rights reserved.",
+    "qualification": "Qualification",
+    "experienceYears": "Years of Experience",
+    "governorate": "Governorate",
+    "city": "City",
+    "area": "Area",
+    "welcome": "Welcome",
+    "accept": "Accept",
+    "reject": "Reject",
+    "change": "Change",
+    "avatarInstruction": "Click on the image to change it",
+    "verified": "Verified",
+    "unverified": "Unverified",
+    "duration": "{minutes} minutes",
+    "subject": "Subject",
+    "stage": "Stage",
+    "selectGovernorate": "Select Governorate",
+    "selectCity": "Select City",
+    "selectArea": "Select Area",
+    "studyMode": "Study Mode",
+    "online": "Online",
+    "offline": "Offline",
+    "atTeacher": "At Teacher",
+    "atStudent": "At Student"
   },
   "auth": {
     "login": "Sign In",
@@ -40,7 +64,11 @@
     "student": "Individual (for myself)",
     "guardian": "Guardian (for my children)",
     "registerClient": "Create Client Account",
-    "registerTeacher": "Create Teacher Account"
+    "registerTeacher": "Create Teacher Account",
+    "resetLinkSent": "Check your email for a password reset link.",
+    "sendResetLink": "Send Reset Link",
+    "backToSignIn": "Back to sign in",
+    "bio": "Bio (Optional)"
   },
   "nav": {
     "home": "Home",
@@ -63,7 +91,75 @@
     "startNow": "Get Started",
     "exploreTeachers": "Explore Teachers",
     "featuresTitle": "Why Zad?",
-    "howItWorksTitle": "How Zad Works"
+    "howItWorksTitle": "How Zad Works",
+    "features": {
+      "local": {
+        "title": "Local Teachers",
+        "desc": "Find tutors near you, in your neighborhood"
+      },
+      "onlineOffline": {
+        "title": "Online & Offline",
+        "desc": "Book lessons online or face-to-face"
+      },
+      "verified": {
+        "title": "Verified Tutors",
+        "desc": "Tutors with real ratings and verified experience"
+      },
+      "family": {
+        "title": "For You & Your Family",
+        "desc": "Book for yourself or your dependents under one account"
+      }
+    },
+    "steps": {
+      "find": {
+        "title": "Find a Teacher",
+        "desc": "Use filters to find the right tutor by subject, area, and mode"
+      },
+      "connect": {
+        "title": "Connect & Coordinate",
+        "desc": "Contact the tutor directly and set up your first session"
+      },
+      "start": {
+        "title": "Start Learning",
+        "desc": "Begin your learning journey online or in-person"
+      }
+    },
+    "readyToStart": "Ready to start?"
+  },
+  "about": {
+    "title": "About Zad",
+    "intro": "Zad is a local learning platform that connects learners with tutors in the same area. We believe quality education starts in your neighborhood — where teacher and student can meet easily, whether online or face-to-face.",
+    "missionTitle": "Our Mission",
+    "missionDesc": "Make local tutoring easy to find and coordinate for every family and every learner, regardless of their level, subject, or preferred study mode.",
+    "whyUsTitle": "What Sets Us Apart",
+    "whyUs": {
+      "geo": "Geographic search — find a tutor in the same neighborhood or city",
+      "flex": "Online & offline lessons — flexibility in how you learn",
+      "account": "One account for the learner and all their dependents",
+      "ratings": "Real ratings from previous students"
+    }
+  },
+  "howItWorks": {
+    "title": "How Zad Works",
+    "subtitle": "Four simple steps to start your learning journey",
+    "steps": {
+      "account": {
+        "title": "Create your account",
+        "desc": "Sign up as a client (for yourself or your children) or as a teacher. Registration takes less than a minute."
+      },
+      "find": {
+        "title": "Find a tutor",
+        "desc": "Use filters for subject, stage, area, and study mode (online/offline) to find the perfect match."
+      },
+      "connect": {
+        "title": "Connect & Coordinate",
+        "desc": "Message the tutor directly through the platform and set up your schedule."
+      },
+      "start": {
+        "title": "Start your journey",
+        "desc": "Begin your sessions and enjoy a personal, local learning experience."
+      }
+    }
   },
   "client": {
     "dashboard": "Dashboard",
@@ -77,7 +173,22 @@
     "editDependent": "Edit Dependent",
     "dependentName": "Name",
     "stage": "Stage",
-    "subjects": "Subjects"
+    "subjects": "Subjects",
+    "guardianAccountKindDesc": "Guardian Account — You can add dependents and create requests for them",
+    "findTeacher": "Find a Teacher",
+    "findTeacherDesc": "Find tutors in your area online or offline",
+    "noRequestsYet": "No requests yet",
+    "noDependentsYet": "No dependents added yet",
+    "noFavoritesYet": "No favorite teachers added yet",
+    "searchPlaceholder": "Search by name or subject...",
+    "allSubjects": "All Subjects",
+    "allStages": "All Stages",
+    "allGovernorates": "All Governorates",
+    "teachersCount": "{count} teachers",
+    "noResultsWithFilters": "No results found. Try changing filters.",
+    "tutor": "Student",
+    "guardian": "Guardian",
+    "settingsDesc": "Detailed client settings editing is still under migration. This page is currently connected to account data from the API."
   },
   "teacher": {
     "dashboard": "Teacher Dashboard",
@@ -97,7 +208,16 @@
     "priceAtStudent": "At Student Price",
     "priceGroup": "Group Price",
     "addSubject": "Add Subject",
-    "editSubject": "Edit Subject"
+    "editSubject": "Edit Subject",
+    "welcome": "Welcome",
+    "incomingContacts": "Incoming Contact Requests",
+    "noIncomingRequests": "No incoming requests found",
+    "settingsTitle": "Teacher Settings",
+    "settingsDesc": "This page displays basic account data currently. Detailed settings editing is still under migration.",
+    "noSubjectsYet": "No subjects added yet",
+    "durationMinutes": "Session duration (minutes)",
+    "nearbyRequests": "Nearby Student Requests",
+    "noRequestsAvailable": "No requests available currently."
   },
   "request": {
     "tutorRequest": "Tutor Request",
@@ -118,7 +238,22 @@
     "description": "Description",
     "createRequest": "Create Request",
     "closeRequest": "Close Request",
-    "deleteRequest": "Delete Request"
+    "deleteRequest": "Delete Request",
+    "newRequest": "New Request",
+    "noRequests": "No requests found",
+    "accepted": "Accepted",
+    "rejected": "Rejected",
+    "pending": "Pending",
+    "noContactRequests": "No contact requests yet",
+    "newTutorRequest": "New Tutor Request",
+    "selectSubject": "Select Subject",
+    "selectStage": "Select Stage",
+    "selectDependent": "Select Dependent",
+    "descriptionPlaceholder": "Description (Optional)",
+    "submitRequest": "Submit Request",
+    "budgetLabel": "Budget: {min} – {max} EGP",
+    "targetSelf": "For myself",
+    "targetDependent": "For my dependent"
   },
   "admin": {
     "dashboard": "Admin Dashboard",
@@ -131,7 +266,27 @@
     "totalTeachers": "Total Teachers",
     "totalClients": "Total Clients",
     "totalRequests": "Total Requests",
-    "activeSubjects": "Active Subjects"
+    "activeSubjects": "Active Subjects",
+    "pendingRequests": "Pending Requests",
+    "admin": "Admin",
+    "name": "Name",
+    "phone": "Phone",
+    "email": "Email",
+    "status": "Status",
+    "arabicName": "Arabic Name",
+    "englishName": "English Name",
+    "order": "Order",
+    "active": "Active",
+    "inactive": "Inactive",
+    "searchClient": "Search client...",
+    "searchTeacher": "Search teacher...",
+    "searchRequest": "Search requests...",
+    "searchStage": "Search stage...",
+    "searchSubject": "Search subject...",
+    "total": "Total",
+    "teacherNotFound": "Teacher not found",
+    "contact": "Contact",
+    "noSubjects": "No subjects added."
   },
   "errors": {
     "required": "This field is required",

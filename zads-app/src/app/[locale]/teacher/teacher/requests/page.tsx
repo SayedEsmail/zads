@@ -1,11 +1,14 @@
 "use client";
 
 import { useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { useContactRequestsStore } from "@/stores/contact-requests";
 import { ErrorBanner } from "@/components/shared/ErrorBanner";
 import { PageSkeleton } from "@/components/shared/PageSkeleton";
 
 export default function TeacherRequestsPage() {
+  const t = useTranslations("teacher");
+  const tCommon = useTranslations("common");
   const { incoming, isLoading, error, fetchIncoming, updateStatus } = useContactRequestsStore();
 
   useEffect(() => {
@@ -14,13 +17,15 @@ export default function TeacherRequestsPage() {
 
   return (
     <div className="max-w-3xl mx-auto space-y-4">
-      <h1 className="text-xl font-bold">طلبات التواصل</h1>
+      <h1 className="text-xl font-bold">{t("incomingContacts")}</h1>
       <ErrorBanner error={error} onRetry={fetchIncoming} />
 
       {isLoading ? (
         <PageSkeleton rows={4} />
       ) : !incoming || incoming.length === 0 ? (
-        <p className="rounded-xl border border-border p-6 text-center text-sm text-muted-foreground">لا توجد طلبات تواصل.</p>
+        <p className="rounded-xl border border-border p-6 text-center text-sm text-muted-foreground">
+          {t("noIncomingRequests")}
+        </p>
       ) : (
         <div className="space-y-3">
           {incoming.map((request) => (
@@ -37,8 +42,18 @@ export default function TeacherRequestsPage() {
               {request.message && <p className="mt-3 text-sm text-muted-foreground">{request.message}</p>}
               {request.status === "pending" && (
                 <div className="mt-4 flex gap-2">
-                  <button onClick={() => updateStatus(request.id, "accepted")} className="rounded-lg bg-success px-3 py-1.5 text-xs font-medium text-white">قبول</button>
-                  <button onClick={() => updateStatus(request.id, "rejected")} className="rounded-lg border border-destructive/30 px-3 py-1.5 text-xs font-medium text-destructive">رفض</button>
+                  <button
+                    onClick={() => updateStatus(request.id, "accepted")}
+                    className="rounded-lg bg-success px-3 py-1.5 text-xs font-medium text-white hover:opacity-90"
+                  >
+                    {tCommon("accept")}
+                  </button>
+                  <button
+                    onClick={() => updateStatus(request.id, "rejected")}
+                    className="rounded-lg border border-destructive/30 px-3 py-1.5 text-xs font-medium text-destructive hover:bg-destructive/10"
+                  >
+                    {tCommon("reject")}
+                  </button>
                 </div>
               )}
             </div>

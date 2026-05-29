@@ -1,20 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
+import { useTranslations } from "next-intl";
 import api from "@/lib/api";
 import { DataTable } from "@/components/admin/DataTable";
 import { ErrorBanner } from "@/components/shared/ErrorBanner";
 import type { Stage } from "@/types";
 
-const columns: ColumnDef<Stage>[] = [
-  { accessorKey: "nameAr", header: "الاسم العربي" },
-  { accessorKey: "nameEn", header: "الاسم الإنجليزي" },
-  { accessorKey: "sortOrder", header: "الترتيب" },
-  { accessorFn: (row) => (row.isActive ? "نشط" : "متوقف"), header: "الحالة", id: "status" },
-];
-
 export default function AdminStagesPage() {
+  const t = useTranslations("admin");
   const [data, setData] = useState<Stage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -27,11 +22,18 @@ export default function AdminStagesPage() {
       .finally(() => setIsLoading(false));
   }, []);
 
+  const columns = useMemo<ColumnDef<Stage>[]>(() => [
+    { accessorKey: "nameAr", header: t("arabicName") },
+    { accessorKey: "nameEn", header: t("englishName") },
+    { accessorKey: "sortOrder", header: t("order") },
+    { accessorFn: (row) => (row.isActive ? t("active") : t("inactive")), header: t("status"), id: "status" },
+  ], [t]);
+
   return (
     <div className="max-w-5xl mx-auto space-y-4">
-      <h1 className="text-xl font-bold">المراحل</h1>
+      <h1 className="text-xl font-bold">{t("stages")}</h1>
       <ErrorBanner error={error} />
-      <DataTable data={data} columns={columns} isLoading={isLoading} searchPlaceholder="ابحث عن مرحلة..." />
+      <DataTable data={data} columns={columns} isLoading={isLoading} searchPlaceholder={t("searchStage")} />
     </div>
   );
 }

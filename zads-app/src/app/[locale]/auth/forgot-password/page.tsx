@@ -39,16 +39,16 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="rounded-2xl border border-border bg-surface p-8 shadow-sm">
-      <div className="mb-6 text-center">
-        <h1 className="text-3xl font-bold text-primary">زاد</h1>
+    <div className="w-full bg-surface p-4 sm:p-8">
+      <div className="mb-6 flex flex-col items-center justify-center">
+        <img src="/logo.svg" alt="Zads Logo" className="h-16 w-auto object-contain" />
       </div>
 
       <h2 className="mb-2 text-xl font-semibold">{t("forgotPassword")}</h2>
 
       {success ? (
         <div className="mt-4 rounded-lg bg-success/10 p-4 text-sm text-success">
-          Check your email for a password reset link.
+          {t("resetLinkSent")}
         </div>
       ) : (
         <>
@@ -75,7 +75,7 @@ export default function ForgotPasswordPage() {
               disabled={isLoading}
               className="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-dark disabled:opacity-60"
             >
-              {isLoading ? "..." : "Send Reset Link"}
+              {isLoading ? "..." : t("sendResetLink")}
             </button>
           </form>
         </>
@@ -83,7 +83,7 @@ export default function ForgotPasswordPage() {
 
       <p className="mt-6 text-center text-sm">
         <Link href={`/${locale}/auth/login`} className="font-medium text-primary hover:underline">
-          ← Back to sign in
+          <span className="inline-block rtl:rotate-180">←</span> {t("backToSignIn")}
         </Link>
       </p>
     </div>

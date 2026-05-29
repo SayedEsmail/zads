@@ -66,7 +66,7 @@ export default function ClientDashboardPage() {
         <p className="text-xl font-bold text-primary">{session?.user.name} 👋</p>
         {clientStore.data?.clientAccountKind === "guardian" && (
           <p className="mt-1 text-xs text-muted-foreground">
-            حساب ولي أمر — يمكنك إضافة تابعين وإنشاء طلبات لهم
+            {t("guardianAccountKindDesc")}
           </p>
         )}
       </div>
@@ -97,8 +97,8 @@ export default function ClientDashboardPage() {
           <Search className="h-5 w-5 text-primary" />
         </div>
         <div>
-          <p className="font-semibold text-primary">ابحث عن معلم</p>
-          <p className="text-xs text-muted-foreground">اعثر على مدرسين في منطقتك أونلاين أو أوفلاين</p>
+          <p className="font-semibold text-primary">{t("findTeacher")}</p>
+          <p className="text-xs text-muted-foreground">{t("findTeacherDesc")}</p>
         </div>
       </Link>
 
@@ -113,7 +113,7 @@ export default function ClientDashboardPage() {
         {tutorStore.isLoading ? (
           <PageSkeleton rows={2} />
         ) : recentRequests.length === 0 ? (
-          <p className="text-sm text-muted-foreground">لا توجد طلبات حتى الآن</p>
+          <p className="text-sm text-muted-foreground">{t("noRequestsYet")}</p>
         ) : (
           <div className="space-y-3">
             {recentRequests.map((r) => (
