@@ -39,7 +39,8 @@
     "online": "Online",
     "offline": "Offline",
     "atTeacher": "At Teacher",
-    "atStudent": "At Student"
+    "atStudent": "At Student",
+    "optional": "optional"
   },
   "auth": {
     "login": "Sign In",
@@ -68,7 +69,8 @@
     "resetLinkSent": "Check your email for a password reset link.",
     "sendResetLink": "Send Reset Link",
     "backToSignIn": "Back to sign in",
-    "bio": "Bio (Optional)"
+    "bio": "Bio (Optional)",
+    "welcomeBack": "Welcome Back!"
   },
   "nav": {
     "home": "Home",

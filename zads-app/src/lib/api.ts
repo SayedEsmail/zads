@@ -2,7 +2,8 @@ import axios from "axios";
 import { getSession, signOut } from "next-auth/react";
 
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000/api",
+  // Use relative /api so it correctly uses the browser's current host/port (e.g. localhost:3001) for the proxy
+  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || "/api",
   headers: {
     "Content-Type": "application/json",
   },

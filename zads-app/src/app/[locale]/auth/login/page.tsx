@@ -44,15 +44,20 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="w-full bg-surface p-4 sm:p-8">
+    <div className="w-full p-4 sm:p-8">
       {/* Logo */}
-      <div className="mb-8 flex flex-col items-center justify-center">
-        <img src="/logo.svg" alt="Zads Logo" className="h-16 w-auto object-contain" />
+      <div className="mb-10 flex flex-col items-center justify-center">
+        <img src="/logo.svg" alt="Zads Logo" className="h-14 w-auto object-contain" />
       </div>
 
-      <h2 className="mb-6 text-xl font-semibold">{t("login")}</h2>
+      <div className="text-center mb-8">
+        <h2 className="text-2xl font-bold text-foreground mb-1">
+          {t("welcomeBack") || "Welcome Back!"} 👋
+        </h2>
+        <p className="text-sm text-muted-foreground">{t("login")}</p>
+      </div>
 
-      <ErrorBanner error={error} className="mb-4" />
+      <ErrorBanner error={error} className="mb-6" />
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
         <div>
@@ -62,10 +67,10 @@ export default function LoginPage() {
             type="tel"
             dir="ltr"
             placeholder="05xxxxxxxx"
-            className="w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+            className="w-full rounded-[1.25rem] border border-border bg-white px-4 py-3.5 text-sm font-medium focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
           />
           {errors.phone && (
-            <p className="mt-1 text-xs text-destructive">{errors.phone.message}</p>
+            <p className="mt-1.5 px-1 text-xs font-medium text-destructive">{errors.phone.message}</p>
           )}
         </div>
 
@@ -74,7 +79,7 @@ export default function LoginPage() {
             <label className="text-sm font-medium">{t("password")}</label>
             <Link
               href={`/${locale}/auth/forgot-password`}
-              className="text-xs text-primary hover:underline"
+              className="text-xs font-medium text-primary hover:text-primary/80 transition-colors"
             >
               {t("forgotPassword")}
             </Link>
@@ -83,28 +88,28 @@ export default function LoginPage() {
             {...register("password")}
             type="password"
             placeholder="••••••••"
-            className="w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+            className="w-full rounded-[1.25rem] border border-border bg-white px-4 py-3.5 text-sm font-medium focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
           />
           {errors.password && (
-            <p className="mt-1 text-xs text-destructive">{errors.password.message}</p>
+            <p className="mt-1.5 px-1 text-xs font-medium text-destructive">{errors.password.message}</p>
           )}
         </div>
 
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-60"
+          className="mt-4 w-full rounded-[1.25rem] bg-primary py-4 text-sm font-bold text-white shadow-lg shadow-primary/20 transition-all hover:bg-primary-dark hover:shadow-primary/30 hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
         >
           {isLoading ? "..." : t("login")}
         </button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-muted-foreground">
+      <div className="mt-10 text-center text-sm font-medium text-muted-foreground">
         {t("noAccount")}{" "}
-        <Link href={`/${locale}/auth/register`} className="font-medium text-primary hover:underline">
+        <Link href={`/${locale}/auth/register`} className="text-primary hover:text-primary-dark hover:underline">
           {t("registerNow")}
         </Link>
-      </p>
+      </div>
     </div>
   );
 }

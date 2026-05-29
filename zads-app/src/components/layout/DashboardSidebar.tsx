@@ -128,7 +128,7 @@ export default function DashboardSidebar({ role }: Props) {
   return (
     <>
       {/* Global Top Header (Desktop & Mobile) */}
-      <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-border bg-surface px-6 shadow-sm shrink-0">
+      <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-border/50 bg-white/80 backdrop-blur-md px-6 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] shrink-0">
         <Link href={`/${locale}/public`} className="flex items-center">
           <img src="/logo.svg" alt="Zads Logo" className="h-10 md:h-12 w-auto object-contain" />
         </Link>
@@ -136,16 +136,16 @@ export default function DashboardSidebar({ role }: Props) {
           {/* Language Switcher */}
           <button
             onClick={switchLocale}
-            className="flex items-center gap-1 rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium hover:bg-muted text-foreground transition-colors"
+            className="flex items-center gap-1.5 rounded-xl border border-border/50 bg-white px-3 py-1.5 text-xs font-semibold shadow-sm hover:bg-muted text-foreground transition-colors"
             title="Switch language / تغيير اللغة"
           >
-            <Globe className="h-3.5 w-3.5" />
+            <Globe className="h-4 w-4 text-primary" />
             <span>{otherLocale.toUpperCase()}</span>
           </button>
           
           <button
             onClick={() => setMobileOpen(true)}
-            className="rounded-lg border border-border p-2 hover:bg-muted text-foreground md:hidden"
+            className="rounded-xl border border-border/50 bg-white p-2 shadow-sm hover:bg-muted text-foreground md:hidden"
             aria-label="Open menu"
           >
             <Menu className="h-5 w-5" />
@@ -156,7 +156,7 @@ export default function DashboardSidebar({ role }: Props) {
       {/* Mobile overlay */}
       {mobileOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/50 md:hidden"
+          className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm md:hidden"
           onClick={() => setMobileOpen(false)}
         />
       )}
@@ -164,7 +164,7 @@ export default function DashboardSidebar({ role }: Props) {
       {/* Mobile drawer */}
       <div
         className={cn(
-          "fixed inset-y-0 end-0 z-50 w-64 bg-surface shadow-xl transition-transform duration-300 md:hidden",
+          "fixed inset-y-0 end-0 z-50 w-64 bg-white shadow-2xl transition-transform duration-300 md:hidden",
           mobileOpen ? "translate-x-0" : "translate-x-full rtl:-translate-x-full"
         )}
       >
@@ -172,7 +172,7 @@ export default function DashboardSidebar({ role }: Props) {
       </div>
 
       {/* Desktop sidebar (Fixed below top header) */}
-      <aside className="hidden w-64 border-e border-border bg-surface md:block fixed top-16 start-0 bottom-0 z-20">
+      <aside className="hidden w-64 border-e border-border/50 bg-white shadow-[4px_0_24px_-4px_rgba(0,0,0,0.02)] md:block fixed top-16 start-0 bottom-0 z-20">
         <div className="h-full overflow-y-auto">
           {sidebarContent}
         </div>

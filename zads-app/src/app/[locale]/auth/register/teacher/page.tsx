@@ -27,6 +27,7 @@ type FormValues = z.infer<typeof schema>;
 
 export default function RegisterTeacherPage() {
   const t = useTranslations("auth");
+  const tCommon = useTranslations("common");
   const locale = useLocale();
   const router = useRouter();
   const { registerTeacher, isLoading, error } = useAuthStore();
@@ -74,27 +75,27 @@ export default function RegisterTeacherPage() {
               type={type}
               dir={dir}
               placeholder={placeholder}
-              className="w-full rounded-lg border border-border px-3 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+              className="w-full rounded-[1.25rem] border border-border bg-white px-4 py-3.5 text-sm font-medium focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
             />
             {errors[name] && (
-              <p className="mt-1 text-xs text-destructive">{errors[name]?.message}</p>
+              <p className="mt-1.5 px-1 text-xs font-medium text-destructive">{errors[name]?.message}</p>
             )}
           </div>
         ))}
 
         <div>
-          <label className="mb-1.5 block text-sm font-medium">{t("bio")}</label>
+          <label className="mb-1.5 block text-sm font-medium">{t("bio")} <span className="text-muted-foreground font-normal">({tCommon("optional")})</span></label>
           <textarea
             {...register("bio")}
             rows={3}
-            className="w-full rounded-lg border border-border px-3 py-2.5 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+            className="w-full rounded-[1.25rem] border border-border bg-white px-4 py-3.5 text-sm font-medium focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
           />
         </div>
 
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-dark disabled:opacity-60"
+          className="mt-4 w-full rounded-[1.25rem] bg-primary py-4 text-sm font-bold text-white shadow-lg shadow-primary/20 transition-all hover:bg-primary-dark hover:shadow-primary/30 hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
         >
           {isLoading ? "..." : t("registerTeacher")}
         </button>

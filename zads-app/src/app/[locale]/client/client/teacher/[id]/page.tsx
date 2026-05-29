@@ -54,7 +54,7 @@ export default function TeacherDetailPage() {
     <div className="max-w-3xl mx-auto space-y-5">
       <ErrorBanner error={error} />
 
-      <section className="rounded-xl border border-border bg-surface p-5">
+      <section className="rounded-[1.25rem] border border-slate-100 bg-white shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] p-5">
         <div className="flex items-start justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold">{teacher.user?.name}</h1>
@@ -103,7 +103,7 @@ export default function TeacherDetailPage() {
           <p className="rounded-xl border border-border p-5 text-sm text-muted-foreground">{tAdmin("noSubjects")}</p>
         ) : (
           teacher.subjects?.map((item) => (
-            <div key={item.id} className="rounded-xl border border-border bg-surface p-4">
+            <div key={item.id} className="rounded-[1.25rem] border border-slate-100 bg-white shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] p-4">
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <p className="font-medium">{item.subject?.nameAr}</p>

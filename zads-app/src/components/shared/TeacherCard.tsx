@@ -31,7 +31,7 @@ export function TeacherCard({
   const area = teacher.area;
 
   return (
-    <div className="flex items-start gap-3 rounded-xl border border-border bg-surface p-4 transition-shadow hover:shadow-sm">
+    <div className="group flex items-start gap-4 rounded-[1.25rem] border border-slate-100 bg-white p-5 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_30px_-10px_rgba(0,0,0,0.1)] hover:border-blue-100">
       {/* Avatar */}
       <div className="shrink-0">
         {user?.avatarUrl ? (

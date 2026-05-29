@@ -100,7 +100,7 @@ export default function TeacherSubjectsPage() {
 
       {showDialog && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 sm:items-center" onClick={() => setShowDialog(false)}>
-          <div className="w-full max-w-md rounded-t-2xl bg-surface p-6 sm:rounded-2xl" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-md rounded-t-2xl bg-white p-6 sm:rounded-2xl" onClick={(e) => e.stopPropagation()}>
             <h2 className="mb-4 font-semibold">{editingId ? t("editSubject") : t("addSubject")}</h2>
             <div className="space-y-3">
               <select value={form.subjectId} onChange={(e) => setForm((f) => ({ ...f, subjectId: e.target.value }))} className="w-full rounded-lg border border-border px-3 py-2.5 text-sm focus:outline-none">
