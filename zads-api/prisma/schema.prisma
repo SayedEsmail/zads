@@ -96,6 +96,7 @@ model Teacher {
   areaId          String?  @map("area_id")
   lessonTypes     Json     @default("[\"at_teacher\", \"at_student\"]") @map("lesson_types")
   isVerified      Boolean  @default(false) @map("is_verified")
+  certificateUrl  String?  @map("certificate_url")
   viewsCount      Int      @default(0) @map("views_count")
   avgRating       Decimal  @default(0) @map("avg_rating") @db.Decimal(2, 1)
   ratingCount     Int      @default(0) @map("rating_count")
@@ -109,6 +110,7 @@ model Teacher {
   contactRequests ContactRequest[]
   comparisonItems ComparisonItem[]
   whatsappClicks  WhatsAppClick[]
+  availabilities  TeacherAvailability[]
 
   @@index([areaId])
   @@map("teachers")
@@ -140,6 +142,7 @@ model ParentChild {
   parentId  String   @map("parent_id")
   name      String
   stageId   String   @map("stage_id")
+  schoolType String?  @map("school_type")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
@@ -237,15 +240,17 @@ model Favorite {
 }
 
 model ContactRequest {
-  id        String               @id @default(uuid())
-  parentId  String               @map("parent_id")
-  teacherId String               @map("teacher_id")
-  subjectId String?              @map("subject_id")
-  stageId   String?              @map("stage_id")
-  message   String?
-  status    ContactRequestStatus @default(pending)
-  createdAt DateTime             @default(now()) @map("created_at")
-  updatedAt DateTime             @updatedAt @map("updated_at")
+  id           String               @id @default(uuid())
+  parentId     String               @map("parent_id")
+  teacherId    String               @map("teacher_id")
+  subjectId    String?              @map("subject_id")
+  stageId      String?              @map("stage_id")
+  message      String?
+  replyMessage String?              @map("reply_message")
+  status       ContactRequestStatus @default(pending)
+  initiatedBy  String               @default("parent") @map("initiated_by")
+  createdAt    DateTime             @default(now()) @map("created_at")
+  updatedAt    DateTime             @updatedAt @map("updated_at")
 
   parent  Parent   @relation(fields: [parentId], references: [id], onDelete: Cascade)
   teacher Teacher  @relation(fields: [teacherId], references: [id], onDelete: Cascade)
@@ -374,4 +379,18 @@ model WhatsAppClick {
   @@index([teacherId])
   @@index([parentId])
   @@map("whatsapp_clicks")
+}
+
+model TeacherAvailability {
+  id        String   @id @default(uuid())
+  teacherId String   @map("teacher_id")
+  dayOfWeek Int      @map("day_of_week") // 0 = Sunday, 6 = Saturday
+  startTime String   @map("start_time")  // e.g. "14:00"
+  endTime   String   @map("end_time")    // e.g. "18:00"
+  createdAt DateTime @default(now()) @map("created_at")
+
+  teacher   Teacher  @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  @@unique([teacherId, dayOfWeek, startTime, endTime])
+  @@map("teacher_availabilities")
 }

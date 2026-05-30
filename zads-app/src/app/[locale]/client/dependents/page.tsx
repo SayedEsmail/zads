@@ -1,0 +1,180 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
+import { Plus, Edit2, Trash2, Users } from "lucide-react";
+import { useDependentsStore } from "@/stores/dependents";
+import { useSearchStore } from "@/stores/search";
+import { PageSkeleton } from "@/components/shared/PageSkeleton";
+import { ErrorBanner } from "@/components/shared/ErrorBanner";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import type { Dependent } from "@/types";
+
+export default function DependentsPage() {
+  const t = useTranslations("client");
+  const tCommon = useTranslations("common");
+  const { data, isLoading, error, fetch, add, update, remove } = useDependentsStore();
+  const { subjects, stages, fetchSubjects, fetchStages } = useSearchStore();
+  const [showDialog, setShowDialog] = useState(false);
+  const [editing, setEditing] = useState<Dependent | null>(null);
+  const [form, setForm] = useState({ name: "", stageId: "", subjectIds: [] as string[], schoolType: "" });
+
+  useEffect(() => {
+    fetch();
+    fetchSubjects();
+    fetchStages();
+  }, []);
+
+  const openAdd = () => { setEditing(null); setForm({ name: "", stageId: "", subjectIds: [], schoolType: "" }); setShowDialog(true); };
+  const openEdit = (d: Dependent) => { setEditing(d); setForm({ name: d.name, stageId: d.stageId, subjectIds: d.subjects?.map(s => s.subject.id) ?? [], schoolType: d.schoolType ?? "" }); setShowDialog(true); };
+
+  const handleSave = async () => {
+    if (editing) {
+      await update(editing.id, form);
+    } else {
+      await add(form);
+    }
+    setShowDialog(false);
+  };
+
+  if (isLoading && !data) return <PageSkeleton />;
+
+  return (
+    <div className="max-w-2xl mx-auto space-y-4">
+      <div className="flex items-center justify-between">
+        <h1 className="text-xl font-bold">{t("dependents")}</h1>
+        <button
+          onClick={openAdd}
+          className="flex items-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary-dark"
+        >
+          <Plus className="h-4 w-4" />
+          {t("addDependent")}
+        </button>
+      </div>
+
+      <ErrorBanner error={error} onRetry={fetch} />
+
+      {!data || data.length === 0 ? (
+        <div className="rounded-[1.25rem] border border-dashed border-slate-200 bg-slate-50 p-10 text-center">
+          <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
+            <Users className="w-8 h-8 text-slate-300" />
+          </div>
+          <p className="text-muted-foreground font-medium">{t("noDependentsYet")}</p>
+          <button onClick={openAdd} className="mt-4 text-sm font-bold text-primary hover:text-blue-700 hover:underline">
+            {t("addDependent")}
+          </button>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {data.map((dep) => (
+            <div key={dep.id} className="rounded-[1.25rem] border border-slate-100 bg-white shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] p-4">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="font-semibold">{dep.name}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {dep.stage?.nameAr} {dep.schoolType && `• ${t(dep.schoolType)}`}
+                  </p>
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {dep.subjects?.map(({ subject }) => (
+                      <span key={subject.id} className="rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">
+                        {subject.nameAr}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={() => openEdit(dep)} className="text-muted-foreground hover:text-primary">
+                    <Edit2 className="h-4 w-4" />
+                  </button>
+                  <button onClick={() => remove(dep.id)} className="text-muted-foreground hover:text-destructive">
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Simple dialog */}
+      {showDialog && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 sm:items-center" onClick={() => setShowDialog(false)}>
+          <div className="w-full max-w-md rounded-t-2xl bg-white p-6 sm:rounded-2xl" onClick={(e) => e.stopPropagation()}>
+            <h2 className="mb-4 font-semibold">{editing ? t("editDependent") : t("addDependent")}</h2>
+            <div className="space-y-3">
+              <input
+                placeholder={t("dependentName")}
+                value={form.name}
+                onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                className="w-full rounded-lg border border-border px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+              />
+              <Select 
+                value={form.stageId} 
+                onValueChange={(val) => setForm((f) => ({ ...f, stageId: val || "" }))}
+              >
+                <SelectTrigger className="w-full rounded-lg border border-slate-200 px-3 py-5 text-sm focus:ring-2 focus:ring-primary/20 h-auto bg-white">
+                  <SelectValue placeholder={t("stage")}>
+                    {stages.find((s) => s.id === form.stageId)?.nameAr || t("stage")}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {stages.map((s) => (
+                    <SelectItem key={s.id} value={s.id}>
+                      {s.nameAr}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select 
+                value={form.schoolType} 
+                onValueChange={(val) => setForm((f) => ({ ...f, schoolType: val || "" }))}
+              >
+                <SelectTrigger className="w-full rounded-lg border border-slate-200 px-3 py-5 text-sm focus:ring-2 focus:ring-primary/20 h-auto bg-white">
+                  <SelectValue placeholder={t("schoolType")}>
+                    {form.schoolType ? t(form.schoolType) : t("schoolType")}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="governmental">{t("governmental")}</SelectItem>
+                  <SelectItem value="experimental">{t("experimental")}</SelectItem>
+                  <SelectItem value="private">{t("private")}</SelectItem>
+                  <SelectItem value="international">{t("international")}</SelectItem>
+                </SelectContent>
+              </Select>
+              <div>
+                <p className="mb-2 text-sm font-medium">{t("subjects")}</p>
+                <div className="flex flex-wrap gap-2">
+                  {subjects.map((s) => (
+                    <button
+                      key={s.id}
+                      type="button"
+                      onClick={() => setForm((f) => ({
+                        ...f,
+                        subjectIds: f.subjectIds.includes(s.id)
+                          ? f.subjectIds.filter((id) => id !== s.id)
+                          : [...f.subjectIds, s.id],
+                      }))}
+                      className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                        form.subjectIds.includes(s.id) ? "bg-primary text-white" : "border border-border hover:bg-muted"
+                      }`}
+                    >
+                      {s.nameAr}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="mt-5 flex gap-3">
+              <button onClick={handleSave} className="flex-1 rounded-lg bg-primary py-2.5 text-sm font-medium text-white hover:bg-primary-dark">
+                {tCommon("save")}
+              </button>
+              <button onClick={() => setShowDialog(false)} className="flex-1 rounded-lg border border-border py-2.5 text-sm hover:bg-muted">
+                {tCommon("cancel")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

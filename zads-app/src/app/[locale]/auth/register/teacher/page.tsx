@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import Link from "next/link";
@@ -8,29 +9,22 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAuthStore } from "@/stores/auth";
 import { ErrorBanner } from "@/components/shared/ErrorBanner";
+import { Eye, EyeOff } from "lucide-react";
 
-const schema = z
-  .object({
-    name: z.string().min(2),
-    phone: z.string().min(8),
-    email: z.string().email().optional().or(z.literal("")),
-    password: z.string().min(8),
-    confirmPassword: z.string(),
-    bio: z.string().optional(),
-  })
-  .refine((d) => d.password === d.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
-  });
+const schema = z.object({
+  name: z.string().min(2, "Name is required"),
+  phone: z.string().min(8, "Invalid phone number"),
+  password: z.string().min(8, "Minimum 8 characters"),
+});
 
 type FormValues = z.infer<typeof schema>;
 
 export default function RegisterTeacherPage() {
   const t = useTranslations("auth");
-  const tCommon = useTranslations("common");
   const locale = useLocale();
   const router = useRouter();
   const { registerTeacher, isLoading, error } = useAuthStore();
+  const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
@@ -43,10 +37,8 @@ export default function RegisterTeacherPage() {
       name: data.name,
       phone: data.phone,
       password: data.password,
-      email: data.email || undefined,
-      bio: data.bio || undefined,
     });
-    router.replace(`/${locale}/teacher/teacher`);
+    router.replace(`/${locale}/teacher`);
     router.refresh();
   };
 
@@ -61,35 +53,49 @@ export default function RegisterTeacherPage() {
       <ErrorBanner error={error} className="mb-4" />
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
-        {[
-          { name: "name" as const, label: t("fullName"), type: "text" },
-          { name: "phone" as const, label: t("phone"), type: "tel", dir: "ltr" as const, placeholder: "05xxxxxxxx" },
-          { name: "email" as const, label: t("email"), type: "email", dir: "ltr" as const },
-          { name: "password" as const, label: t("password"), type: "password", placeholder: "••••••••" },
-          { name: "confirmPassword" as const, label: t("confirmPassword"), type: "password", placeholder: "••••••••" },
-        ].map(({ name, label, type, dir, placeholder }) => (
-          <div key={name}>
-            <label className="mb-1.5 block text-sm font-medium">{label}</label>
-            <input
-              {...register(name)}
-              type={type}
-              dir={dir}
-              placeholder={placeholder}
-              className="w-full rounded-[1.25rem] border border-border bg-white px-4 py-3.5 text-sm font-medium focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-            />
-            {errors[name] && (
-              <p className="mt-1.5 px-1 text-xs font-medium text-destructive">{errors[name]?.message}</p>
-            )}
-          </div>
-        ))}
-
+        {/* Name */}
         <div>
-          <label className="mb-1.5 block text-sm font-medium">{t("bio")} <span className="text-muted-foreground font-normal">({tCommon("optional")})</span></label>
-          <textarea
-            {...register("bio")}
-            rows={3}
+          <label className="mb-1.5 block text-sm font-medium">{t("fullName")}</label>
+          <input
+            {...register("name")}
+            type="text"
             className="w-full rounded-[1.25rem] border border-border bg-white px-4 py-3.5 text-sm font-medium focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
           />
+          {errors.name && <p className="mt-1.5 px-1 text-xs font-medium text-destructive">{errors.name.message}</p>}
+        </div>
+
+        {/* Phone */}
+        <div>
+          <label className="mb-1.5 block text-sm font-medium">{t("phone")}</label>
+          <input
+            {...register("phone")}
+            type="tel"
+            dir="ltr"
+            placeholder="05xxxxxxxx"
+            className="w-full rounded-[1.25rem] border border-border bg-white px-4 py-3.5 text-sm font-medium focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+          />
+          {errors.phone && <p className="mt-1.5 px-1 text-xs font-medium text-destructive">{errors.phone.message}</p>}
+        </div>
+
+        {/* Password */}
+        <div>
+          <label className="mb-1.5 block text-sm font-medium">{t("password")}</label>
+          <div className="relative">
+            <input
+              {...register("password")}
+              type={showPassword ? "text" : "password"}
+              placeholder="••••••••"
+              className="w-full rounded-[1.25rem] border border-border bg-white px-4 py-3.5 pe-12 text-sm font-medium focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute inset-y-0 end-0 flex items-center pe-4 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+            </button>
+          </div>
+          {errors.password && <p className="mt-1.5 px-1 text-xs font-medium text-destructive">{errors.password.message}</p>}
         </div>
 
         <button

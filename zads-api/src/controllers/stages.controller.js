@@ -6,8 +6,15 @@ const response = require('../utils/response');
  */
 const getAllStages = async (req, res, next) => {
     try {
+        const { includeInactive } = req.query;
+        const where = {};
+
+        if (includeInactive !== 'true') {
+            where.isActive = true;
+        }
+
         const stages = await prisma.stage.findMany({
-            where: { isActive: true },
+            where,
             orderBy: { sortOrder: 'asc' }
         });
 

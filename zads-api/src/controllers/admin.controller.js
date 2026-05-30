@@ -321,6 +321,39 @@ const deleteTutorRequest = async (req, res, next) => {
     }
 };
 
+/**
+ * Toggle teacher verification status
+ */
+const toggleTeacherVerification = async (req, res, next) => {
+    try {
+        const { teacherId } = req.params;
+        const { isVerified } = req.body;
+
+        if (typeof isVerified !== 'boolean') {
+            return response.error(res, 'isVerified must be a boolean', 400);
+        }
+
+        const teacher = await prisma.teacher.update({
+            where: { id: teacherId },
+            data: { isVerified },
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        name: true,
+                        status: true
+                    }
+                }
+            }
+        });
+
+        return response.success(res, teacher, isVerified ? 'Teacher verified' : 'Teacher unverified');
+
+    } catch (error) {
+        next(error);
+    }
+};
+
 module.exports = {
     getDashboardStats,
     getAllTeachers,
@@ -328,5 +361,6 @@ module.exports = {
     updateUserStatus,
     getContactStats,
     getAllTutorRequests,
-    deleteTutorRequest
+    deleteTutorRequest,
+    toggleTeacherVerification
 };

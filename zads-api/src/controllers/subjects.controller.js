@@ -6,8 +6,15 @@ const response = require('../utils/response');
  */
 const getAllSubjects = async (req, res, next) => {
     try {
+        const { includeInactive } = req.query;
+        const where = {};
+
+        if (includeInactive !== 'true') {
+            where.isActive = true;
+        }
+
         const subjects = await prisma.subject.findMany({
-            where: { isActive: true },
+            where,
             orderBy: { sortOrder: 'asc' }
         });
 

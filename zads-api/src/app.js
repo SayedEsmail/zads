@@ -98,3 +98,5 @@ if (require.main === module) {
 }
 
 module.exports = app;
+// Force nodemon reload after prisma client generation
+

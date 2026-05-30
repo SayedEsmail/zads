@@ -6,8 +6,8 @@ import { usePathname, useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { signOut, useSession } from "next-auth/react";
 import {
-  LayoutDashboard, Search, FileText, Heart, Users, User, Settings,
-  BookOpen, ListTodo, BarChart2, Menu, X, LogOut, GraduationCap, Globe,
+  LayoutDashboard, Search, FileText, Heart, Users, User,
+  BookOpen, ListTodo, BarChart2, Menu, X, LogOut, GraduationCap, Globe, MessageCircle, Clock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -17,29 +17,30 @@ type Translator = (key: string) => string;
 
 function useNavItems(role: Role, locale: string, t: Translator) {
   if (role === "client") {
-    const base = `/${locale}/client/client`;
+    const base = `/${locale}/client`;
     return [
       { href: base, label: t("dashboard"), icon: LayoutDashboard },
+      { href: `${base}/teacher`, label: t("searchTeachers"), icon: Search },
       { href: `${base}/dependents`, label: t("dependents"), icon: Users },
-      { href: `${base}/requests`, label: t("requests"), icon: FileText },
+      { href: `${base}/requests`, label: t("requestsClient"), icon: FileText },
+      { href: `${base}/contacts`, label: t("contactRequests"), icon: MessageCircle },
       { href: `${base}/favorites`, label: t("favorites"), icon: Heart },
       { href: `${base}/profile`, label: t("profile"), icon: User },
-      { href: `${base}/settings`, label: t("settings"), icon: Settings },
     ];
   }
   if (role === "teacher") {
-    const base = `/${locale}/teacher/teacher`;
+    const base = `/${locale}/teacher`;
     return [
       { href: base, label: t("dashboard"), icon: LayoutDashboard },
-      { href: `${base}/browse`, label: t("browse"), icon: Search },
-      { href: `${base}/requests`, label: t("requests"), icon: FileText },
+      { href: `${base}/browse`, label: t("browseTeacher"), icon: Search },
+      { href: `${base}/requests`, label: t("requestsTeacher"), icon: FileText },
       { href: `${base}/subjects`, label: t("subjects"), icon: BookOpen },
+      { href: `${base}/availability`, label: t("availability"), icon: Clock },
       { href: `${base}/profile`, label: t("profile"), icon: User },
-      { href: `${base}/settings`, label: t("settings"), icon: Settings },
     ];
   }
   // admin
-  const base = `/${locale}/admin/admin`;
+  const base = `/${locale}/admin`;
   return [
     { href: base, label: t("admin"), icon: BarChart2 },
     { href: `${base}/teachers`, label: t("teachers"), icon: GraduationCap },
@@ -101,7 +102,7 @@ export default function DashboardSidebar({ role }: Props) {
             onClick={() => setMobileOpen(false)}
             className={cn(
               "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-              pathname === href || pathname.startsWith(href + "/")
+              (href === `/${locale}/${role}/${role}` ? pathname === href : (pathname === href || pathname.startsWith(href + "/")))
                 ? "bg-primary/10 text-primary"
                 : "text-foreground hover:bg-muted"
             )}
@@ -129,7 +130,7 @@ export default function DashboardSidebar({ role }: Props) {
     <>
       {/* Global Top Header (Desktop & Mobile) */}
       <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-border/50 bg-white/80 backdrop-blur-md px-6 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] shrink-0">
-        <Link href={`/${locale}/public`} className="flex items-center">
+        <Link href={`/${locale}/${role}/${role}`} className="flex items-center">
           <img src="/logo.svg" alt="Zads Logo" className="h-10 md:h-12 w-auto object-contain" />
         </Link>
         <div className="flex items-center gap-3">

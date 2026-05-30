@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const teachersController = require('../controllers/teachers.controller');
-const { auth, isTeacher } = require('../middlewares/auth');
+const { auth, optionalAuth, isTeacher } = require('../middlewares/auth');
 
 // Protected routes (teacher only) - MUST be before /:id
 router.get('/me', auth, isTeacher, teachersController.getMyProfile);
@@ -10,10 +10,12 @@ router.get('/me/stats', auth, isTeacher, teachersController.getMyStats);
 router.get('/me/subjects', auth, isTeacher, teachersController.getMySubjects);
 router.post('/me/subjects', auth, isTeacher, teachersController.addSubject);
 router.put('/me/subjects/:teacherSubjectId', auth, isTeacher, teachersController.updateSubject);
+router.get('/me/availability', auth, isTeacher, teachersController.getMyAvailability);
+router.put('/me/availability', auth, isTeacher, teachersController.updateMyAvailability);
 
-// Public routes
-router.get('/search', teachersController.searchTeachers);
-router.get('/', teachersController.searchTeachers);
+// Public routes (with optional auth for parent smart filtering)
+router.get('/search', optionalAuth, teachersController.searchTeachers);
+router.get('/', optionalAuth, teachersController.searchTeachers);
 router.get('/:id', teachersController.getTeacherById);
 
 module.exports = router;

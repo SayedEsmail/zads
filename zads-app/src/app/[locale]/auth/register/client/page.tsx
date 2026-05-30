@@ -10,19 +10,14 @@ import { z } from "zod";
 import { useAuthStore } from "@/stores/auth";
 import { ErrorBanner } from "@/components/shared/ErrorBanner";
 import type { ClientAccountKind } from "@/types";
+import { Eye, EyeOff } from "lucide-react";
 
-const schema = z
-  .object({
-    name: z.string().min(2, "Name is required"),
-    phone: z.string().min(8, "Invalid phone number"),
-    password: z.string().min(8, "Minimum 8 characters"),
-    confirmPassword: z.string(),
-    clientAccountKind: z.enum(["student", "guardian"] as const),
-  })
-  .refine((d) => d.password === d.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
-  });
+const schema = z.object({
+  name: z.string().min(2, "Name is required"),
+  phone: z.string().min(8, "Invalid phone number"),
+  password: z.string().min(8, "Minimum 8 characters"),
+  clientAccountKind: z.enum(["student", "guardian"] as const),
+});
 
 type FormValues = z.infer<typeof schema>;
 
@@ -32,6 +27,7 @@ export default function RegisterClientPage() {
   const locale = useLocale();
   const router = useRouter();
   const { registerClient, isLoading, error } = useAuthStore();
+  const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
@@ -53,7 +49,7 @@ export default function RegisterClientPage() {
       password: data.password,
       clientAccountKind: data.clientAccountKind,
     });
-    router.replace(`/${locale}/client/client`);
+    router.replace(`/${locale}/client`);
     router.refresh();
   };
 
@@ -68,6 +64,27 @@ export default function RegisterClientPage() {
       <ErrorBanner error={error} className="mb-4" />
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
+        {/* Account Kind segmented control */}
+        <div>
+          <label className="mb-2 block text-sm font-medium">{t("accountKind")}</label>
+          <div className="grid grid-cols-2 overflow-hidden rounded-[1.25rem] border border-border bg-white p-1">
+            {(["student", "guardian"] as ClientAccountKind[]).map((kind) => (
+              <button
+                key={kind}
+                type="button"
+                onClick={() => setValue("clientAccountKind", kind)}
+                className={`rounded-[1rem] py-3 text-sm font-medium transition-all ${
+                  accountKind === kind
+                    ? "bg-primary text-white shadow-sm"
+                    : "bg-transparent text-muted-foreground hover:bg-slate-50 hover:text-foreground"
+                }`}
+              >
+                {t(kind)}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Name */}
         <div>
           <label className="mb-1.5 block text-sm font-medium">{t("fullName")}</label>
@@ -95,48 +112,22 @@ export default function RegisterClientPage() {
         {/* Password */}
         <div>
           <label className="mb-1.5 block text-sm font-medium">{t("password")}</label>
-          <input
-            {...register("password")}
-            type="password"
-            placeholder="••••••••"
-            className="w-full rounded-[1.25rem] border border-border bg-white px-4 py-3.5 text-sm font-medium focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-          />
-          {errors.password && <p className="mt-1.5 px-1 text-xs font-medium text-destructive">{errors.password.message}</p>}
-        </div>
-
-        {/* Confirm Password */}
-        <div>
-          <label className="mb-1.5 block text-sm font-medium">{t("confirmPassword")}</label>
-          <input
-            {...register("confirmPassword")}
-            type="password"
-            placeholder="••••••••"
-            className="w-full rounded-[1.25rem] border border-border bg-white px-4 py-3.5 text-sm font-medium focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-          />
-          {errors.confirmPassword && (
-            <p className="mt-1.5 px-1 text-xs font-medium text-destructive">{errors.confirmPassword.message}</p>
-          )}
-        </div>
-
-        {/* Account Kind segmented control */}
-        <div>
-          <label className="mb-2 block text-sm font-medium">{t("accountKind")}</label>
-          <div className="grid grid-cols-2 overflow-hidden rounded-[1.25rem] border border-border bg-white p-1">
-            {(["student", "guardian"] as ClientAccountKind[]).map((kind) => (
-              <button
-                key={kind}
-                type="button"
-                onClick={() => setValue("clientAccountKind", kind)}
-                className={`rounded-[1rem] py-3 text-sm font-medium transition-all ${
-                  accountKind === kind
-                    ? "bg-primary text-white shadow-sm"
-                    : "bg-transparent text-muted-foreground hover:bg-slate-50 hover:text-foreground"
-                }`}
-              >
-                {t(kind)}
-              </button>
-            ))}
+          <div className="relative">
+            <input
+              {...register("password")}
+              type={showPassword ? "text" : "password"}
+              placeholder="••••••••"
+              className="w-full rounded-[1.25rem] border border-border bg-white px-4 py-3.5 pe-12 text-sm font-medium focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute inset-y-0 end-0 flex items-center pe-4 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+            </button>
           </div>
+          {errors.password && <p className="mt-1.5 px-1 text-xs font-medium text-destructive">{errors.password.message}</p>}
         </div>
 
         <button

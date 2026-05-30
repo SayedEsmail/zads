@@ -61,6 +61,7 @@ export interface Teacher {
   areaId?: string | null;
   lessonTypes: LessonType[];
   isVerified: boolean;
+  certificateUrl?: string | null;
   viewsCount: number;
   avgRating: number;
   ratingCount: number;
@@ -70,6 +71,7 @@ export interface Teacher {
   user?: Pick<User, "id" | "name" | "phone" | "avatarUrl">;
   area?: Area & { city: City & { governorate: Governorate } };
   subjects?: TeacherSubject[];
+  availabilities?: TeacherAvailability[];
 }
 
 /** Maps the API `Parent` model — product name: Client / Learner */
@@ -93,6 +95,7 @@ export interface Dependent {
   parentId: string;
   name: string;
   stageId: string;
+  schoolType?: string | null;
   createdAt: string;
   updatedAt: string;
   // Relations
@@ -172,12 +175,14 @@ export interface ContactRequest {
   subjectId?: string | null;
   stageId?: string | null;
   message?: string | null;
+  replyMessage?: string | null;
   status: ContactRequestStatus;
+  initiatedBy?: "parent" | "teacher";
   createdAt: string;
   updatedAt: string;
   // Relations
-  teacher?: Pick<Teacher, "id"> & { user: Pick<User, "name" | "avatarUrl"> };
-  parent?: Pick<ClientProfile, "id"> & { user: Pick<User, "name"> };
+  teacher?: Pick<Teacher, "id"> & { user: Pick<User, "name" | "avatarUrl" | "phone"> };
+  parent?: Pick<ClientProfile, "id"> & { user: Pick<User, "name" | "phone" | "avatarUrl"> };
   subject?: Subject;
   stage?: Stage;
 }
@@ -252,3 +257,21 @@ export interface AdminStats {
   totalRequests: number;
   activeSubjects: number;
 }
+
+export interface TeacherAvailability {
+  id: string;
+  teacherId: string;
+  dayOfWeek: number; // 0 = Sunday, 6 = Saturday
+  startTime: string; // e.g. "14:00"
+  endTime: string;   // e.g. "18:00"
+  createdAt: string;
+}
+
+export type AdminParent = ClientProfile & {
+  user: User;
+};
+
+export type AdminTeacher = Teacher & {
+  user: User;
+};
+

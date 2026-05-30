@@ -27,20 +27,45 @@ const searchTeachers = async (req, res, next) => {
             user: { status: 'active' }
         };
 
-        // Location filter - always filter by governorate to show all teachers in the governorate
-        if (governorateId) {
-            teacherWhere.area = { city: { governorateId } };
-        } else if (cityId) {
-            teacherWhere.area = { city: { governorateId: { not: null } } };
-        } else if (areaId) {
-            // If only areaId provided, get the governorate from it
+        // Determine active location filters (defaulting to logged-in parent's location if no search filters provided)
+        let activeAreaId = areaId;
+        let activeCityId = cityId;
+        let activeGovId = governorateId;
+
+        const parent = req.user?.parent;
+        if (parent?.areaId && !areaId && !cityId && !governorateId) {
+            const parentArea = await prisma.area.findUnique({
+                where: { id: parent.areaId },
+                include: { city: true }
+            });
+            if (parentArea) {
+                activeAreaId = parentArea.id;
+                activeCityId = parentArea.cityId;
+                activeGovId = parentArea.city?.governorateId;
+            }
+        }
+
+        // Apply governorate restriction (always show teachers within the target governorate)
+        if (activeAreaId) {
             const area = await prisma.area.findUnique({
-                where: { id: areaId },
+                where: { id: activeAreaId },
                 include: { city: true }
             });
             if (area?.city?.governorateId) {
                 teacherWhere.area = { city: { governorateId: area.city.governorateId } };
+                activeGovId = area.city.governorateId;
+                activeCityId = area.cityId;
             }
+        } else if (activeCityId) {
+            const city = await prisma.city.findUnique({
+                where: { id: activeCityId }
+            });
+            if (city?.governorateId) {
+                teacherWhere.area = { city: { governorateId: city.governorateId } };
+                activeGovId = city.governorateId;
+            }
+        } else if (activeGovId) {
+            teacherWhere.area = { city: { governorateId: activeGovId } };
         }
 
         // Lesson type filter
@@ -49,6 +74,33 @@ const searchTeachers = async (req, res, next) => {
         }
 
         // Subject/Stage filter
+        const parentId = req.user?.parent?.id;
+        if (parentId && !subjectId) {
+            const childSubjects = await prisma.parentChildSubject.findMany({
+                where: { parentChild: { parentId } },
+                select: { subjectId: true }
+            });
+
+            const tutorRequests = await prisma.tutorRequest.findMany({
+                where: { parentId },
+                select: { subjectId: true }
+            });
+
+            const neededSubjectIds = Array.from(new Set([
+                ...childSubjects.map(cs => cs.subjectId),
+                ...tutorRequests.map(tr => tr.subjectId)
+            ]));
+
+            if (neededSubjectIds.length > 0) {
+                teacherWhere.subjects = {
+                    some: {
+                        subjectId: { in: neededSubjectIds },
+                        isActive: true
+                    }
+                };
+            }
+        }
+
         const subjectWhere = { isActive: true };
         if (subjectId) subjectWhere.subjectId = subjectId;
         if (stageId) subjectWhere.stageId = stageId;
@@ -109,13 +161,13 @@ const searchTeachers = async (req, res, next) => {
         // Also consider verification and rating
         teachers.sort((a, b) => {
             // Priority 1: Same area
-            const aInSameArea = areaId && a.areaId === areaId ? 1 : 0;
-            const bInSameArea = areaId && b.areaId === areaId ? 1 : 0;
+            const aInSameArea = activeAreaId && a.areaId === activeAreaId ? 1 : 0;
+            const bInSameArea = activeAreaId && b.areaId === activeAreaId ? 1 : 0;
             if (aInSameArea !== bInSameArea) return bInSameArea - aInSameArea;
 
             // Priority 2: Same city
-            const aInSameCity = cityId && a.area?.cityId === cityId ? 1 : 0;
-            const bInSameCity = cityId && b.area?.cityId === cityId ? 1 : 0;
+            const aInSameCity = activeCityId && a.area?.cityId === activeCityId ? 1 : 0;
+            const bInSameCity = activeCityId && b.area?.cityId === activeCityId ? 1 : 0;
             if (aInSameCity !== bInSameCity) return bInSameCity - aInSameCity;
 
             // Priority 3: Verified
@@ -163,12 +215,27 @@ const getTeacherById = async (req, res, next) => {
                         avatarUrl: true
                     }
                 },
+                area: {
+                    include: {
+                        city: {
+                            include: {
+                                governorate: true
+                            }
+                        }
+                    }
+                },
                 subjects: {
                     where: { isActive: true },
                     include: {
                         subject: true,
                         stage: true
                     }
+                },
+                availabilities: {
+                    orderBy: [
+                        { dayOfWeek: 'asc' },
+                        { startTime: 'asc' }
+                    ]
                 }
             }
         });
@@ -206,7 +273,8 @@ const updateTeacher = async (req, res, next) => {
             experienceYears,
             qualification,
             areaId,
-            lessonTypes
+            lessonTypes,
+            certificateUrl
         } = req.body;
 
         const updated = await prisma.teacher.update({
@@ -216,7 +284,8 @@ const updateTeacher = async (req, res, next) => {
                 ...(experienceYears !== undefined && { experienceYears }),
                 ...(qualification !== undefined && { qualification }),
                 ...(areaId !== undefined && { areaId }),
-                ...(lessonTypes !== undefined && { lessonTypes })
+                ...(lessonTypes !== undefined && { lessonTypes }),
+                ...(certificateUrl !== undefined && { certificateUrl })
             },
             include: {
                 user: {
@@ -468,6 +537,88 @@ const getMySubjects = async (req, res, next) => {
     }
 };
 
+/**
+ * Get my availability slots (Teacher)
+ */
+const getMyAvailability = async (req, res, next) => {
+    try {
+        const teacherId = req.user.teacher?.id;
+        if (!teacherId) {
+            return response.error(res, 'Teacher profile not found', 404);
+        }
+
+        const availabilities = await prisma.teacherAvailability.findMany({
+            where: { teacherId },
+            orderBy: [
+                { dayOfWeek: 'asc' },
+                { startTime: 'asc' }
+            ]
+        });
+
+        return response.success(res, availabilities);
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * Update my availability slots (Teacher)
+ */
+const updateMyAvailability = async (req, res, next) => {
+    try {
+        const teacherId = req.user.teacher?.id;
+        if (!teacherId) {
+            return response.error(res, 'Teacher profile not found', 404);
+        }
+
+        const { slots } = req.body; // Array of { dayOfWeek: number, startTime: string, endTime: string }
+
+        if (!Array.isArray(slots)) {
+            return response.error(res, 'Slots must be an array', 400);
+        }
+
+        // Validate slots
+        for (const slot of slots) {
+            if (slot.dayOfWeek < 0 || slot.dayOfWeek > 6) {
+                return response.error(res, 'Invalid day of week', 400);
+            }
+            if (!slot.startTime || !slot.endTime) {
+                return response.error(res, 'Start time and end time are required', 400);
+            }
+        }
+
+        // Execute in transaction: delete all existing slots, insert new ones
+        const result = await prisma.$transaction(async (tx) => {
+            await tx.teacherAvailability.deleteMany({
+                where: { teacherId }
+            });
+
+            if (slots.length > 0) {
+                await tx.teacherAvailability.createMany({
+                    data: slots.map(slot => ({
+                        teacherId,
+                        dayOfWeek: parseInt(slot.dayOfWeek),
+                        startTime: slot.startTime,
+                        endTime: slot.endTime
+                    }))
+                });
+            }
+
+            return tx.teacherAvailability.findMany({
+                where: { teacherId },
+                orderBy: [
+                    { dayOfWeek: 'asc' },
+                    { startTime: 'asc' }
+                ]
+            });
+        });
+
+        return response.success(res, result, 'Availability updated successfully');
+    } catch (error) {
+        next(error);
+    }
+};
+
 // ============================================
 // HELPER FUNCTIONS
 // ============================================
@@ -500,5 +651,7 @@ module.exports = {
     updateSubject,
     getMyStats,
     getMyProfile,
-    getMySubjects
+    getMySubjects,
+    getMyAvailability,
+    updateMyAvailability
 };
