@@ -78,12 +78,19 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   ],
 
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         token.apiToken = user.apiToken;
         token.userType = user.userType;
         token.phone = user.phone;
         token.sub = user.id;
+        token.name = user.name;
+        token.picture = user.image;
+      }
+      if (trigger === "update" && session) {
+        if (session.name) token.name = session.name;
+        if (session.image) token.picture = session.image;
+        if (session.phone) token.phone = session.phone;
       }
       return token;
     },
@@ -94,6 +101,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       session.user.id = token.sub ?? "";
       session.user.phone = token.phone;
       session.user.userType = token.userType;
+      session.user.name = token.name;
+      session.user.image = token.picture;
       return session;
     },
   },

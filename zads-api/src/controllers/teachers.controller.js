@@ -273,7 +273,8 @@ const updateTeacher = async (req, res, next) => {
             experienceYears,
             qualification,
             areaId,
-            lessonTypes
+            lessonTypes,
+            certificateUrl
         } = req.body;
 
         const updated = await prisma.teacher.update({
@@ -283,7 +284,8 @@ const updateTeacher = async (req, res, next) => {
                 ...(experienceYears !== undefined && { experienceYears }),
                 ...(qualification !== undefined && { qualification }),
                 ...(areaId !== undefined && { areaId }),
-                ...(lessonTypes !== undefined && { lessonTypes })
+                ...(lessonTypes !== undefined && { lessonTypes }),
+                ...(certificateUrl !== undefined && { certificateUrl })
             },
             include: {
                 user: {

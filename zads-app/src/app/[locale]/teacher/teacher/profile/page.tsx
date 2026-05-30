@@ -7,15 +7,20 @@ import { useSearchStore } from "@/stores/search";
 import { useAuthStore } from "@/stores/auth";
 import { PageSkeleton } from "@/components/shared/PageSkeleton";
 import { ErrorBanner } from "@/components/shared/ErrorBanner";
-import { Eye, EyeOff, User, Lock, MapPin, CheckCircle } from "lucide-react";
+import { Eye, EyeOff, User, Lock, MapPin, CheckCircle, Camera, FileText, UploadCloud, ShieldCheck, AlertCircle, Trash2, ExternalLink } from "lucide-react";
 import Image from "next/image";
 import { getInitials } from "@/lib/utils";
+import { useSession } from "next-auth/react";
+import { useLocale } from "next-intl";
+import { toast } from "sonner";
 
 export default function TeacherProfilePage() {
+  const locale = useLocale();
   const t = useTranslations("teacher");
   const tAuth = useTranslations("auth");
   const tCommon = useTranslations("common");
   const tErr = useTranslations("errors");
+  const { update: updateSession } = useSession();
   const teacherStore = useTeacherStore();
   const authStore = useAuthStore();
 
@@ -87,12 +92,87 @@ export default function TeacherProfilePage() {
     }
   }, [selectedCity]);
 
+  // Drag and drop certificate uploader states & handlers
+  const [dragActive, setDragActive] = useState(false);
+  const [isUploadingCert, setIsUploadingCert] = useState(false);
+  const certFileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleCertFile(e.dataTransfer.files[0]);
+    }
+  };
+
+  const handleCertChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    if (e.target.files && e.target.files[0]) {
+      handleCertFile(e.target.files[0]);
+    }
+  };
+
+  const handleCertFile = async (file: File) => {
+    const allowedTypes = ["application/pdf", "image/jpeg", "image/png", "image/jpg", "image/webp"];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error(
+        locale === "ar"
+          ? "الملفات المسموح بها فقط هي صور PNG, JPG أو ملفات PDF"
+          : "Only PNG, JPG images or PDF files are allowed"
+      );
+      return;
+    }
+    
+    setIsUploadingCert(true);
+    try {
+      await teacherStore.uploadCertificate(file);
+      toast.success(
+        locale === "ar" ? "تم رفع شهادة التوثيق بنجاح" : "Verification certificate uploaded successfully"
+      );
+    } catch {
+      toast.error(locale === "ar" ? "فشل رفع الملف" : "Failed to upload certificate");
+    } finally {
+      setIsUploadingCert(false);
+    }
+  };
+
+  const handleRemoveCertificate = async () => {
+    if (!confirm(locale === "ar" ? "هل أنت متأكد من رغبتك في حذف ملف التوثيق الحالي؟" : "Are you sure you want to delete the current certificate?")) return;
+    try {
+      await teacherStore.updateProfile({ certificateUrl: null });
+      toast.success(locale === "ar" ? "تم إزالة الملف بنجاح" : "Certificate removed successfully");
+    } catch {
+      toast.error(locale === "ar" ? "فشل حذف الملف" : "Failed to remove certificate");
+    }
+  };
+
   if ((teacherStore.isLoading || authStore.isLoading) && !teacherStore.data) return <PageSkeleton />;
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    await authStore.uploadAvatar(file);
+    try {
+      await authStore.uploadAvatar(file);
+      const updatedProfile = useAuthStore.getState().profile;
+      if (updatedProfile?.avatarUrl) {
+        await updateSession({ image: updatedProfile.avatarUrl });
+      }
+      toast.success(t("avatarUpdated") || "تم تحديث الصورة الشخصية بنجاح");
+    } catch {
+      toast.error(tErr("avatarFailed") || "فشل رفع الصورة");
+    }
   };
 
   const handleUpdateInfo = async (e: React.FormEvent) => {
@@ -206,8 +286,8 @@ export default function TeacherProfilePage() {
                     {getInitials(user?.name ?? "?")}
                   </div>
                 )}
-                <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <span className="text-xs text-white">{tCommon("change")}</span>
+                <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/55 opacity-0 group-hover:opacity-100 transition-all duration-300 scale-95 group-hover:scale-100">
+                  <Camera className="w-5 h-5 text-white animate-pulse" />
                 </div>
               </div>
               <div>
@@ -352,95 +432,205 @@ export default function TeacherProfilePage() {
             </div>
           </form>
         ) : (
-          <form onSubmit={handleUpdatePassword} className="space-y-5">
-            <h2 className="text-sm font-bold text-foreground">{tAuth("forgotPassword")}</h2>
-            
-            {passwordError && <ErrorBanner error={passwordError} />}
+          <div className="space-y-8">
+            <form onSubmit={handleUpdatePassword} className="space-y-5">
+              <h2 className="text-sm font-bold text-foreground">{tAuth("forgotPassword")}</h2>
+              
+              {passwordError && <ErrorBanner error={passwordError} />}
 
-            {/* Current Password */}
-            <div>
-              <label className="mb-1.5 block text-sm font-semibold">{tAuth("password")}</label>
-              <div className="relative max-w-md">
-                <input
-                  type={showCurrent ? "text" : "password"}
-                  value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
-                  required
-                  placeholder="••••••••"
-                  className="w-full rounded-xl border border-border px-3 py-2.5 pe-12 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-                />
+              {/* Current Password */}
+              <div>
+                <label className="mb-1.5 block text-sm font-semibold">{tAuth("password")}</label>
+                <div className="relative max-w-md">
+                  <input
+                    type={showCurrent ? "text" : "password"}
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    required
+                    placeholder="••••••••"
+                    className="w-full rounded-xl border border-border px-3 py-2.5 pe-12 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowCurrent(!showCurrent)}
+                    className="absolute inset-y-0 end-0 flex items-center pe-4 text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {showCurrent ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* New Password */}
+              <div>
+                <label className="mb-1.5 block text-sm font-semibold">كلمة المرور الجديدة</label>
+                <div className="relative max-w-md">
+                  <input
+                    type={showNew ? "text" : "password"}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    required
+                    placeholder="••••••••"
+                    className="w-full rounded-xl border border-border px-3 py-2.5 pe-12 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNew(!showNew)}
+                    className="absolute inset-y-0 end-0 flex items-center pe-4 text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {showNew ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Confirm New Password */}
+              <div>
+                <label className="mb-1.5 block text-sm font-semibold">تأكيد كلمة المرور الجديدة</label>
+                <div className="relative max-w-md">
+                  <input
+                    type={showConfirm ? "text" : "password"}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                    placeholder="••••••••"
+                    className="w-full rounded-xl border border-border px-3 py-2.5 pe-12 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirm(!showConfirm)}
+                    className="absolute inset-y-0 end-0 flex items-center pe-4 text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {showConfirm ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Success alert */}
+              {securitySuccess && (
+                <div className="flex items-center gap-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 p-4 text-sm font-medium animate-in fade-in slide-in-from-bottom-2 duration-300">
+                  <CheckCircle className="h-5 w-5 text-emerald-600" />
+                  <span>تم تغيير كلمة المرور بنجاح!</span>
+                </div>
+              )}
+
+              <div className="pt-2">
                 <button
-                  type="button"
-                  onClick={() => setShowCurrent(!showCurrent)}
-                  className="absolute inset-y-0 end-0 flex items-center pe-4 text-muted-foreground hover:text-foreground transition-colors"
+                  type="submit"
+                  disabled={authStore.isLoading}
+                  className="rounded-xl bg-primary px-8 py-3 text-sm font-bold text-white hover:bg-primary-dark transition-all shadow-md shadow-primary/10 disabled:opacity-60"
                 >
-                  {showCurrent ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  {authStore.isLoading ? "..." : tCommon("save")}
                 </button>
               </div>
-            </div>
+            </form>
 
-            {/* New Password */}
-            <div>
-              <label className="mb-1.5 block text-sm font-semibold">كلمة المرور الجديدة</label>
-              <div className="relative max-w-md">
-                <input
-                  type={showNew ? "text" : "password"}
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  required
-                  placeholder="••••••••"
-                  className="w-full rounded-xl border border-border px-3 py-2.5 pe-12 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowNew(!showNew)}
-                  className="absolute inset-y-0 end-0 flex items-center pe-4 text-muted-foreground hover:text-foreground transition-colors"
+            <hr className="my-8 border-slate-100" />
+
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="w-5 h-5 text-orange-500" />
+                <h3 className="font-bold text-slate-800 text-base">
+                  {locale === "ar" ? "توثيق الحساب والشهادات المهنية" : "Account Verification & Credentials"}
+                </h3>
+              </div>
+              <p className="text-xs text-muted-foreground max-w-xl leading-relaxed">
+                {locale === "ar"
+                  ? "قم برفع شهادتك الجامعية أو وثيقة التخرج أو ما يثبت هويتك المهنية. سيقوم المشرفون بمراجعة المستند وتفعيل شارة التوثيق لحسابك لجذب المزيد من الطلاب."
+                  : "Upload your university degree, graduation document, or professional ID. Administrators will verify the document and activate your verified badge to attract more students."}
+              </p>
+
+              {/* Verification Status */}
+              <div className="flex flex-wrap items-center gap-3">
+                {teacherStore.data?.isVerified ? (
+                  <div className="flex items-center gap-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 px-3.5 py-2 text-xs font-semibold">
+                    <ShieldCheck className="h-4 w-4 text-emerald-600 animate-bounce" />
+                    <span>{locale === "ar" ? "حسابك موثق ورسمي" : "Your account is verified & official"}</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 px-3.5 py-2 text-xs font-semibold">
+                    <AlertCircle className="h-4 w-4 text-amber-600 animate-pulse" />
+                    <span>
+                      {teacherStore.data?.certificateUrl
+                        ? (locale === "ar" ? "المستندات قيد المراجعة والتدقيق" : "Documents under administrative review")
+                        : (locale === "ar" ? "بانتظار رفع شهادة التوثيق" : "Awaiting credentials upload")}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Upload area or active file card */}
+              {teacherStore.data?.certificateUrl ? (
+                <div className="rounded-[1.25rem] border border-slate-100 bg-slate-50/50 p-4 flex items-center justify-between gap-4 max-w-xl shadow-sm">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="h-10 w-10 rounded-xl bg-orange-50 flex items-center justify-center shrink-0 border border-orange-100">
+                      <FileText className="h-5 w-5 text-orange-500" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-slate-700 truncate">
+                        {locale === "ar" ? "شهادة التوثيق المهنية" : "Verification Certificate"}
+                      </p>
+                      <p className="text-[11px] text-muted-foreground truncate max-w-xs">
+                        {teacherStore.data.certificateUrl.split('/').pop()}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <a
+                      href={teacherStore.data.certificateUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="h-8 w-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-500 hover:text-primary hover:border-primary/30 transition-colors shadow-sm"
+                      title={locale === "ar" ? "عرض المستند" : "View Document"}
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                    </a>
+                    <button
+                      onClick={handleRemoveCertificate}
+                      className="h-8 w-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-red-600 hover:border-red-200 transition-colors shadow-sm"
+                      title={locale === "ar" ? "حذف الملف" : "Delete File"}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div
+                  onDragEnter={handleDrag}
+                  onDragOver={handleDrag}
+                  onDragLeave={handleDrag}
+                  onDrop={handleDrop}
+                  onClick={() => certFileInputRef.current?.click()}
+                  className={`border-2 border-dashed rounded-[1.25rem] p-6 max-w-xl flex flex-col items-center justify-center gap-2 cursor-pointer transition-all duration-300 text-center ${
+                    dragActive
+                      ? "border-orange-500 bg-orange-50/20 scale-[1.02]"
+                      : "border-slate-200 bg-slate-50 hover:bg-slate-100/50 hover:border-orange-300"
+                  }`}
                 >
-                  {showNew ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                </button>
-              </div>
+                  <input
+                    ref={certFileInputRef}
+                    type="file"
+                    accept="image/*,application/pdf"
+                    className="hidden"
+                    onChange={handleCertChange}
+                  />
+                  <div className="h-12 w-12 rounded-full bg-orange-50 border border-orange-100 flex items-center justify-center text-orange-500 shadow-sm shrink-0">
+                    <UploadCloud className="h-6 w-6 animate-pulse" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-slate-700">
+                      {isUploadingCert
+                        ? (locale === "ar" ? "جاري رفع الملف الآن..." : "Uploading file...")
+                        : (locale === "ar" ? "اسحب وأسقط الملف هنا أو اضغط للتصفح" : "Drag & drop file here or click to browse")}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {locale === "ar"
+                        ? "يدعم صور PNG, JPG أو ملفات PDF حتى 10 ميجابايت"
+                        : "Supports PNG, JPG images or PDF files up to 10MB"}
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
-
-            {/* Confirm New Password */}
-            <div>
-              <label className="mb-1.5 block text-sm font-semibold">تأكيد كلمة المرور الجديدة</label>
-              <div className="relative max-w-md">
-                <input
-                  type={showConfirm ? "text" : "password"}
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
-                  placeholder="••••••••"
-                  className="w-full rounded-xl border border-border px-3 py-2.5 pe-12 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirm(!showConfirm)}
-                  className="absolute inset-y-0 end-0 flex items-center pe-4 text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  {showConfirm ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                </button>
-              </div>
-            </div>
-
-            {/* Success alert */}
-            {securitySuccess && (
-              <div className="flex items-center gap-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 p-4 text-sm font-medium animate-in fade-in slide-in-from-bottom-2 duration-300">
-                <CheckCircle className="h-5 w-5 text-emerald-600" />
-                <span>تم تغيير كلمة المرور بنجاح!</span>
-              </div>
-            )}
-
-            <div className="pt-2">
-              <button
-                type="submit"
-                disabled={authStore.isLoading}
-                className="rounded-xl bg-primary px-8 py-3 text-sm font-bold text-white hover:bg-primary-dark transition-all shadow-md shadow-primary/10 disabled:opacity-60"
-              >
-                {authStore.isLoading ? "..." : tCommon("save")}
-              </button>
-            </div>
-          </form>
+          </div>
         )}
 
       </div>
