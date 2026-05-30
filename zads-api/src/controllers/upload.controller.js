@@ -2,7 +2,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
-// Configure storage
+// Configure storage for general images (avatars, etc.)
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         const uploadDir = 'public/uploads/images';
@@ -12,7 +12,21 @@ const storage = multer.diskStorage({
         cb(null, uploadDir);
     },
     filename: (req, file, cb) => {
-        // Create unique filename: timestamp-random.ext
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, uniqueSuffix + path.extname(file.originalname));
+    }
+});
+
+// Configure storage for certificates (degrees, verification documents)
+const certificateStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        const uploadDir = 'public/uploads/certificates';
+        if (!fs.existsSync(uploadDir)) {
+            fs.mkdirSync(uploadDir, { recursive: true });
+        }
+        cb(null, uploadDir);
+    },
+    filename: (req, file, cb) => {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
         cb(null, uniqueSuffix + path.extname(file.originalname));
     }
@@ -27,6 +41,16 @@ const fileFilter = (req, file, cb) => {
     }
 };
 
+// File filter for certificates (images and PDFs)
+const certificateFilter = (req, file, cb) => {
+    const allowedMimeTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
+    if (allowedMimeTypes.includes(file.mimetype)) {
+        cb(null, true);
+    } else {
+        cb(new Error('Only PDF and image files are allowed for certificates!'), false);
+    }
+};
+
 const upload = multer({
     storage: storage,
     fileFilter: fileFilter,
@@ -35,7 +59,15 @@ const upload = multer({
     }
 });
 
-// Upload Controller
+const certificateUpload = multer({
+    storage: certificateStorage,
+    fileFilter: certificateFilter,
+    limits: {
+        fileSize: 10 * 1024 * 1024 // 10MB limit
+    }
+});
+
+// Upload Image Controller
 exports.uploadImage = (req, res) => {
     if (!req.file) {
         return res.status(400).json({
@@ -44,8 +76,6 @@ exports.uploadImage = (req, res) => {
         });
     }
 
-    // Construct public URL
-    // Assumes server runs on environment defined host/port
     const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 3000}`;
     const imageUrl = `${baseUrl}/uploads/images/${req.file.filename}`;
 
@@ -59,4 +89,27 @@ exports.uploadImage = (req, res) => {
     });
 };
 
+// Upload Certificate Controller
+exports.uploadCertificate = (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({
+            success: false,
+            message: 'No certificate file uploaded'
+        });
+    }
+
+    const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 3000}`;
+    const fileUrl = `${baseUrl}/uploads/certificates/${req.file.filename}`;
+
+    res.status(200).json({
+        success: true,
+        message: 'Certificate uploaded successfully',
+        data: {
+            url: fileUrl,
+            filename: req.file.filename
+        }
+    });
+};
+
 exports.uploadMiddleware = upload.single('image');
+exports.certificateMiddleware = certificateUpload.single('certificate');

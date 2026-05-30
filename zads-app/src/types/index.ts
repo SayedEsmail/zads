@@ -61,6 +61,7 @@ export interface Teacher {
   areaId?: string | null;
   lessonTypes: LessonType[];
   isVerified: boolean;
+  certificateUrl?: string | null;
   viewsCount: number;
   avgRating: number;
   ratingCount: number;

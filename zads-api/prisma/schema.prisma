@@ -96,6 +96,7 @@ model Teacher {
   areaId          String?  @map("area_id")
   lessonTypes     Json     @default("[\"at_teacher\", \"at_student\"]") @map("lesson_types")
   isVerified      Boolean  @default(false) @map("is_verified")
+  certificateUrl  String?  @map("certificate_url")
   viewsCount      Int      @default(0) @map("views_count")
   avgRating       Decimal  @default(0) @map("avg_rating") @db.Decimal(2, 1)
   ratingCount     Int      @default(0) @map("rating_count")

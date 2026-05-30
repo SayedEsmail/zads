@@ -7,9 +7,11 @@ import { useClientStore } from "@/stores/client";
 import { useSearchStore } from "@/stores/search";
 import { ErrorBanner } from "@/components/shared/ErrorBanner";
 import { PageSkeleton } from "@/components/shared/PageSkeleton";
-import { Eye, EyeOff, User, Lock, MapPin, CheckCircle } from "lucide-react";
+import { Eye, EyeOff, User, Lock, MapPin, CheckCircle, Camera } from "lucide-react";
 import Image from "next/image";
 import { getInitials } from "@/lib/utils";
+import { useSession } from "next-auth/react";
+import { toast } from "sonner";
 import type { ClientAccountKind } from "@/types";
 
 export default function ClientProfilePage() {
@@ -18,6 +20,7 @@ export default function ClientProfilePage() {
   const tClient = useTranslations("client");
   const tCommon = useTranslations("common");
   const tErr = useTranslations("errors");
+  const { update: updateSession } = useSession();
   const auth = useAuthStore();
   const client = useClientStore();
 
@@ -90,7 +93,16 @@ export default function ClientProfilePage() {
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    await auth.uploadAvatar(file);
+    try {
+      await auth.uploadAvatar(file);
+      const updatedProfile = useAuthStore.getState().profile;
+      if (updatedProfile?.avatarUrl) {
+        await updateSession({ image: updatedProfile.avatarUrl });
+      }
+      toast.success(tClient("avatarUpdated") || "تم تحديث الصورة الشخصية بنجاح");
+    } catch {
+      toast.error(tErr("avatarFailed") || "فشل رفع الصورة");
+    }
   };
 
   const handleUpdateInfo = async (e: React.FormEvent) => {
@@ -199,8 +211,8 @@ export default function ClientProfilePage() {
                     {getInitials(auth.profile?.name ?? "?")}
                   </div>
                 )}
-                <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <span className="text-xs text-white">{tCommon("change")}</span>
+                <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/55 opacity-0 group-hover:opacity-100 transition-all duration-300 scale-95 group-hover:scale-100">
+                  <Camera className="w-5 h-5 text-white animate-pulse" />
                 </div>
               </div>
               <div>
