@@ -165,17 +165,20 @@ const login = async (req, res, next) => {
 
         // Find user
         let user;
-        if (phone) {
+        const searchPhone = (phone && phone !== 'undefined') ? phone : null;
+        const searchEmail = (email && email !== 'undefined') ? email : null;
+
+        if (searchPhone) {
             user = await prisma.user.findUnique({
-                where: { phone },
+                where: { phone: searchPhone },
                 include: {
                     teacher: true,
                     parent: true
                 }
             });
-        } else if (email) {
+        } else if (searchEmail) {
             user = await prisma.user.findUnique({
-                where: { email },
+                where: { email: searchEmail },
                 include: {
                     teacher: true,
                     parent: true

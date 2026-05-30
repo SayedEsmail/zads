@@ -45,12 +45,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
       async authorize(credentials) {
         try {
+          const phone = credentials?.phone && credentials.phone !== "undefined" ? credentials.phone : undefined;
+          const email = credentials?.email && credentials.email !== "undefined" ? credentials.email : undefined;
+
           const res = await fetch(`${API_BASE}/api/auth/login`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              phone: credentials?.phone || undefined,
-              email: credentials?.email || undefined,
+              phone,
+              email,
               password: credentials?.password,
             }),
           });
