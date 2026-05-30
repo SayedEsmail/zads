@@ -17,9 +17,9 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 
 function getRoleHome(locale: string, userType: string | null): string {
-  if (userType === "parent") return `/${locale}/client/client`;
-  if (userType === "teacher") return `/${locale}/teacher/teacher`;
-  if (userType === "admin") return `/${locale}/admin/admin`;
+  if (userType === "parent") return `/${locale}/client`;
+  if (userType === "teacher") return `/${locale}/teacher`;
+  if (userType === "admin") return `/${locale}/admin`;
   return `/${locale}/public`;
 }
 

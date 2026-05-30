@@ -17,7 +17,7 @@ type Translator = (key: string) => string;
 
 function useNavItems(role: Role, locale: string, t: Translator) {
   if (role === "client") {
-    const base = `/${locale}/client/client`;
+    const base = `/${locale}/client`;
     return [
       { href: base, label: t("dashboard"), icon: LayoutDashboard },
       { href: `${base}/teacher`, label: t("searchTeachers"), icon: Search },
@@ -29,7 +29,7 @@ function useNavItems(role: Role, locale: string, t: Translator) {
     ];
   }
   if (role === "teacher") {
-    const base = `/${locale}/teacher/teacher`;
+    const base = `/${locale}/teacher`;
     return [
       { href: base, label: t("dashboard"), icon: LayoutDashboard },
       { href: `${base}/browse`, label: t("browseTeacher"), icon: Search },
@@ -40,7 +40,7 @@ function useNavItems(role: Role, locale: string, t: Translator) {
     ];
   }
   // admin
-  const base = `/${locale}/admin/admin`;
+  const base = `/${locale}/admin`;
   return [
     { href: base, label: t("admin"), icon: BarChart2 },
     { href: `${base}/teachers`, label: t("teachers"), icon: GraduationCap },

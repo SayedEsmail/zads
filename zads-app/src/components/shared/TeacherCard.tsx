@@ -33,7 +33,7 @@ export function TeacherCard({
   const area = teacher.area;
 
   const handleCardClick = () => {
-    router.push(`/${locale}/client/client/teacher/${teacher.id}`);
+    router.push(`/${locale}/client/teacher/${teacher.id}`);
   };
 
   return (
@@ -65,7 +65,7 @@ export function TeacherCard({
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-2">
           <Link
-            href={`/${locale}/client/client/teacher/${teacher.id}`}
+            href={`/${locale}/client/teacher/${teacher.id}`}
             onClick={(e) => e.stopPropagation()}
             className="font-semibold hover:text-primary line-clamp-1"
           >

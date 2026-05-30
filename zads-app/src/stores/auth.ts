@@ -17,7 +17,7 @@ interface AuthState {
   error: string | null;
 
   // Actions
-  login: (phone: string, password: string) => Promise<string | null>;
+  login: (phone: string, password: string, email?: string) => Promise<string | null>;
   registerClient: (payload: RegisterClientPayload) => Promise<void>;
   registerTeacher: (payload: RegisterTeacherPayload) => Promise<void>;
   logout: () => Promise<void>;
@@ -34,11 +34,12 @@ export const useAuthStore = create<AuthState>()(
       ...initialSlice<null>(),
       profile: null,
 
-      login: async (phone, password) => {
+      login: async (phone, password, email) => {
         set({ isLoading: true, error: null });
         try {
           const result = await signIn("credentials", {
-            phone,
+            phone: phone || undefined,
+            email: email || undefined,
             password,
             redirect: false,
           });

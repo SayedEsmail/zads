@@ -161,16 +161,27 @@ const registerParent = async (req, res, next) => {
  */
 const login = async (req, res, next) => {
     try {
-        const { phone, password } = req.body;
+        const { phone, email, password } = req.body;
 
         // Find user
-        const user = await prisma.user.findUnique({
-            where: { phone },
-            include: {
-                teacher: true,
-                parent: true
-            }
-        });
+        let user;
+        if (phone) {
+            user = await prisma.user.findUnique({
+                where: { phone },
+                include: {
+                    teacher: true,
+                    parent: true
+                }
+            });
+        } else if (email) {
+            user = await prisma.user.findUnique({
+                where: { email },
+                include: {
+                    teacher: true,
+                    parent: true
+                }
+            });
+        }
 
         if (!user) {
             return response.error(res, 'Invalid phone or password', 401);

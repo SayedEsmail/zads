@@ -9,16 +9,16 @@ const intlMiddleware = createMiddleware(routing);
 const PROTECTED: Array<{ pattern: RegExp; role: string | string[] }> = [
   { pattern: /^\/[^/]+\/client(\/.*)?$/, role: "parent" },   // API enum: parent = client/learner
   { pattern: /^\/[^/]+\/teacher(\/.*)?$/, role: "teacher" },
-  { pattern: /^\/[^/]+\/admin(\/.*)?$/, role: "admin" },
+  { pattern: /^\/[^/]+\/admin(?!\/login)(\/.*)?$/, role: "admin" },
 ];
 
 // Auth routes: redirect to role home if already authenticated
 const AUTH_PATHS = /^\/[^/]+\/auth\/(login|register|forgot-password)(\/.*)?$/;
 
 function getRoleHome(locale: string, userType: string): string {
-  if (userType === "parent") return `/${locale}/client/client`;
-  if (userType === "teacher") return `/${locale}/teacher/teacher`;
-  if (userType === "admin") return `/${locale}/admin/admin`;
+  if (userType === "parent") return `/${locale}/client`;
+  if (userType === "teacher") return `/${locale}/teacher`;
+  if (userType === "admin") return `/${locale}/admin`;
   return `/${locale}/public`;
 }
 
@@ -58,7 +58,9 @@ export async function proxy(request: NextRequest) {
   for (const { pattern, role } of PROTECTED) {
     if (pattern.test(pathname)) {
       if (!token) {
-        const loginUrl = new URL(`/${locale}/auth/login`, request.url);
+        const isAdminRoute = pathname.includes("/admin");
+        const redirectPath = isAdminRoute ? `/${locale}/admin/login` : `/${locale}/auth/login`;
+        const loginUrl = new URL(redirectPath, request.url);
         loginUrl.searchParams.set("callbackUrl", pathname);
         return NextResponse.redirect(loginUrl);
       }
@@ -74,7 +76,7 @@ export async function proxy(request: NextRequest) {
 
   // Legacy /parent/* → /client/* redirect
   if (/^\/[^/]+\/parent(\/.*)?$/.test(pathname)) {
-    const newPath = pathname.replace(/\/parent/, "/client/client");
+    const newPath = pathname.replace(/\/parent/, "/client");
     return NextResponse.redirect(new URL(newPath, request.url), 301);
   }
 

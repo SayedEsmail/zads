@@ -73,28 +73,28 @@ export default function AdminDashboardPage() {
     {
       title: locale === "ar" ? "توثيق شهادات المعلمين" : "Teacher Document Verification",
       desc: locale === "ar" ? "مراجعة الشهادات المرفوعة وتفعيل شارة التوثيق" : "Review uploaded certificates & activate verified badge",
-      href: `/${locale}/admin/admin/teachers`,
+      href: `/${locale}/admin/teachers`,
       icon: ShieldCheck,
       color: "border-amber-100 hover:border-amber-300 text-amber-600 bg-amber-50/20"
     },
     {
       title: locale === "ar" ? "إدارة المراحل التعليمية" : "Curriculum Stages CRUD",
       desc: locale === "ar" ? "إضافة وتعديل وتفعيل المراحل الدراسية المختلفة" : "Create, update, and toggle active stages",
-      href: `/${locale}/admin/admin/stages`,
+      href: `/${locale}/admin/stages`,
       icon: BookOpen,
       color: "border-indigo-100 hover:border-indigo-300 text-indigo-600 bg-indigo-50/20"
     },
     {
       title: locale === "ar" ? "إدارة المواد الدراسية" : "Curriculum Subjects CRUD",
       desc: locale === "ar" ? "إدارة وتصنيف المواد التعليمية النشطة والجديدة" : "Manage and categorize active and new subjects",
-      href: `/${locale}/admin/admin/subjects`,
+      href: `/${locale}/admin/subjects`,
       icon: BookOpen,
       color: "border-emerald-100 hover:border-emerald-300 text-emerald-600 bg-emerald-50/20"
     },
     {
       title: locale === "ar" ? "إدارة وحظر المستخدمين" : "User Status & Ban Control",
       desc: locale === "ar" ? "حظر وفك الحظر عن أولياء الأمور والمدرسين" : "Suspend and activate parent or tutor accounts",
-      href: `/${locale}/admin/admin/parents`,
+      href: `/${locale}/admin/parents`,
       icon: Users,
       color: "border-rose-100 hover:border-rose-300 text-rose-600 bg-rose-50/20"
     }

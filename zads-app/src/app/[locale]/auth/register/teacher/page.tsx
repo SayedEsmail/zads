@@ -38,7 +38,7 @@ export default function RegisterTeacherPage() {
       phone: data.phone,
       password: data.password,
     });
-    router.replace(`/${locale}/teacher/teacher`);
+    router.replace(`/${locale}/teacher`);
     router.refresh();
   };
 

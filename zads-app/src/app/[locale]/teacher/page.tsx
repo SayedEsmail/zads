@@ -69,7 +69,7 @@ export default function TeacherDashboardPage() {
       label: t("stats.subjects"),
       value: teacherStore.data?.subjects?.length ?? 0,
       icon: BookOpen,
-      href: `/${locale}/teacher/teacher/subjects`,
+      href: `/${locale}/teacher/subjects`,
       color: "bg-indigo-50 text-indigo-600",
     },
   ] : [];
@@ -133,7 +133,7 @@ export default function TeacherDashboardPage() {
               <span className={`h-4.5 w-4.5 rounded-full flex items-center justify-center border text-[10px] ${
                 isLocationComplete ? "bg-emerald-100 border-emerald-300 text-emerald-700 font-bold" : "border-amber-300 bg-white text-transparent"
               }`}>✓</span>
-              <Link href={`/${locale}/teacher/teacher/profile`} className={`hover:underline ${isLocationComplete ? "text-slate-400 line-through font-normal" : "text-primary"}`}>
+              <Link href={`/${locale}/teacher/profile`} className={`hover:underline ${isLocationComplete ? "text-slate-400 line-through font-normal" : "text-primary"}`}>
                 {t("setupLocation")}
               </Link>
             </li>
@@ -142,7 +142,7 @@ export default function TeacherDashboardPage() {
               <span className={`h-4.5 w-4.5 rounded-full flex items-center justify-center border text-[10px] ${
                 hasSubjects ? "bg-emerald-100 border-emerald-300 text-emerald-700 font-bold" : "border-amber-300 bg-white text-transparent"
               }`}>✓</span>
-              <Link href={`/${locale}/teacher/teacher/subjects`} className={`hover:underline ${hasSubjects ? "text-slate-400 line-through font-normal" : "text-primary"}`}>
+              <Link href={`/${locale}/teacher/subjects`} className={`hover:underline ${hasSubjects ? "text-slate-400 line-through font-normal" : "text-primary"}`}>
                 {t("setupSubjects")}
               </Link>
             </li>
@@ -151,7 +151,7 @@ export default function TeacherDashboardPage() {
               <span className={`h-4.5 w-4.5 rounded-full flex items-center justify-center border text-[10px] ${
                 isBioComplete ? "bg-emerald-100 border-emerald-300 text-emerald-700 font-bold" : "border-amber-300 bg-white text-transparent"
               }`}>✓</span>
-              <Link href={`/${locale}/teacher/teacher/profile`} className={`hover:underline ${isBioComplete ? "text-slate-400 line-through font-normal" : "text-primary"}`}>
+              <Link href={`/${locale}/teacher/profile`} className={`hover:underline ${isBioComplete ? "text-slate-400 line-through font-normal" : "text-primary"}`}>
                 {t("setupBio")}
               </Link>
             </li>
@@ -198,7 +198,7 @@ export default function TeacherDashboardPage() {
       {/* Direct Contact Requests Big CTA Card (Unified layout & showing count) */}
       {stats && (
         <Link
-          href={`/${locale}/teacher/teacher/requests`}
+          href={`/${locale}/teacher/requests`}
           className="group flex items-center justify-between rounded-[1.25rem] bg-white p-5 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_10px_30px_-10px_rgba(0,0,0,0.1)] hover:-translate-y-1 transition-all duration-300 border border-transparent hover:border-orange-100"
         >
           <div className="flex items-center gap-4">
@@ -229,7 +229,7 @@ export default function TeacherDashboardPage() {
           <h2 className="text-lg font-bold text-foreground">
             {locale === "ar" ? "فرص التدريس المتاحة في منطقتك" : "Available Teaching Opportunities"}
           </h2>
-          <Link href={`/${locale}/teacher/teacher/browse`} className="text-sm font-semibold text-primary hover:text-blue-700 hover:underline">
+          <Link href={`/${locale}/teacher/browse`} className="text-sm font-semibold text-primary hover:text-blue-700 hover:underline">
             {tCommon("viewAll")}
           </Link>
         </div>
