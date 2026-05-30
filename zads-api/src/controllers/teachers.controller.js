@@ -230,6 +230,12 @@ const getTeacherById = async (req, res, next) => {
                         subject: true,
                         stage: true
                     }
+                },
+                availabilities: {
+                    orderBy: [
+                        { dayOfWeek: 'asc' },
+                        { startTime: 'asc' }
+                    ]
                 }
             }
         });
@@ -529,6 +535,88 @@ const getMySubjects = async (req, res, next) => {
     }
 };
 
+/**
+ * Get my availability slots (Teacher)
+ */
+const getMyAvailability = async (req, res, next) => {
+    try {
+        const teacherId = req.user.teacher?.id;
+        if (!teacherId) {
+            return response.error(res, 'Teacher profile not found', 404);
+        }
+
+        const availabilities = await prisma.teacherAvailability.findMany({
+            where: { teacherId },
+            orderBy: [
+                { dayOfWeek: 'asc' },
+                { startTime: 'asc' }
+            ]
+        });
+
+        return response.success(res, availabilities);
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * Update my availability slots (Teacher)
+ */
+const updateMyAvailability = async (req, res, next) => {
+    try {
+        const teacherId = req.user.teacher?.id;
+        if (!teacherId) {
+            return response.error(res, 'Teacher profile not found', 404);
+        }
+
+        const { slots } = req.body; // Array of { dayOfWeek: number, startTime: string, endTime: string }
+
+        if (!Array.isArray(slots)) {
+            return response.error(res, 'Slots must be an array', 400);
+        }
+
+        // Validate slots
+        for (const slot of slots) {
+            if (slot.dayOfWeek < 0 || slot.dayOfWeek > 6) {
+                return response.error(res, 'Invalid day of week', 400);
+            }
+            if (!slot.startTime || !slot.endTime) {
+                return response.error(res, 'Start time and end time are required', 400);
+            }
+        }
+
+        // Execute in transaction: delete all existing slots, insert new ones
+        const result = await prisma.$transaction(async (tx) => {
+            await tx.teacherAvailability.deleteMany({
+                where: { teacherId }
+            });
+
+            if (slots.length > 0) {
+                await tx.teacherAvailability.createMany({
+                    data: slots.map(slot => ({
+                        teacherId,
+                        dayOfWeek: parseInt(slot.dayOfWeek),
+                        startTime: slot.startTime,
+                        endTime: slot.endTime
+                    }))
+                });
+            }
+
+            return tx.teacherAvailability.findMany({
+                where: { teacherId },
+                orderBy: [
+                    { dayOfWeek: 'asc' },
+                    { startTime: 'asc' }
+                ]
+            });
+        });
+
+        return response.success(res, result, 'Availability updated successfully');
+    } catch (error) {
+        next(error);
+    }
+};
+
 // ============================================
 // HELPER FUNCTIONS
 // ============================================
@@ -561,5 +649,7 @@ module.exports = {
     updateSubject,
     getMyStats,
     getMyProfile,
-    getMySubjects
+    getMySubjects,
+    getMyAvailability,
+    updateMyAvailability
 };

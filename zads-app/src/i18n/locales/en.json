@@ -92,7 +92,8 @@
     "favorites": "Favorites",
     "subjects": "Subjects",
     "browse": "Available Teaching Opportunities",
-    "admin": "Admin"
+    "admin": "Admin",
+    "availability": "Availability Schedule"
   },
   "landing": {
     "heroTitle": "Zad — Local Learning Platform",

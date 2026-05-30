@@ -52,22 +52,25 @@ export default function TeacherProfilePage() {
   }, []);
 
   useEffect(() => {
-    if (authStore.profile) {
-      setName(authStore.profile.name || "");
-      setPhone(authStore.profile.phone || "");
-    }
-    if (teacherStore.data) {
-      setBio(teacherStore.data.bio || "");
-      setQualification(teacherStore.data.qualification || "");
-      setExperienceYears(teacherStore.data.experienceYears || 0);
-      setSelectedArea(teacherStore.data.areaId || "");
-      if (teacherStore.data.area) {
-        setSelectedCity(teacherStore.data.area.cityId || "");
-        if (teacherStore.data.area.city) {
-          setSelectedGov(teacherStore.data.area.city.governorateId || "");
+    const timer = setTimeout(() => {
+      if (authStore.profile) {
+        setName(authStore.profile.name || "");
+        setPhone(authStore.profile.phone || "");
+      }
+      if (teacherStore.data) {
+        setBio(teacherStore.data.bio || "");
+        setQualification(teacherStore.data.qualification || "");
+        setExperienceYears(teacherStore.data.experienceYears || 0);
+        setSelectedArea(teacherStore.data.areaId || "");
+        if (teacherStore.data.area) {
+          setSelectedCity(teacherStore.data.area.cityId || "");
+          if (teacherStore.data.area.city) {
+            setSelectedGov(teacherStore.data.area.city.governorateId || "");
+          }
         }
       }
-    }
+    }, 0);
+    return () => clearTimeout(timer);
   }, [authStore.profile, teacherStore.data]);
 
   // Load cities if a governorate is pre-populated

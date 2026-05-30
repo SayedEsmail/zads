@@ -10,6 +10,8 @@ router.get('/me/stats', auth, isTeacher, teachersController.getMyStats);
 router.get('/me/subjects', auth, isTeacher, teachersController.getMySubjects);
 router.post('/me/subjects', auth, isTeacher, teachersController.addSubject);
 router.put('/me/subjects/:teacherSubjectId', auth, isTeacher, teachersController.updateSubject);
+router.get('/me/availability', auth, isTeacher, teachersController.getMyAvailability);
+router.put('/me/availability', auth, isTeacher, teachersController.updateMyAvailability);
 
 // Public routes (with optional auth for parent smart filtering)
 router.get('/search', optionalAuth, teachersController.searchTeachers);
