@@ -173,12 +173,14 @@ export interface ContactRequest {
   subjectId?: string | null;
   stageId?: string | null;
   message?: string | null;
+  replyMessage?: string | null;
   status: ContactRequestStatus;
+  initiatedBy?: "parent" | "teacher";
   createdAt: string;
   updatedAt: string;
   // Relations
-  teacher?: Pick<Teacher, "id"> & { user: Pick<User, "name" | "avatarUrl"> };
-  parent?: Pick<ClientProfile, "id"> & { user: Pick<User, "name"> };
+  teacher?: Pick<Teacher, "id"> & { user: Pick<User, "name" | "avatarUrl" | "phone"> };
+  parent?: Pick<ClientProfile, "id"> & { user: Pick<User, "name" | "phone" | "avatarUrl"> };
   subject?: Subject;
   stage?: Stage;
 }

@@ -62,7 +62,7 @@ const createRequest = async (req, res, next) => {
  */
 const getTutorRequests = async (req, res, next) => {
     try {
-        const { subjectId, stageId, areaId } = req.query;
+        const { subjectId, stageId, areaId, cityId, governorateId } = req.query;
 
         const where = {
             status: 'active',
@@ -74,9 +74,49 @@ const getTutorRequests = async (req, res, next) => {
 
         if (subjectId) where.subjectId = subjectId;
         if (stageId) where.stageId = stageId;
-        if (areaId) where.areaId = areaId;
         if (req.query.studyMode) where.studyMode = req.query.studyMode;
         if (req.query.requestTarget) where.requestTarget = req.query.requestTarget;
+
+        // Determine active location filters (defaulting to logged-in teacher's location if no search filters provided)
+        let activeAreaId = areaId;
+        let activeCityId = cityId;
+        let activeGovId = governorateId;
+
+        const teacher = req.user?.teacher;
+        if (teacher?.areaId && !areaId && !cityId && !governorateId) {
+            const teacherArea = await prisma.area.findUnique({
+                where: { id: teacher.areaId },
+                include: { city: true }
+            });
+            if (teacherArea) {
+                activeAreaId = teacherArea.id;
+                activeCityId = teacherArea.cityId;
+                activeGovId = teacherArea.city?.governorateId;
+            }
+        }
+
+        // Apply governorate restriction (always scope requests to the target governorate)
+        if (activeAreaId) {
+            where.areaId = activeAreaId;
+        } else if (activeCityId) {
+            where.area = { cityId: activeCityId };
+        } else if (activeGovId) {
+            where.area = { city: { governorateId: activeGovId } };
+        }
+
+        const teacherId = req.user?.teacher?.id;
+        if (teacherId && !subjectId) {
+            // Find all subjects this teacher teaches
+            const teacherSubjects = await prisma.teacherSubject.findMany({
+                where: { teacherId },
+                select: { subjectId: true }
+            });
+            
+            if (teacherSubjects.length > 0) {
+                const subjectIds = teacherSubjects.map(ts => ts.subjectId);
+                where.subjectId = { in: subjectIds };
+            }
+        }
 
         const requests = await prisma.tutorRequest.findMany({
             where,
@@ -88,6 +128,7 @@ const getTutorRequests = async (req, res, next) => {
                 },
                 subject: true,
                 stage: true,
+                parentChild: true,
                 area: {
                     include: {
                         city: {
@@ -101,35 +142,53 @@ const getTutorRequests = async (req, res, next) => {
             orderBy: { createdAt: 'desc' }
         });
 
-        // Proximity Sorting based on logged-in teacher's location
-        const teacherAreaId = req.user?.teacher?.areaId;
-        if (teacherAreaId) {
+        // Proximity Sorting based on active location (defaulting to teacher's home location)
+        let sortAreaId = teacher?.areaId;
+        let sortCityId = null;
+        let sortGovId = null;
+
+        if (sortAreaId) {
             const teacherArea = await prisma.area.findUnique({
-                where: { id: teacherAreaId },
+                where: { id: sortAreaId },
                 include: { city: true }
             });
-
             if (teacherArea) {
-                requests.sort((a, b) => {
-                    // Priority 1: Same neighborhood/area
-                    const aSameArea = a.areaId === teacherAreaId ? 1 : 0;
-                    const bSameArea = b.areaId === teacherAreaId ? 1 : 0;
-                    if (aSameArea !== bSameArea) return bSameArea - aSameArea;
-
-                    // Priority 2: Same city
-                    const aSameCity = a.area?.cityId === teacherArea.cityId ? 1 : 0;
-                    const bSameCity = b.area?.cityId === teacherArea.cityId ? 1 : 0;
-                    if (aSameCity !== bSameCity) return bSameCity - aSameCity;
-
-                    // Priority 3: Same governorate
-                    const aSameGov = a.area?.city?.governorateId === teacherArea.city?.governorateId ? 1 : 0;
-                    const bSameGov = b.area?.city?.governorateId === teacherArea.city?.governorateId ? 1 : 0;
-                    if (aSameGov !== bSameGov) return bSameGov - aSameGov;
-
-                    // Default to creation date descending
-                    return new Date(b.createdAt) - new Date(a.createdAt);
-                });
+                sortCityId = teacherArea.cityId;
+                sortGovId = teacherArea.city?.governorateId;
             }
+        }
+
+        // If specific search filters were explicitly provided, let's use them to prioritize sorting
+        if (areaId) {
+            sortAreaId = areaId;
+        }
+        if (cityId) {
+            sortCityId = cityId;
+        }
+        if (governorateId) {
+            sortGovId = governorateId;
+        }
+
+        if (sortAreaId || sortCityId) {
+            requests.sort((a, b) => {
+                // Priority 1: Same neighborhood/area
+                const aSameArea = sortAreaId && a.areaId === sortAreaId ? 1 : 0;
+                const bSameArea = sortAreaId && b.areaId === sortAreaId ? 1 : 0;
+                if (aSameArea !== bSameArea) return bSameArea - aSameArea;
+
+                // Priority 2: Same city
+                const aSameCity = sortCityId && a.area?.cityId === sortCityId ? 1 : 0;
+                const bSameCity = sortCityId && b.area?.cityId === sortCityId ? 1 : 0;
+                if (aSameCity !== bSameCity) return bSameCity - aSameCity;
+
+                // Priority 3: Same governorate
+                const aSameGov = sortGovId && a.area?.city?.governorateId === sortGovId ? 1 : 0;
+                const bSameGov = sortGovId && b.area?.city?.governorateId === sortGovId ? 1 : 0;
+                if (aSameGov !== bSameGov) return bSameGov - aSameGov;
+
+                // Default to creation date descending
+                return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+            });
         }
 
         return response.success(res, requests);
