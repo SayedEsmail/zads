@@ -83,7 +83,7 @@ async function main() {
     await prisma.teacherAvailability.deleteMany({});
     await prisma.teacher.deleteMany({});
     await prisma.parent.deleteMany({});
-    await prisma.user.deleteMany({ where: { NOT: { userType: 'admin' } } });
+    await prisma.user.deleteMany({});
     console.log('🗑️  Dummy data cleared!');
 
     // Seed locations first
@@ -228,13 +228,8 @@ async function main() {
         }
     });
 
-    console.log(`✅ Created admin user: ${admin.phone}`);
-
-    console.log('');
+    console.log('✅ Admin user created/verified successfully.');
     console.log('🎉 Seeding completed!');
-    console.log('');
-    console.log('Test accounts:');
-    console.log('  Admin:   admin@example.com / admin123 (Phone: 01000000000)');
 }
 
 main()

@@ -43,13 +43,11 @@ export const useAuthStore = create<AuthState>()(
             password,
             redirect: false,
           });
-          console.log("[AUTH DEBUG] signIn result:", JSON.stringify(result));
           if (result?.error) {
             set({ error: "Invalid phone or password", isLoading: false });
             return null;
           } else {
             const session = await getSession();
-            console.log("[AUTH DEBUG] getSession result:", JSON.stringify(session));
             set({ isLoading: false });
             return session?.userType ?? null;
           }
