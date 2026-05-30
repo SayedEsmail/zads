@@ -62,21 +62,21 @@ export default function ClientDashboardPage() {
       label: t("dependents"),
       value: dependentsStore.data?.length ?? 0,
       icon: Users,
-      href: `/${locale}/client/client/dependents`,
+      href: `/${locale}/client/dependents`,
       color: "bg-blue-50 text-blue-600",
     },
     {
       label: t("tutorRequests"),
       value: tutorStore.data?.filter((r) => r.status === "active").length ?? 0,
       icon: FileText,
-      href: `/${locale}/client/client/requests`,
+      href: `/${locale}/client/requests`,
       color: "bg-orange-50 text-orange-600",
     },
     {
       label: tNav("favorites"),
       value: favoritesStore.data?.length ?? 0,
       icon: Heart,
-      href: `/${locale}/client/client/favorites`,
+      href: `/${locale}/client/favorites`,
       color: "bg-rose-50 text-rose-600",
     },
   ];
@@ -115,7 +115,7 @@ export default function ClientDashboardPage() {
               <span className={`h-4.5 w-4.5 rounded-full flex items-center justify-center border text-[10px] ${
                 isLocationComplete ? "bg-emerald-100 border-emerald-300 text-emerald-700 font-bold" : "border-amber-300 bg-white text-transparent"
               }`}>✓</span>
-              <Link href={`/${locale}/client/client/profile`} className={`hover:underline ${isLocationComplete ? "text-slate-400 line-through font-normal" : "text-primary"}`}>
+              <Link href={`/${locale}/client/profile`} className={`hover:underline ${isLocationComplete ? "text-slate-400 line-through font-normal" : "text-primary"}`}>
                 {t("setupLocation")}
               </Link>
             </li>
@@ -125,7 +125,7 @@ export default function ClientDashboardPage() {
                 <span className={`h-4.5 w-4.5 rounded-full flex items-center justify-center border text-[10px] ${
                   hasDependents ? "bg-emerald-100 border-emerald-300 text-emerald-700 font-bold" : "border-amber-300 bg-white text-transparent"
                 }`}>✓</span>
-                <Link href={`/${locale}/client/client/dependents`} className={`hover:underline ${hasDependents ? "text-slate-400 line-through font-normal" : "text-primary"}`}>
+                <Link href={`/${locale}/client/dependents`} className={`hover:underline ${hasDependents ? "text-slate-400 line-through font-normal" : "text-primary"}`}>
                   {t("setupGuardian")}
                 </Link>
               </li>
@@ -134,7 +134,7 @@ export default function ClientDashboardPage() {
                 <span className={`h-4.5 w-4.5 rounded-full flex items-center justify-center border text-[10px] ${
                   hasSelfRequests ? "bg-emerald-100 border-emerald-300 text-emerald-700 font-bold" : "border-amber-300 bg-white text-transparent"
                 }`}>✓</span>
-                <Link href={`/${locale}/client/client/requests`} className={`hover:underline ${hasSelfRequests ? "text-slate-400 line-through font-normal" : "text-primary"}`}>
+                <Link href={`/${locale}/client/requests`} className={`hover:underline ${hasSelfRequests ? "text-slate-400 line-through font-normal" : "text-primary"}`}>
                   {t("setupStudent")}
                 </Link>
               </li>
@@ -164,7 +164,7 @@ export default function ClientDashboardPage() {
 
       {/* Direct Contact Requests Big CTA Card (Unified layout & showing count) */}
       <Link
-        href={`/${locale}/client/client/contacts`}
+        href={`/${locale}/client/contacts`}
         className="group flex items-center justify-between rounded-[1.25rem] bg-white p-5 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_10px_30px_-10px_rgba(0,0,0,0.1)] hover:-translate-y-1 transition-all duration-300 border border-transparent hover:border-orange-100"
       >
         <div className="flex items-center gap-4">
@@ -194,7 +194,7 @@ export default function ClientDashboardPage() {
           <h2 className="text-lg font-bold text-foreground">
             {locale === "ar" ? "المعلمون القريبون منك" : "Teachers Near You"}
           </h2>
-          <Link href={`/${locale}/client/client/teacher`} className="text-sm font-semibold text-primary hover:text-blue-700 hover:underline">
+          <Link href={`/${locale}/client/teacher`} className="text-sm font-semibold text-primary hover:text-blue-700 hover:underline">
             {tCommon("viewAll")}
           </Link>
         </div>

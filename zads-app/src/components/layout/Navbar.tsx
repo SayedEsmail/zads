@@ -25,9 +25,9 @@ export default function Navbar() {
   const getDashboardHref = () => {
     if (!session) return `/${locale}/auth/login`;
     const type = session.userType;
-    if (type === "parent") return `/${locale}/client/client`;
-    if (type === "teacher") return `/${locale}/teacher/teacher`;
-    if (type === "admin") return `/${locale}/admin/admin`;
+    if (type === "parent") return `/${locale}/client`;
+    if (type === "teacher") return `/${locale}/teacher`;
+    if (type === "admin") return `/${locale}/admin`;
     return `/${locale}/public`;
   };
 

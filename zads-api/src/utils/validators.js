@@ -25,8 +25,12 @@ const registerParentSchema = z.object({
 });
 
 const loginSchema = z.object({
-    phone: z.string().regex(phoneRegex, 'Invalid Egyptian phone number'),
+    phone: z.string().regex(phoneRegex, 'Invalid Egyptian phone number').optional(),
+    email: z.string().email('Invalid email address').optional(),
     password: z.string().min(1, 'Password is required')
+}).refine(data => data.phone || data.email, {
+    message: "Either phone or email must be provided",
+    path: ["phone"]
 });
 
 const updateProfileSchema = z.object({

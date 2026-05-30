@@ -69,6 +69,23 @@ async function seedLocations() {
 async function main() {
     console.log('🌱 Seeding database...');
 
+    // Clean up all non-admin users and dummy data
+    console.log('🧹 Clearing all dummy data and non-admin users...');
+    await prisma.parentChildSubject.deleteMany({});
+    await prisma.parentChild.deleteMany({});
+    await prisma.favorite.deleteMany({});
+    await prisma.contactRequest.deleteMany({});
+    await prisma.tutorRequest.deleteMany({});
+    await prisma.comparisonItem.deleteMany({});
+    await prisma.comparison.deleteMany({});
+    await prisma.whatsAppClick.deleteMany({});
+    await prisma.teacherSubject.deleteMany({});
+    await prisma.teacherAvailability.deleteMany({});
+    await prisma.teacher.deleteMany({});
+    await prisma.parent.deleteMany({});
+    await prisma.user.deleteMany({ where: { NOT: { userType: 'admin' } } });
+    console.log('🗑️  Dummy data cleared!');
+
     // Seed locations first
     await seedLocations();
 
@@ -195,12 +212,16 @@ async function main() {
     console.log(`✅ Created ${stages.length} stages`);
 
     // Create Admin User
-    const adminPassword = await bcrypt.hash('admin123', 10);
+    const adminPassword = await bcrypt.hash('Secoo@3366', 10);
     const admin = await prisma.user.upsert({
         where: { phone: '01000000000' },
-        update: {},
+        update: {
+            email: '5atab.work@gmail.com',
+            passwordHash: adminPassword
+        },
         create: {
             phone: '01000000000',
+            email: '5atab.work@gmail.com',
             passwordHash: adminPassword,
             name: 'Admin',
             userType: 'admin'
@@ -209,86 +230,11 @@ async function main() {
 
     console.log(`✅ Created admin user: ${admin.phone}`);
 
-    // Create Sample Teacher
-    const teacherPassword = await bcrypt.hash('teacher123', 10);
-    const teacherUser = await prisma.user.upsert({
-        where: { phone: '01111111111' },
-        update: {},
-        create: {
-            phone: '01111111111',
-            passwordHash: teacherPassword,
-            name: 'أحمد محمود',
-            userType: 'teacher'
-        }
-    });
-
-    const teacher = await prisma.teacher.upsert({
-        where: { userId: teacherUser.id },
-        update: {},
-        create: {
-            userId: teacherUser.id,
-            bio: 'مدرس رياضيات بخبرة 10 سنوات في تدريس المرحلة الثانوية',
-            experienceYears: 10,
-            qualification: 'بكالوريوس تربية - قسم رياضيات',
-            areaId: 'area-city-cairo-nasr-city-first-district',  // Nasr City
-            lessonTypes: ['at_teacher', 'at_student', 'group']
-        }
-    });
-
-    // Add subject to teacher
-    await prisma.teacherSubject.upsert({
-        where: {
-            teacherId_subjectId_stageId: {
-                teacherId: teacher.id,
-                subjectId: 'subj-math',
-                stageId: 'stage-secondary'
-            }
-        },
-        update: {},
-        create: {
-            teacherId: teacher.id,
-            subjectId: 'subj-math',
-            stageId: 'stage-secondary',
-            priceAtTeacher: 150,
-            priceAtStudent: 200,
-            priceGroup: 80,
-            durationMinutes: 60
-        }
-    });
-
-    console.log(`✅ Created sample teacher: ${teacherUser.name}`);
-
-    // Create Sample Parent
-    const parentPassword = await bcrypt.hash('parent123', 10);
-    const parentUser = await prisma.user.upsert({
-        where: { phone: '01222222222' },
-        update: {},
-        create: {
-            phone: '01222222222',
-            passwordHash: parentPassword,
-            name: 'سارة أحمد',
-            userType: 'parent'
-        }
-    });
-
-    await prisma.parent.upsert({
-        where: { userId: parentUser.id },
-        update: {},
-        create: {
-            userId: parentUser.id,
-            areaId: 'area-city-cairo-nasr-city-first-district'
-        }
-    });
-
-    console.log(`✅ Created sample parent: ${parentUser.name}`);
-
     console.log('');
     console.log('🎉 Seeding completed!');
     console.log('');
     console.log('Test accounts:');
-    console.log('  Admin:   01000000000 / admin123');
-    console.log('  Teacher: 01111111111 / teacher123');
-    console.log('  Parent:  01222222222 / parent123');
+    console.log('  Admin:   5atab.work@gmail.com / Secoo@3366 (Phone: 01000000000)');
 }
 
 main()
