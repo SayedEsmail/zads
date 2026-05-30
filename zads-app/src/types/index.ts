@@ -266,3 +266,12 @@ export interface TeacherAvailability {
   endTime: string;   // e.g. "18:00"
   createdAt: string;
 }
+
+export type AdminParent = ClientProfile & {
+  user: User;
+};
+
+export type AdminTeacher = Teacher & {
+  user: User;
+};
+

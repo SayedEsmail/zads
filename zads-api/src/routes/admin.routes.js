@@ -11,6 +11,7 @@ router.get('/dashboard', adminController.getDashboardStats);
 
 // Teachers management
 router.get('/teachers', adminController.getAllTeachers);
+router.patch('/teachers/:teacherId/verify', adminController.toggleTeacherVerification);
 
 // Parents management
 router.get('/parents', adminController.getAllParents);
