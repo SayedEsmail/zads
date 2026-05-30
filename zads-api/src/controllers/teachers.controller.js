@@ -27,20 +27,45 @@ const searchTeachers = async (req, res, next) => {
             user: { status: 'active' }
         };
 
-        // Location filter - always filter by governorate to show all teachers in the governorate
-        if (governorateId) {
-            teacherWhere.area = { city: { governorateId } };
-        } else if (cityId) {
-            teacherWhere.area = { city: { governorateId: { not: null } } };
-        } else if (areaId) {
-            // If only areaId provided, get the governorate from it
+        // Determine active location filters (defaulting to logged-in parent's location if no search filters provided)
+        let activeAreaId = areaId;
+        let activeCityId = cityId;
+        let activeGovId = governorateId;
+
+        const parent = req.user?.parent;
+        if (parent?.areaId && !areaId && !cityId && !governorateId) {
+            const parentArea = await prisma.area.findUnique({
+                where: { id: parent.areaId },
+                include: { city: true }
+            });
+            if (parentArea) {
+                activeAreaId = parentArea.id;
+                activeCityId = parentArea.cityId;
+                activeGovId = parentArea.city?.governorateId;
+            }
+        }
+
+        // Apply governorate restriction (always show teachers within the target governorate)
+        if (activeAreaId) {
             const area = await prisma.area.findUnique({
-                where: { id: areaId },
+                where: { id: activeAreaId },
                 include: { city: true }
             });
             if (area?.city?.governorateId) {
                 teacherWhere.area = { city: { governorateId: area.city.governorateId } };
+                activeGovId = area.city.governorateId;
+                activeCityId = area.cityId;
             }
+        } else if (activeCityId) {
+            const city = await prisma.city.findUnique({
+                where: { id: activeCityId }
+            });
+            if (city?.governorateId) {
+                teacherWhere.area = { city: { governorateId: city.governorateId } };
+                activeGovId = city.governorateId;
+            }
+        } else if (activeGovId) {
+            teacherWhere.area = { city: { governorateId: activeGovId } };
         }
 
         // Lesson type filter
@@ -49,6 +74,33 @@ const searchTeachers = async (req, res, next) => {
         }
 
         // Subject/Stage filter
+        const parentId = req.user?.parent?.id;
+        if (parentId && !subjectId) {
+            const childSubjects = await prisma.parentChildSubject.findMany({
+                where: { parentChild: { parentId } },
+                select: { subjectId: true }
+            });
+
+            const tutorRequests = await prisma.tutorRequest.findMany({
+                where: { parentId },
+                select: { subjectId: true }
+            });
+
+            const neededSubjectIds = Array.from(new Set([
+                ...childSubjects.map(cs => cs.subjectId),
+                ...tutorRequests.map(tr => tr.subjectId)
+            ]));
+
+            if (neededSubjectIds.length > 0) {
+                teacherWhere.subjects = {
+                    some: {
+                        subjectId: { in: neededSubjectIds },
+                        isActive: true
+                    }
+                };
+            }
+        }
+
         const subjectWhere = { isActive: true };
         if (subjectId) subjectWhere.subjectId = subjectId;
         if (stageId) subjectWhere.stageId = stageId;
@@ -109,13 +161,13 @@ const searchTeachers = async (req, res, next) => {
         // Also consider verification and rating
         teachers.sort((a, b) => {
             // Priority 1: Same area
-            const aInSameArea = areaId && a.areaId === areaId ? 1 : 0;
-            const bInSameArea = areaId && b.areaId === areaId ? 1 : 0;
+            const aInSameArea = activeAreaId && a.areaId === activeAreaId ? 1 : 0;
+            const bInSameArea = activeAreaId && b.areaId === activeAreaId ? 1 : 0;
             if (aInSameArea !== bInSameArea) return bInSameArea - aInSameArea;
 
             // Priority 2: Same city
-            const aInSameCity = cityId && a.area?.cityId === cityId ? 1 : 0;
-            const bInSameCity = cityId && b.area?.cityId === cityId ? 1 : 0;
+            const aInSameCity = activeCityId && a.area?.cityId === activeCityId ? 1 : 0;
+            const bInSameCity = activeCityId && b.area?.cityId === activeCityId ? 1 : 0;
             if (aInSameCity !== bInSameCity) return bInSameCity - aInSameCity;
 
             // Priority 3: Verified

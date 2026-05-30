@@ -40,6 +40,43 @@ const createRequest = async (req, res, next) => {
 };
 
 /**
+ * Create contact request (teacher to parent/client)
+ */
+const createRequestAsTeacher = async (req, res, next) => {
+    try {
+        const teacherId = req.user.teacher?.id;
+        const { parentId, subjectId, stageId, message } = req.body;
+
+        if (!teacherId) {
+            return response.error(res, 'Teacher profile not found', 404);
+        }
+
+        const contactRequest = await prisma.contactRequest.create({
+            data: {
+                parentId,
+                teacherId,
+                subjectId,
+                stageId,
+                message,
+                initiatedBy: 'teacher'
+            },
+            include: {
+                parent: {
+                    include: {
+                        user: { select: { name: true } }
+                    }
+                }
+            }
+        });
+
+        return response.created(res, contactRequest, 'Contact request sent to parent');
+
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
  * Get my contact requests (for parent)
  */
 const getMyRequestsAsParent = async (req, res, next) => {
@@ -55,7 +92,7 @@ const getMyRequestsAsParent = async (req, res, next) => {
             include: {
                 teacher: {
                     include: {
-                        user: { select: { name: true, avatarUrl: true } }
+                        user: { select: { name: true, phone: true, avatarUrl: true } }
                     }
                 },
                 subject: true,
@@ -115,13 +152,13 @@ const updateRequestStatus = async (req, res, next) => {
     try {
         const teacherId = req.user.teacher?.id;
         const { requestId } = req.params;
-        const { status } = req.body;
+        const { status, replyMessage } = req.body;
 
         if (!teacherId) {
             return response.error(res, 'Teacher profile not found', 404);
         }
 
-        if (!['accepted', 'rejected'].includes(status)) {
+        if (status && !['accepted', 'rejected'].includes(status)) {
             return response.error(res, 'Invalid status', 400);
         }
 
@@ -130,12 +167,80 @@ const updateRequestStatus = async (req, res, next) => {
                 id: requestId,
                 teacherId // Ensure ownership
             },
-            data: { status }
+            data: { 
+                ...(status && { status }),
+                ...(replyMessage !== undefined && { replyMessage })
+            }
         });
 
         // TODO: Send push notification to parent
 
-        return response.success(res, request, `Request ${status}`);
+        return response.success(res, request, `Request status updated`);
+
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * Update request message by parent (client)
+ */
+const updateRequestMessage = async (req, res, next) => {
+    try {
+        const parentId = req.user.parent?.id;
+        const { requestId } = req.params;
+        const { message } = req.body;
+
+        if (!parentId) {
+            return response.error(res, 'Parent profile not found', 404);
+        }
+
+        const request = await prisma.contactRequest.update({
+            where: {
+                id: requestId,
+                parentId // Ensure ownership
+            },
+            data: { 
+                ...(message !== undefined && { message })
+            }
+        });
+
+        return response.success(res, request, `Request message updated`);
+
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * Update request status by parent (accept/reject teacher initiated request)
+ */
+const updateRequestStatusAsParent = async (req, res, next) => {
+    try {
+        const parentId = req.user.parent?.id;
+        const { requestId } = req.params;
+        const { status, replyMessage } = req.body;
+
+        if (!parentId) {
+            return response.error(res, 'Parent profile not found', 404);
+        }
+
+        if (status && !['accepted', 'rejected'].includes(status)) {
+            return response.error(res, 'Invalid status', 400);
+        }
+
+        const request = await prisma.contactRequest.update({
+            where: {
+                id: requestId,
+                parentId // Ensure ownership
+            },
+            data: { 
+                ...(status && { status }),
+                ...(replyMessage !== undefined && { replyMessage })
+            }
+        });
+
+        return response.success(res, request, `Request status updated by parent`);
 
     } catch (error) {
         next(error);
@@ -144,7 +249,10 @@ const updateRequestStatus = async (req, res, next) => {
 
 module.exports = {
     createRequest,
+    createRequestAsTeacher,
     getMyRequestsAsParent,
     getIncomingRequests,
-    updateRequestStatus
+    updateRequestStatus,
+    updateRequestMessage,
+    updateRequestStatusAsParent
 };

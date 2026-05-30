@@ -3,10 +3,13 @@
 import { useEffect, useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { Search, SlidersHorizontal } from "lucide-react";
+import { toast } from "sonner";
 import { useSearchStore } from "@/stores/search";
 import { useFavoritesStore } from "@/stores/favorites";
+import { useContactRequestsStore } from "@/stores/contact-requests";
 import { TeacherCard } from "@/components/shared/TeacherCard";
 import { PageSkeleton } from "@/components/shared/PageSkeleton";
+import { ErrorBanner } from "@/components/shared/ErrorBanner";
 import type { StudyMode } from "@/types";
 
 export default function TeacherSearchPage() {
@@ -16,16 +19,19 @@ export default function TeacherSearchPage() {
   const tCommon = useTranslations("common");
   const {
     teachers, totalTeachers, isLoadingTeachers, error,
-    subjects, stages, governorates,
-    fetchSubjects, fetchStages, fetchGovernorates, searchTeachers,
+    subjects, stages, governorates, cities, areas,
+    fetchSubjects, fetchStages, fetchGovernorates, fetchCities, fetchAreas, searchTeachers,
   } = useSearchStore();
   const { isFavorite, addFavorite, removeFavorite } = useFavoritesStore();
+  const { createRequest } = useContactRequestsStore();
 
   const [filters, setFilters] = useState({
     query: "",
     subjectId: "",
     stageId: "",
     governorateId: "",
+    cityId: "",
+    areaId: "",
     studyMode: "" as StudyMode | "",
   });
   const [showFilters, setShowFilters] = useState(false);
@@ -37,11 +43,27 @@ export default function TeacherSearchPage() {
     searchTeachers({});
   }, []);
 
+  useEffect(() => {
+    if (filters.governorateId) {
+      fetchCities(filters.governorateId);
+    }
+    setFilters((f) => ({ ...f, cityId: "", areaId: "" }));
+  }, [filters.governorateId]);
+
+  useEffect(() => {
+    if (filters.cityId) {
+      fetchAreas(filters.cityId);
+    }
+    setFilters((f) => ({ ...f, areaId: "" }));
+  }, [filters.cityId]);
+
   const handleSearch = () => {
     searchTeachers({
       subjectId: filters.subjectId || undefined,
       stageId: filters.stageId || undefined,
       governorateId: filters.governorateId || undefined,
+      cityId: filters.cityId || undefined,
+      areaId: filters.areaId || undefined,
       studyMode: (filters.studyMode as StudyMode) || undefined,
     });
   };
@@ -79,7 +101,7 @@ export default function TeacherSearchPage() {
 
       {/* Filters panel */}
       {showFilters && (
-        <div className="grid grid-cols-2 gap-3 rounded-[1.25rem] border border-slate-100 bg-white shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] p-4 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 rounded-[1.25rem] border border-slate-100 bg-white shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] p-4 sm:grid-cols-3">
           <select
             value={filters.subjectId}
             onChange={(e) => setFilters((f) => ({ ...f, subjectId: e.target.value }))}
@@ -105,6 +127,24 @@ export default function TeacherSearchPage() {
             {governorates.map((g) => <option key={g.id} value={g.id}>{g.nameAr}</option>)}
           </select>
           <select
+            value={filters.cityId}
+            onChange={(e) => setFilters((f) => ({ ...f, cityId: e.target.value }))}
+            disabled={!filters.governorateId}
+            className="rounded-lg border border-border px-2.5 py-2 text-sm focus:outline-none disabled:bg-muted disabled:text-muted-foreground"
+          >
+            <option value="">{tClient("allCities")}</option>
+            {cities.map((c) => <option key={c.id} value={c.id}>{c.nameAr}</option>)}
+          </select>
+          <select
+            value={filters.areaId}
+            onChange={(e) => setFilters((f) => ({ ...f, areaId: e.target.value }))}
+            disabled={!filters.cityId}
+            className="rounded-lg border border-border px-2.5 py-2 text-sm focus:outline-none disabled:bg-muted disabled:text-muted-foreground"
+          >
+            <option value="">{tClient("allAreas")}</option>
+            {areas.map((a) => <option key={a.id} value={a.id}>{a.nameAr}</option>)}
+          </select>
+          <select
             value={filters.studyMode}
             onChange={(e) => setFilters((f) => ({ ...f, studyMode: e.target.value as StudyMode | "" }))}
             className="rounded-lg border border-border px-2.5 py-2 text-sm focus:outline-none"
@@ -118,6 +158,7 @@ export default function TeacherSearchPage() {
       )}
 
       {/* Results */}
+      {error && <ErrorBanner error={error} />}
       <p className="text-sm text-muted-foreground">{tClient("teachersCount", { count: totalTeachers })}</p>
 
       {isLoadingTeachers ? (
@@ -133,6 +174,17 @@ export default function TeacherSearchPage() {
               onToggleFavorite={(id) =>
                 isFavorite(id) ? removeFavorite(id) : addFavorite(id)
               }
+              onContact={(id) => {
+                createRequest({
+                  teacherId: id,
+                })
+                  .then(() => {
+                    toast.success(tClient("requestSent") ?? "تم إرسال الطلب");
+                  })
+                  .catch((err) => {
+                    toast.error(err?.response?.data?.message ?? err.message ?? "خطأ أثناء الإرسال");
+                  });
+              }}
             />
           ))}
           {teachers.length === 0 && (

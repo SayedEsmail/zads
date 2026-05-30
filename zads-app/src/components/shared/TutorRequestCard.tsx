@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { X, Trash2 } from "lucide-react";
+import { X, Trash2, MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { TutorRequest } from "@/types";
 
@@ -9,6 +9,7 @@ interface TutorRequestCardProps {
   request: TutorRequest;
   onClose?: (id: string) => void;
   onDelete?: (id: string) => void;
+  onContact?: (request: TutorRequest) => void;
   showActions?: boolean;
 }
 
@@ -22,6 +23,7 @@ export function TutorRequestCard({
   request,
   onClose,
   onDelete,
+  onContact,
   showActions = true,
 }: TutorRequestCardProps) {
   const t = useTranslations("request");
@@ -118,6 +120,18 @@ export function TutorRequestCard({
               {t("deleteRequest")}
             </button>
           )}
+        </div>
+      )}
+      {/* Teacher Contact Action */}
+      {onContact && request.status === "active" && (
+        <div className="mt-3 flex items-center gap-2 border-t border-slate-50 pt-3">
+          <button
+            onClick={() => onContact(request)}
+            className="flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-bold text-white hover:bg-primary-dark shadow-md shadow-primary/10 transition-all cursor-pointer"
+          >
+            <MessageCircle className="h-3.5 w-3.5" />
+            {t("contactParent") || "تواصل مباشر مع ولي الأمر"}
+          </button>
         </div>
       )}
     </div>

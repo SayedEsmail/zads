@@ -1,16 +1,21 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
-import { Users, FileText, Heart, Search, ChevronRight } from "lucide-react";
+import { Users, FileText, Heart, ChevronRight } from "lucide-react";
 import { useClientStore } from "@/stores/client";
 import { useTutorRequestsStore } from "@/stores/tutor-requests";
 import { useDependentsStore } from "@/stores/dependents";
+import { useFavoritesStore } from "@/stores/favorites";
+import { useContactRequestsStore } from "@/stores/contact-requests";
 import { PageSkeleton } from "@/components/shared/PageSkeleton";
 import { ErrorBanner } from "@/components/shared/ErrorBanner";
-import { TutorRequestCard } from "@/components/shared/TutorRequestCard";
+import { TeacherCard } from "@/components/shared/TeacherCard";
+import type { Teacher } from "@/types";
+import { toast } from "sonner";
+import api from "@/lib/api";
 
 export default function ClientDashboardPage() {
   const { data: session } = useSession();
@@ -22,11 +27,25 @@ export default function ClientDashboardPage() {
   const clientStore = useClientStore();
   const tutorStore = useTutorRequestsStore();
   const dependentsStore = useDependentsStore();
+  const favoritesStore = useFavoritesStore();
+  const contactStore = useContactRequestsStore();
+
+  const [nearbyTeachers, setNearbyTeachers] = useState<Teacher[]>([]);
+  const [isLoadingTeachers, setIsLoadingTeachers] = useState(true);
+  const [teachersError, setTeachersError] = useState<string | null>(null);
 
   useEffect(() => {
     clientStore.fetch();
     tutorStore.fetch();
     dependentsStore.fetch();
+    favoritesStore.fetch();
+    contactStore.fetch();
+
+    // Fetch top 3 nearby teachers
+    api.get<{ data: Teacher[] }>("/teachers?limit=3")
+      .then((res) => setNearbyTeachers(res.data.data))
+      .catch((err) => setTeachersError(err.response?.data?.message ?? err.message))
+      .finally(() => setIsLoadingTeachers(false));
   }, []);
 
   if (clientStore.isLoading && !clientStore.data) return <PageSkeleton />;
@@ -44,28 +63,26 @@ export default function ClientDashboardPage() {
       value: dependentsStore.data?.length ?? 0,
       icon: Users,
       href: `/${locale}/client/client/dependents`,
-      color: "bg-blue-100 text-blue-600",
+      color: "bg-blue-50 text-blue-600",
     },
     {
       label: t("tutorRequests"),
       value: tutorStore.data?.filter((r) => r.status === "active").length ?? 0,
       icon: FileText,
       href: `/${locale}/client/client/requests`,
-      color: "bg-orange-100 text-orange-600",
+      color: "bg-orange-50 text-orange-600",
     },
     {
       label: tNav("favorites"),
-      value: 0,
+      value: favoritesStore.data?.length ?? 0,
       icon: Heart,
       href: `/${locale}/client/client/favorites`,
-      color: "bg-rose-100 text-rose-600",
+      color: "bg-rose-50 text-rose-600",
     },
   ];
 
-  const recentRequests = tutorStore.data?.slice(0, 3) ?? [];
-
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-6 text-start">
       {/* Welcome */}
       <div className="rounded-[1.25rem] bg-gradient-to-r from-blue-600 to-indigo-600 p-6 sm:p-8 text-white shadow-[0_10px_40px_-10px_rgba(37,99,235,0.4)] relative overflow-hidden isolate">
         <div className="absolute top-0 right-0 -mr-16 -mt-16 w-48 h-48 bg-white/10 rounded-full blur-2xl"></div>
@@ -74,11 +91,11 @@ export default function ClientDashboardPage() {
         <div className="relative z-10">
           <p className="text-sm font-medium text-blue-100 mb-1">{t("welcome")}</p>
           <p className="text-2xl sm:text-3xl font-bold mb-2">{session?.user.name} 👋</p>
-          {clientStore.data?.clientAccountKind === "guardian" && (
-            <p className="text-sm text-blue-100/90 max-w-md leading-relaxed">
-              {t("guardianAccountKindDesc")}
-            </p>
-          )}
+          <p className="text-sm text-blue-100/90 max-w-md leading-relaxed">
+            {clientStore.data?.clientAccountKind === "guardian"
+              ? t("guardianAccountKindDesc")
+              : (locale === "ar" ? "أهلاً بك في منصة زاد التعليمية للتعلم المحلي المتميز" : "Welcome to the Zads learning platform for excellent local tutoring")}
+          </p>
         </div>
       </div>
 
@@ -126,7 +143,7 @@ export default function ClientDashboardPage() {
         </div>
       )}
 
-      {/* Stats */}
+      {/* Stats Grid (Unified 3-column layout) */}
       <div className="grid grid-cols-3 gap-4">
         {stats.map(({ label, value, icon: Icon, href, color }) => (
           <Link
@@ -138,53 +155,86 @@ export default function ClientDashboardPage() {
               <Icon className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-foreground">{value}</p>
-              <p className="text-xs font-medium text-muted-foreground">{label}</p>
+              <p className="text-2xl font-bold text-foreground leading-none mb-1">{value}</p>
+              <p className="text-xs font-semibold text-muted-foreground">{label}</p>
             </div>
           </Link>
         ))}
       </div>
 
-      {/* Search teachers CTA */}
+      {/* Direct Contact Requests Big CTA Card (Unified layout & showing count) */}
       <Link
-        href={`/${locale}/client/client/teacher`}
-        className="group flex items-center justify-between rounded-[1.25rem] bg-white p-5 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_10px_30px_-10px_rgba(0,0,0,0.1)] hover:-translate-y-1 transition-all duration-300 border border-transparent hover:border-blue-100"
+        href={`/${locale}/client/client/contacts`}
+        className="group flex items-center justify-between rounded-[1.25rem] bg-white p-5 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_10px_30px_-10px_rgba(0,0,0,0.1)] hover:-translate-y-1 transition-all duration-300 border border-transparent hover:border-orange-100"
       >
         <div className="flex items-center gap-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
-            <Search className="h-6 w-6" />
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-orange-100 text-orange-600 transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3">
+            <FileText className="h-6 w-6" />
           </div>
           <div>
-            <p className="font-bold text-foreground text-lg">{t("findTeacher")}</p>
-            <p className="text-sm text-muted-foreground">{t("findTeacherDesc")}</p>
+            <p className="font-bold text-foreground text-lg leading-tight mb-1">
+              {locale === "ar" ? "طلبات التواصل المباشر" : "Direct Contact Requests"}{" "}
+              <span className="text-primary-dark">({contactStore.sent?.length ?? 0})</span>
+            </p>
+            <p className="text-sm text-muted-foreground">
+              {locale === "ar"
+                ? "أدر طلبات التواصل المباشر والردود والاتصال بالمعلمين"
+                : "Manage direct contact requests, replies, and contacting teachers"}
+            </p>
           </div>
         </div>
-        <div className="h-8 w-8 rounded-full bg-muted/30 flex items-center justify-center text-muted-foreground group-hover:bg-emerald-500 group-hover:text-white transition-colors duration-300">
+        <div className="h-8 w-8 rounded-full bg-muted/30 flex items-center justify-center text-muted-foreground group-hover:bg-orange-500 group-hover:text-white transition-colors duration-300 shrink-0">
           <ChevronRight className="h-4 w-4 rtl:rotate-180" />
         </div>
       </Link>
 
-      {/* Recent requests */}
+      {/* Nearby Teachers Section (Symmetric list display) */}
       <section>
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-bold text-foreground">{t("tutorRequests")}</h2>
-          <Link href={`/${locale}/client/client/requests`} className="text-sm font-medium text-primary hover:text-blue-700 hover:underline">
+          <h2 className="text-lg font-bold text-foreground">
+            {locale === "ar" ? "المعلمون القريبون منك" : "Teachers Near You"}
+          </h2>
+          <Link href={`/${locale}/client/client/teacher`} className="text-sm font-semibold text-primary hover:text-blue-700 hover:underline">
             {tCommon("viewAll")}
           </Link>
         </div>
-        {tutorStore.isLoading ? (
+
+        <ErrorBanner error={teachersError} />
+
+        {isLoadingTeachers ? (
           <PageSkeleton rows={2} />
-        ) : recentRequests.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-8 text-center bg-muted/20 rounded-xl">
+        ) : nearbyTeachers.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-8 text-center bg-muted/20 rounded-[1.25rem]">
             <div className="w-12 h-12 bg-muted/30 rounded-full flex items-center justify-center mb-3">
-              <FileText className="w-5 h-5 text-muted-foreground" />
+              <Users className="w-5 h-5 text-muted-foreground" />
             </div>
-            <p className="text-sm font-medium text-muted-foreground">{t("noRequestsYet")}</p>
+            <p className="text-sm font-medium text-muted-foreground">
+              {locale === "ar" ? "لا يوجد معلمون متاحون حالياً في منطقتك" : "No teachers available in your area currently."}
+            </p>
           </div>
         ) : (
           <div className="space-y-3">
-            {recentRequests.map((r) => (
-              <TutorRequestCard key={r.id} request={r} showActions={false} />
+            {nearbyTeachers.map((teacher) => (
+              <TeacherCard
+                key={teacher.id}
+                teacher={teacher}
+                subjects={teacher.subjects}
+                isFavorite={favoritesStore.isFavorite(teacher.id)}
+                onToggleFavorite={(id) =>
+                  favoritesStore.isFavorite(id) ? favoritesStore.removeFavorite(id) : favoritesStore.addFavorite(id)
+                }
+                onContact={(id) => {
+                  contactStore.createRequest({
+                    teacherId: id,
+                  })
+                    .then(() => {
+                      toast.success(t("requestSent") ?? "تم إرسال الطلب");
+                    })
+                    .catch((err) => {
+                      toast.error(err?.response?.data?.message ?? err.message ?? "خطأ أثناء الإرسال");
+                    });
+                }}
+              />
             ))}
           </div>
         )}
