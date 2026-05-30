@@ -52,20 +52,23 @@ export default function ClientProfilePage() {
   }, []);
 
   useEffect(() => {
-    if (auth.profile) {
-      setName(auth.profile.name || "");
-      setPhone(auth.profile.phone || "");
-    }
-    if (client.data) {
-      setAccountKind(client.data.clientAccountKind);
-      setSelectedArea(client.data.areaId || "");
-      if (client.data.area) {
-        setSelectedCity(client.data.area.cityId || "");
-        if (client.data.area.city) {
-          setSelectedGov(client.data.area.city.governorateId || "");
+    const timer = setTimeout(() => {
+      if (auth.profile) {
+        setName(auth.profile.name || "");
+        setPhone(auth.profile.phone || "");
+      }
+      if (client.data) {
+        setAccountKind(client.data.clientAccountKind);
+        setSelectedArea(client.data.areaId || "");
+        if (client.data.area) {
+          setSelectedCity(client.data.area.cityId || "");
+          if (client.data.area.city) {
+            setSelectedGov(client.data.area.city.governorateId || "");
+          }
         }
       }
-    }
+    }, 0);
+    return () => clearTimeout(timer);
   }, [auth.profile, client.data]);
 
   // Load cities if a governorate is pre-populated

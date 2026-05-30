@@ -92,7 +92,8 @@
     "favorites": "المفضلة",
     "subjects": "المواد",
     "browse": "فرص التدريس المتاحة",
-    "admin": "الإدارة"
+    "admin": "الإدارة",
+    "availability": "مواعيد العمل"
   },
   "landing": {
     "heroTitle": "زاد — منصة التعلم المحلي",

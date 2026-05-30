@@ -13,6 +13,9 @@ import type { Teacher } from "@/types";
 import { useContactRequestsStore } from "@/stores/contact-requests";
 import { toast } from "sonner";
 
+const DAYS_AR = ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
+const DAYS_EN = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
 export default function TeacherDetailPage() {
   const locale = useLocale();
   const { id } = useParams<{ id: string }>();
@@ -28,6 +31,7 @@ export default function TeacherDetailPage() {
   const [selectedSubjectId, setSelectedSubjectId] = useState("");
   const [studyMode, setStudyMode] = useState<"online" | "offline">("online");
   const [message, setMessage] = useState("");
+  const [selectedSlot, setSelectedSlot] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -35,7 +39,7 @@ export default function TeacherDetailPage() {
 
   useEffect(() => {
     fetchSentRequests();
-  }, []);
+  }, [fetchSentRequests]);
 
   useEffect(() => {
     if (!id) return;
@@ -62,17 +66,7 @@ export default function TeacherDetailPage() {
   const selectedSubjectRate = teacher?.subjects?.find((s) => s.id === selectedSubjectId);
 
   // Auto select default studyMode based on pricing availability when subject changes
-  useEffect(() => {
-    if (selectedSubjectRate) {
-      if (selectedSubjectRate.priceOnline != null) {
-        setStudyMode("online");
-      } else if (selectedSubjectRate.priceOffline != null) {
-        setStudyMode("offline");
-      } else {
-        setStudyMode("online");
-      }
-    }
-  }, [selectedSubjectId]);
+  // Removed synchronous setState in useEffect and moved directly to event handlers to comply with React Compiler constraints.
 
   const currentPrice =
     studyMode === "online"
@@ -87,18 +81,27 @@ export default function TeacherDetailPage() {
     setSubmitError(null);
 
     try {
+      let finalMessage = message.trim();
+      if (selectedSlot) {
+        finalMessage = locale === "ar"
+          ? `[الموعد المفضل: ${selectedSlot}]\n${finalMessage}`
+          : `[Preferred Time: ${selectedSlot}]\n${finalMessage}`;
+      }
+
       await createRequest({
         teacherId: id,
         subjectId: selectedSubjectRate?.subjectId || undefined,
         stageId: selectedSubjectRate?.stageId || undefined,
-        message: message.trim() || undefined,
+        message: finalMessage || undefined,
       });
 
       toast.success("تم إرسال طلب التواصل المباشر بنجاح!");
       setShowDialog(false);
       setMessage("");
-    } catch (err: any) {
-      setSubmitError(err.response?.data?.message ?? err.message ?? "حدث خطأ أثناء إرسال الطلب");
+      setSelectedSlot("");
+    } catch (err) {
+      const axiosErr = err as { response?: { data?: { message?: string } }; message?: string };
+      setSubmitError(axiosErr.response?.data?.message ?? axiosErr.message ?? "حدث خطأ أثناء إرسال الطلب");
     } finally {
       setIsSubmitting(false);
     }
@@ -181,7 +184,13 @@ export default function TeacherDetailPage() {
               <button
                 onClick={() => {
                   if (teacher.subjects && teacher.subjects.length > 0) {
-                    setSelectedSubjectId(teacher.subjects[0].id);
+                    const firstSub = teacher.subjects[0];
+                    setSelectedSubjectId(firstSub.id);
+                    if (firstSub.priceOnline != null) {
+                      setStudyMode("online");
+                    } else if (firstSub.priceOffline != null) {
+                      setStudyMode("offline");
+                    }
                   }
                   setShowDialog(true);
                 }}
@@ -229,6 +238,53 @@ export default function TeacherDetailPage() {
             </div>
           )}
         </div>
+      </section>
+
+      {/* Weekly Availability Schedule */}
+      <section className="space-y-3.5 text-start">
+        <h2 className="font-black text-slate-850 text-lg flex items-center gap-2">
+          <Clock className="h-5 w-5 text-slate-450 shrink-0" />
+          {locale === "ar" ? "مواعيد العمل المتاحة" : "Available Tutoring Hours"}
+        </h2>
+        {!teacher.availabilities || teacher.availabilities.length === 0 ? (
+          <div className="rounded-[1.25rem] border border-slate-200 bg-white p-5 text-center text-sm text-muted-foreground shadow-sm">
+            {locale === "ar"
+              ? "المعلم لم يحدد مواعيد عمل ثابتة، يمكنك طلب تواصل مباشر للتنسيق معه."
+              : "Teacher has not set fixed weekly hours, request direct contact to coordinate slots."}
+          </div>
+        ) : (
+          <div className="rounded-[1.25rem] border border-slate-100 bg-white shadow-[0_4px_20px_-4px_rgba(0,0,0,0.04)] p-5 space-y-3">
+            {(locale === "ar" ? DAYS_AR : DAYS_EN).map((dayName, idx) => {
+              const daySlots = teacher.availabilities?.filter((s) => s.dayOfWeek === idx) ?? [];
+              if (daySlots.length === 0) return null; // Only render days that have slots!
+
+              return (
+                <div key={dayName} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-50 last:border-b-0 pb-3 last:pb-0">
+                  <div className="font-bold text-slate-700 text-sm w-24 shrink-0">
+                    {dayName}
+                  </div>
+                  <div className="flex-1 flex flex-wrap gap-1.5">
+                    {daySlots.map((slot) => {
+                      const formatTime = (time: string) => {
+                        const [h, m] = time.split(":");
+                        const hour = parseInt(h);
+                        const ampm = hour >= 12 ? (locale === "ar" ? "م" : "PM") : (locale === "ar" ? "ص" : "AM");
+                        const displayHour = hour % 12 || 12;
+                        return `${displayHour}:${m} ${ampm}`;
+                      };
+                      return (
+                        <span key={slot.id} className="inline-flex items-center gap-1.5 rounded-full bg-orange-50 border border-orange-100/50 px-3 py-0.5 text-xs font-semibold text-orange-700">
+                          <Clock className="w-3 h-3 text-orange-400 shrink-0" />
+                          {formatTime(slot.startTime)} - {formatTime(slot.endTime)}
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </section>
 
       {/* Subjects Taught & Pricing */}
@@ -325,7 +381,18 @@ export default function TeacherDetailPage() {
                 </label>
                 <select
                   value={selectedSubjectId}
-                  onChange={(e) => setSelectedSubjectId(e.target.value)}
+                  onChange={(e) => {
+                    const subId = e.target.value;
+                    setSelectedSubjectId(subId);
+                    const subRate = teacher.subjects?.find((s) => s.id === subId);
+                    if (subRate) {
+                      if (subRate.priceOnline != null) {
+                        setStudyMode("online");
+                      } else if (subRate.priceOffline != null) {
+                        setStudyMode("offline");
+                      }
+                    }
+                  }}
                   required
                   className="w-full rounded-xl border border-border px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white"
                 >
@@ -391,6 +458,37 @@ export default function TeacherDetailPage() {
                   )}
                 </div>
               </div>
+
+              {/* Proposed Time Slot */}
+              {teacher.availabilities && teacher.availabilities.length > 0 && (
+                <div>
+                  <label className="block text-xs font-bold text-muted-foreground mb-1.5">
+                    {locale === "ar" ? "اختر موعداً مقترحاً من جدول المعلم (اختياري)" : "Select a slot from teacher's schedule (optional)"}
+                  </label>
+                  <select
+                    value={selectedSlot}
+                    onChange={(e) => setSelectedSlot(e.target.value)}
+                    className="w-full rounded-xl border border-border px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white"
+                  >
+                    <option value="">{locale === "ar" ? "اختر موعداً..." : "Choose a time slot..."}</option>
+                    {teacher.availabilities.map((slot) => {
+                      const dayName = (locale === "ar" ? DAYS_AR : DAYS_EN)[slot.dayOfWeek];
+                      const formatTime = (time: string) => {
+                        const [h, m] = time.split(":");
+                        const hour = parseInt(h);
+                        const ampm = hour >= 12 ? (locale === "ar" ? "م" : "PM") : (locale === "ar" ? "ص" : "AM");
+                        const displayHour = hour % 12 || 12;
+                        return `${displayHour}:${m} ${ampm}`;
+                      };
+                      return (
+                        <option key={slot.id} value={`${dayName} • ${formatTime(slot.startTime)} - ${formatTime(slot.endTime)}`}>
+                          {dayName} • {formatTime(slot.startTime)} - {formatTime(slot.endTime)}
+                        </option>
+                      );
+                    })}
+                  </select>
+                </div>
+              )}
 
               {/* Message */}
               <div>

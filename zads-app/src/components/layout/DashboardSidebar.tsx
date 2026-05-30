@@ -6,8 +6,8 @@ import { usePathname, useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { signOut, useSession } from "next-auth/react";
 import {
-  LayoutDashboard, Search, FileText, Heart, Users, User, Settings,
-  BookOpen, ListTodo, BarChart2, Menu, X, LogOut, GraduationCap, Globe, MessageCircle,
+  LayoutDashboard, Search, FileText, Heart, Users, User,
+  BookOpen, ListTodo, BarChart2, Menu, X, LogOut, GraduationCap, Globe, MessageCircle, Clock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -35,6 +35,7 @@ function useNavItems(role: Role, locale: string, t: Translator) {
       { href: `${base}/browse`, label: t("browseTeacher"), icon: Search },
       { href: `${base}/requests`, label: t("requestsTeacher"), icon: FileText },
       { href: `${base}/subjects`, label: t("subjects"), icon: BookOpen },
+      { href: `${base}/availability`, label: t("availability"), icon: Clock },
       { href: `${base}/profile`, label: t("profile"), icon: User },
     ];
   }

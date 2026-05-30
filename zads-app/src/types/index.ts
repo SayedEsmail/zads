@@ -70,6 +70,7 @@ export interface Teacher {
   user?: Pick<User, "id" | "name" | "phone" | "avatarUrl">;
   area?: Area & { city: City & { governorate: Governorate } };
   subjects?: TeacherSubject[];
+  availabilities?: TeacherAvailability[];
 }
 
 /** Maps the API `Parent` model — product name: Client / Learner */
@@ -254,4 +255,13 @@ export interface AdminStats {
   totalClients: number;
   totalRequests: number;
   activeSubjects: number;
+}
+
+export interface TeacherAvailability {
+  id: string;
+  teacherId: string;
+  dayOfWeek: number; // 0 = Sunday, 6 = Saturday
+  startTime: string; // e.g. "14:00"
+  endTime: string;   // e.g. "18:00"
+  createdAt: string;
 }

@@ -109,6 +109,7 @@ model Teacher {
   contactRequests ContactRequest[]
   comparisonItems ComparisonItem[]
   whatsappClicks  WhatsAppClick[]
+  availabilities  TeacherAvailability[]
 
   @@index([areaId])
   @@map("teachers")
@@ -377,4 +378,18 @@ model WhatsAppClick {
   @@index([teacherId])
   @@index([parentId])
   @@map("whatsapp_clicks")
+}
+
+model TeacherAvailability {
+  id        String   @id @default(uuid())
+  teacherId String   @map("teacher_id")
+  dayOfWeek Int      @map("day_of_week") // 0 = Sunday, 6 = Saturday
+  startTime String   @map("start_time")  // e.g. "14:00"
+  endTime   String   @map("end_time")    // e.g. "18:00"
+  createdAt DateTime @default(now()) @map("created_at")
+
+  teacher   Teacher  @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  @@unique([teacherId, dayOfWeek, startTime, endTime])
+  @@map("teacher_availabilities")
 }

@@ -47,15 +47,13 @@ export default function TeacherSearchPage() {
     if (filters.governorateId) {
       fetchCities(filters.governorateId);
     }
-    setFilters((f) => ({ ...f, cityId: "", areaId: "" }));
-  }, [filters.governorateId]);
+  }, [filters.governorateId, fetchCities]);
 
   useEffect(() => {
     if (filters.cityId) {
       fetchAreas(filters.cityId);
     }
-    setFilters((f) => ({ ...f, areaId: "" }));
-  }, [filters.cityId]);
+  }, [filters.cityId, fetchAreas]);
 
   const handleSearch = () => {
     searchTeachers({
@@ -120,7 +118,10 @@ export default function TeacherSearchPage() {
           </select>
           <select
             value={filters.governorateId}
-            onChange={(e) => setFilters((f) => ({ ...f, governorateId: e.target.value }))}
+            onChange={(e) => {
+              const govId = e.target.value;
+              setFilters((f) => ({ ...f, governorateId: govId, cityId: "", areaId: "" }));
+            }}
             className="rounded-lg border border-border px-2.5 py-2 text-sm focus:outline-none"
           >
             <option value="">{tClient("allGovernorates")}</option>
@@ -128,7 +129,10 @@ export default function TeacherSearchPage() {
           </select>
           <select
             value={filters.cityId}
-            onChange={(e) => setFilters((f) => ({ ...f, cityId: e.target.value }))}
+            onChange={(e) => {
+              const cityId = e.target.value;
+              setFilters((f) => ({ ...f, cityId: cityId, areaId: "" }));
+            }}
             disabled={!filters.governorateId}
             className="rounded-lg border border-border px-2.5 py-2 text-sm focus:outline-none disabled:bg-muted disabled:text-muted-foreground"
           >
