@@ -96,28 +96,28 @@
     "availability": "Availability Schedule"
   },
   "landing": {
-    "heroTitle": "Zad — Local Learning Platform",
-    "heroSubtitle": "Find the best teachers in your area and book lessons online or offline",
+    "heroTitle": "Zads — Direct Tutor Platform",
+    "heroSubtitle": "Connect directly with trusted tutors in your area for home and online sessions with zero commissions",
     "startNow": "Get Started",
-    "exploreTeachers": "Explore Teachers",
-    "featuresTitle": "Why Zad?",
-    "howItWorksTitle": "How Zad Works",
+    "exploreTeachers": "Teachers Directory",
+    "featuresTitle": "Why Zads?",
+    "howItWorksTitle": "How Zads Works",
     "features": {
       "local": {
-        "title": "Local Teachers",
-        "desc": "Find tutors near you, in your neighborhood"
+        "title": "Local Neighborhood Tutors",
+        "desc": "Find educators nearby in 6th of October & Giza for easy coordination"
       },
       "onlineOffline": {
-        "title": "Online & Offline",
-        "desc": "Book lessons online or face-to-face"
+        "title": "Home & Online Sessions",
+        "desc": "Coordinate in-person sessions at home or online with direct agreements"
       },
       "verified": {
         "title": "Verified Tutors",
-        "desc": "Tutors with real ratings and verified experience"
+        "desc": "Document audits grant official verified badges for peace of mind"
       },
       "family": {
-        "title": "For You & Your Family",
-        "desc": "Book for yourself or your dependents under one account"
+        "title": "For You & Your Children",
+        "desc": "Coordinate tutoring for multiple children under one family account"
       }
     },
     "steps": {

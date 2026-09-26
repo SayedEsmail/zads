@@ -1,10 +1,28 @@
 const { z } = require('zod');
 
-// Phone number regex for Egyptian numbers
-const phoneRegex = /^(\+20|0)?1[0125][0-9]{8}$/;
+// Phone number regex for Egyptian numbers (matches 010/011/012/015 followed by 8 digits)
+const phoneRegex = /^(\+20|0020|20)?1[0125][0-9]{8}$/;
+
+/**
+ * Standardize Egyptian phone numbers to local 11-digit format (01xxxxxxxxx)
+ */
+function normalizeEgyptianPhone(input) {
+    if (!input) return input;
+    let cleaned = String(input).trim().replace(/[\s\-\(\)]/g, '');
+    if (cleaned.startsWith('+20')) {
+        cleaned = '0' + cleaned.substring(3);
+    } else if (cleaned.startsWith('0020')) {
+        cleaned = '0' + cleaned.substring(4);
+    } else if (cleaned.startsWith('20') && cleaned.length === 12) {
+        cleaned = '0' + cleaned.substring(2);
+    } else if (cleaned.length === 10 && cleaned.startsWith('1')) {
+        cleaned = '0' + cleaned;
+    }
+    return cleaned;
+}
 
 const registerTeacherSchema = z.object({
-    phone: z.string().regex(phoneRegex, 'Invalid Egyptian phone number'),
+    phone: z.string().regex(phoneRegex, 'Invalid Egyptian phone number (must start with 010, 011, 012, or 015)'),
     password: z.string().min(6, 'Password must be at least 6 characters'),
     name: z.string().min(2, 'Name must be at least 2 characters'),
     email: z.string().email().optional().nullable(),
@@ -16,7 +34,7 @@ const registerTeacherSchema = z.object({
 });
 
 const registerParentSchema = z.object({
-    phone: z.string().regex(phoneRegex, 'Invalid Egyptian phone number'),
+    phone: z.string().regex(phoneRegex, 'Invalid Egyptian phone number (must start with 010, 011, 012, or 015)'),
     password: z.string().min(6, 'Password must be at least 6 characters'),
     name: z.string().min(2, 'Name must be at least 2 characters'),
     email: z.string().email().optional().nullable(),
@@ -38,10 +56,16 @@ const updateProfileSchema = z.object({
     email: z.string().email().optional().nullable(),
     avatarUrl: z.string().url().optional().nullable(),
     phone: z.string().regex(phoneRegex, 'Invalid Egyptian phone number').optional(),
+    currentPassword: z.string().min(1, 'Current password is required to change password').optional(),
     password: z.string().min(6, 'Password must be at least 6 characters').optional()
+}).refine(data => !data.password || data.currentPassword, {
+    message: "Current password is required to set a new password",
+    path: ["currentPassword"]
 });
 
 module.exports = {
+    phoneRegex,
+    normalizeEgyptianPhone,
     registerTeacherSchema,
     registerParentSchema,
     loginSchema,

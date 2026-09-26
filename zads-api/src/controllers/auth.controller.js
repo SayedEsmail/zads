@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const prisma = require('../config/database');
 const { jwtSecret, jwtExpiresIn } = require('../config/env');
 const response = require('../utils/response');
+const { normalizeEgyptianPhone } = require('../utils/validators');
 
 /**
  * Register a new teacher
@@ -21,9 +22,11 @@ const registerTeacher = async (req, res, next) => {
             lessonTypes
         } = req.body;
 
+        const cleanPhone = normalizeEgyptianPhone(phone);
+
         // Check if phone already exists
         const existingUser = await prisma.user.findUnique({
-            where: { phone }
+            where: { phone: cleanPhone }
         });
 
         if (existingUser) {
@@ -37,7 +40,7 @@ const registerTeacher = async (req, res, next) => {
         const result = await prisma.$transaction(async (tx) => {
             const user = await tx.user.create({
                 data: {
-                    phone,
+                    phone: cleanPhone,
                     passwordHash,
                     name,
                     email,
@@ -92,10 +95,11 @@ const registerTeacher = async (req, res, next) => {
 const registerParent = async (req, res, next) => {
     try {
         const { phone, password, name, email, areaId, clientAccountKind } = req.body;
+        const cleanPhone = normalizeEgyptianPhone(phone);
 
         // Check if phone already exists
         const existingUser = await prisma.user.findUnique({
-            where: { phone }
+            where: { phone: cleanPhone }
         });
 
         if (existingUser) {
@@ -109,7 +113,7 @@ const registerParent = async (req, res, next) => {
         const result = await prisma.$transaction(async (tx) => {
             const user = await tx.user.create({
                 data: {
-                    phone,
+                    phone: cleanPhone,
                     passwordHash,
                     name,
                     email,
@@ -165,7 +169,7 @@ const login = async (req, res, next) => {
 
         // Find user
         let user;
-        const searchPhone = (phone && phone !== 'undefined') ? phone : null;
+        const searchPhone = (phone && phone !== 'undefined') ? normalizeEgyptianPhone(phone) : null;
         const searchEmail = (email && email !== 'undefined') ? email : null;
 
         if (searchPhone) {
@@ -276,13 +280,14 @@ const updateFcmToken = async (req, res, next) => {
  */
 const updateProfile = async (req, res, next) => {
     try {
-        const { name, email, avatarUrl, phone, password } = req.body;
+        const { name, email, avatarUrl, phone, password, currentPassword } = req.body;
         const userId = req.user.id;
+        const cleanPhone = phone ? normalizeEgyptianPhone(phone) : undefined;
 
         // Check if phone is being updated and if it belongs to someone else
-        if (phone && phone !== req.user.phone) {
+        if (cleanPhone && cleanPhone !== req.user.phone) {
             const existingUser = await prisma.user.findUnique({
-                where: { phone }
+                where: { phone: cleanPhone }
             });
             if (existingUser) {
                 return response.error(res, 'Phone number already registered', 409);
@@ -293,10 +298,17 @@ const updateProfile = async (req, res, next) => {
             ...(name && { name }),
             ...(email !== undefined && { email }),
             ...(avatarUrl !== undefined && { avatarUrl }),
-            ...(phone && { phone }),
+            ...(cleanPhone && { phone: cleanPhone }),
         };
 
         if (password) {
+            if (!currentPassword) {
+                return response.error(res, 'Current password is required to change password', 400);
+            }
+            const isMatch = await bcrypt.compare(currentPassword, req.user.passwordHash);
+            if (!isMatch) {
+                return response.error(res, 'Current password is incorrect', 401);
+            }
             dataToUpdate.passwordHash = await bcrypt.hash(password, 10);
         }
 

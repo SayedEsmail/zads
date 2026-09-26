@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { Plus, Edit2, Clock, BookOpen } from "lucide-react";
+import { Plus, Edit2, Clock, BookOpen, AlertCircle } from "lucide-react";
+import { toast } from "sonner";
 import { useTeacherSubjectsStore } from "@/stores/teacher-subjects";
 import { useSearchStore } from "@/stores/search";
 import { PageSkeleton } from "@/components/shared/PageSkeleton";
@@ -19,6 +20,8 @@ export default function TeacherSubjectsPage() {
   const [showDialog, setShowDialog] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showPrices, setShowPrices] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [dialogError, setDialogError] = useState<string | null>(null);
   const [form, setForm] = useState({ subjectId: "", stageId: "", priceOnline: "", priceOffline: "", priceAtTeacher: "", priceAtStudent: "", durationMinutes: "60" });
 
   useEffect(() => {
@@ -28,21 +31,53 @@ export default function TeacherSubjectsPage() {
   }, []);
 
   const handleSave = async () => {
-    const payload = {
-      subjectId: form.subjectId,
-      stageId: form.stageId,
-      priceOnline: showPrices && form.priceOnline ? Number(form.priceOnline) : null,
-      priceOffline: showPrices && form.priceOffline ? Number(form.priceOffline) : null,
-      priceAtTeacher: showPrices && form.priceAtTeacher ? Number(form.priceAtTeacher) : null,
-      priceAtStudent: showPrices && form.priceAtStudent ? Number(form.priceAtStudent) : null,
-      durationMinutes: Number(form.durationMinutes) || 60,
-    };
-    if (editingId) {
-      await subjectStore.updateSubject(editingId, payload);
-    } else {
-      await subjectStore.addSubject(payload);
+    if (!form.subjectId || !form.stageId) {
+      setDialogError(locale === "ar" ? "يرجى اختيار المادة والمرحلة الدراسية" : "Please select subject and stage");
+      return;
     }
-    setShowDialog(false);
+
+    // Check for duplicate subject and stage combination
+    const isDuplicate = subjectStore.data?.some(
+      (s) => s.id !== editingId && s.subjectId === form.subjectId && s.stageId === form.stageId
+    );
+
+    if (isDuplicate) {
+      setDialogError(
+        locale === "ar"
+          ? "هذه المادة مضافة بالفعل لنفس المرحلة الدراسية"
+          : "This subject is already added for this stage"
+      );
+      return;
+    }
+
+    setDialogError(null);
+    setIsSaving(true);
+
+    try {
+      const payload = {
+        subjectId: form.subjectId,
+        stageId: form.stageId,
+        priceOnline: showPrices && form.priceOnline ? Number(form.priceOnline) : null,
+        priceOffline: showPrices && form.priceOffline ? Number(form.priceOffline) : null,
+        priceAtTeacher: showPrices && form.priceAtTeacher ? Number(form.priceAtTeacher) : null,
+        priceAtStudent: showPrices && form.priceAtStudent ? Number(form.priceAtStudent) : null,
+        durationMinutes: Number(form.durationMinutes) || 60,
+      };
+
+      if (editingId) {
+        await subjectStore.updateSubject(editingId, payload);
+        toast.success(locale === "ar" ? "تم تحديث المادة بنجاح" : "Subject updated successfully");
+      } else {
+        await subjectStore.addSubject(payload);
+        toast.success(locale === "ar" ? "تمت إضافة المادة بنجاح" : "Subject added successfully");
+      }
+      setShowDialog(false);
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { message?: string } }; message?: string };
+      setDialogError(axiosErr.response?.data?.message ?? axiosErr.message ?? (locale === "ar" ? "حدث خطأ أثناء حفظ المادة" : "Error saving subject"));
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   if (subjectStore.isLoading && !subjectStore.data) return <PageSkeleton />;
@@ -188,6 +223,13 @@ export default function TeacherSubjectsPage() {
           <div className="w-full max-w-md rounded-t-2xl bg-white p-6 sm:rounded-2xl shadow-xl animate-in slide-in-from-bottom-4 duration-300" onClick={(e) => e.stopPropagation()}>
             <h2 className="mb-4 font-bold text-lg text-slate-800 text-start">{editingId ? t("editSubject") : t("addSubject")}</h2>
             
+            {dialogError && (
+              <div className="mb-4 rounded-xl border border-destructive/20 bg-destructive/10 p-3 text-xs font-semibold text-destructive flex items-center gap-2 text-start">
+                <AlertCircle className="h-4 w-4 shrink-0" />
+                <span>{dialogError}</span>
+              </div>
+            )}
+
             <div className="space-y-4">
               {/* Subject Select */}
               <div className="text-start">
@@ -290,13 +332,15 @@ export default function TeacherSubjectsPage() {
             <div className="mt-6 flex gap-3">
               <button 
                 onClick={handleSave} 
-                className="flex-1 rounded-xl bg-primary py-2.5 text-sm font-bold text-white hover:bg-primary-dark shadow-md shadow-primary/10 active:scale-[0.98] transition-all duration-150"
+                disabled={isSaving}
+                className="flex-1 rounded-xl bg-primary py-2.5 text-sm font-bold text-white hover:bg-primary-dark shadow-md shadow-primary/10 active:scale-[0.98] transition-all duration-150 disabled:opacity-50"
               >
-                {tCommon("save")}
+                {isSaving ? (locale === "ar" ? "جاري الحفظ..." : "Saving...") : tCommon("save")}
               </button>
               <button 
                 onClick={() => setShowDialog(false)} 
-                className="flex-1 rounded-xl border border-slate-200 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50 active:scale-[0.98] transition-all duration-150"
+                disabled={isSaving}
+                className="flex-1 rounded-xl border border-slate-200 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50 active:scale-[0.98] transition-all duration-150 disabled:opacity-50"
               >
                 {tCommon("cancel")}
               </button>

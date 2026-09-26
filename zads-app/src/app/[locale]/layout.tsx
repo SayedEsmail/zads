@@ -7,10 +7,42 @@ import { SessionProvider } from "next-auth/react";
 import { Toaster } from "@/components/ui/sonner";
 import "../globals.css";
 
-export const metadata: Metadata = {
-  title: "Zad — Local Learning Platform",
-  description: "Find the best teachers in your area",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const isAr = locale === "ar";
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://zads.education";
+
+  return {
+    title: isAr
+      ? "زاد — منصة ربط المعلمين والطلاب في السادس من أكتوبر والجيزة"
+      : "Zads — Direct Tutor Platform in 6th of October & Giza",
+    description: isAr
+      ? "منصة تعليمية مباشرة بدون أي عمولات. تواصل مباشرة مع أفضل المعلمين الخصوصيين للحصص المنزلية والأونلاين."
+      : "Direct, commission-free platform connecting parents with verified private tutors for home and online sessions.",
+    metadataBase: new URL(baseUrl),
+    alternates: {
+      canonical: `/${locale}/public`,
+      languages: {
+        ar: "/ar/public",
+        en: "/en/public",
+      },
+    },
+    openGraph: {
+      title: isAr
+        ? "زاد — منصة ربط المعلمين والطلاب"
+        : "Zads — Direct Tutor Platform",
+      description: isAr
+        ? "تواصل مباشرة مع معلمين معتمدين بدون أي عمولات وسيطة."
+        : "Connect directly with verified tutors with zero platform commissions.",
+      locale: isAr ? "ar_EG" : "en_US",
+      type: "website",
+    },
+  };
+}
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
