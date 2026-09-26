@@ -117,6 +117,34 @@ async function runTests() {
       { expiresIn: '1h' }
     );
 
+    // Regression coverage for the production dashboard failures and browser preflight.
+    const preflight = await makeRequest(server, {
+      hostname: '127.0.0.1', port, path: '/api/contact-requests', method: 'OPTIONS',
+      headers: {
+        Origin: 'https://zads.app',
+        'Access-Control-Request-Method': 'POST',
+        'Access-Control-Request-Headers': 'authorization,content-type,idempotency-key',
+      },
+    });
+    assert.strictEqual(preflight.status, 204);
+    const allowedHeaders = preflight.headers['access-control-allow-headers'].toLowerCase().split(/,\s*/);
+    for (const name of ['authorization', 'content-type', 'idempotency-key']) {
+      assert(allowedHeaders.includes(name), `CORS must permit ${name}`);
+    }
+    for (const [route, token] of [
+      ['/api/parents/me', parentToken],
+      ['/api/teachers/me/subjects', teacherToken],
+      ['/api/teachers/me/availability', teacherToken],
+      ['/api/contact-requests/incoming', teacherToken],
+      ['/api/tutor-requests', teacherToken],
+    ]) {
+      const result = await makeRequest(server, {
+        hostname: '127.0.0.1', port, path: route, method: 'GET',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      assert.strictEqual(result.status, 200, `Dashboard route must work: ${route}`);
+    }
+
     // ==========================================
     // TEST 1: Public Search Privacy (Z04)
     // ==========================================

@@ -18,13 +18,17 @@ function load(relative, overrides = {}) {
 }
 
 (async () => {
+  process.env.NEXT_PUBLIC_API_BASE_URL = "https://obsolete-api.invalid/api";
   let sessionCalls = 0;
+  let sessionUnavailable = true;
   const api = load('src/lib/api.ts', {
     'next-auth/react': {
-      getSession: async () => { sessionCalls++; throw new Error('Session unavailable'); },
+      getSession: async () => { sessionCalls++; if (sessionUnavailable) throw new Error('Session unavailable'); return { apiToken: 'local-test-token' }; },
       signOut: async () => { throw new Error('Public discovery must not sign out'); },
     },
   });
+  assert.equal(api.default.defaults.baseURL, '/api');
+  assert.equal(api.publicApi.defaults.baseURL, '/api');
   const teacher = { id: 'public-teacher', user: { name: 'Teacher' } };
   api.publicApi.defaults.adapter = async (config) => {
     assert.equal(config.headers.Authorization, undefined);
@@ -48,6 +52,15 @@ function load(relative, overrides = {}) {
 
   await useSearchStore.getState().searchTeachers({});
   assert.equal(sessionCalls, 1, 'Account discovery still uses the authenticated client');
+  sessionUnavailable = false;
+  api.default.defaults.adapter = async (config) => {
+    assert.equal(config.baseURL, '/api');
+    assert.equal(config.headers.Authorization, 'Bearer local-test-token');
+    assert.equal(config.headers['Idempotency-Key'], 'local-test-intent');
+    return { status: 200, statusText: 'OK', headers: {}, config, data: { success: true } };
+  };
+  await api.default.post('/contact-requests', {}, { headers: { 'Idempotency-Key': 'local-test-intent' } });
+
   const React = require('react');
   const { renderToString } = require('react-dom/server');
   const { default: Page } = load('src/app/[locale]/public/teachers/page.tsx', {

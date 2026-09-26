@@ -2,8 +2,8 @@ import axios from "axios";
 import { getSession, signOut } from "next-auth/react";
 
 const api = axios.create({
-  // Use relative /api so it correctly uses the browser's current host/port (e.g. localhost:3001) for the proxy
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || "/api",
+  // Always use the same-origin proxy; upstream configuration belongs in API_BASE_URL.
+  baseURL: "/api",
   headers: {
     "Content-Type": "application/json",
   },
@@ -12,7 +12,7 @@ const api = axios.create({
 
 // Public discovery must not depend on a session or inherit account-specific filters.
 export const publicApi = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || "/api",
+  baseURL: "/api",
   timeout: 15000,
 });
 

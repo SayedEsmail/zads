@@ -47,6 +47,7 @@ export default function PublicTeachersPage() {
   const loading = !initialLoadComplete || isLoadingTeachers;
   const [page, setPage] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
+  const [priceError, setPriceError] = useState("");
 
   useEffect(() => {
     fetchSubjects();
@@ -68,6 +69,20 @@ export default function PublicTeachersPage() {
   }, [filters.cityId, fetchAreas]);
 
   const handleSearch = (nextPage = 1) => {
+    const minPrice = filters.minPrice === "" ? undefined : Number(filters.minPrice);
+    const maxPrice = filters.maxPrice === "" ? undefined : Number(filters.maxPrice);
+    if (
+      (minPrice !== undefined && (!Number.isSafeInteger(minPrice) || minPrice < 0)) ||
+      (maxPrice !== undefined && (!Number.isSafeInteger(maxPrice) || maxPrice < 0))
+    ) {
+      setPriceError(locale === "ar" ? "أدخل سعراً صحيحاً موجباً أو صفراً." : "Enter a whole-number price of zero or more.");
+      return;
+    }
+    if (minPrice !== undefined && maxPrice !== undefined && minPrice > maxPrice) {
+      setPriceError(locale === "ar" ? "يجب ألا يتجاوز الحد الأدنى الحد الأقصى." : "Minimum price must not exceed maximum price.");
+      return;
+    }
+    setPriceError("");
     setPage(nextPage);
     searchTeachers({
       page: nextPage,
@@ -77,8 +92,8 @@ export default function PublicTeachersPage() {
       cityId: filters.cityId || undefined,
       areaId: filters.areaId || undefined,
       studyMode: (filters.studyMode as StudyMode) || undefined,
-      minPrice: filters.minPrice ? Number(filters.minPrice) : undefined,
-      maxPrice: filters.maxPrice ? Number(filters.maxPrice) : undefined,
+      minPrice,
+      maxPrice,
     }, true);
   };
 
@@ -95,6 +110,7 @@ export default function PublicTeachersPage() {
       maxPrice: "",
     };
     setFilters(emptyFilters);
+    setPriceError("");
     setPage(1);
     searchTeachers({}, true);
   };
@@ -213,6 +229,18 @@ export default function PublicTeachersPage() {
                   <option value="online">{locale === "ar" ? "أونلاين فقط" : "Online Only"}</option>
                 </select>
               </div>
+
+              <div>
+                <label htmlFor="public-min-price" className="block text-xs font-bold text-slate-600 mb-1">{locale === "ar" ? "السعر الأدنى" : "Minimum price"}</label>
+                <input id="public-min-price" type="number" min="0" step="1" inputMode="numeric" value={filters.minPrice} onChange={(e) => { setFilters((f) => ({ ...f, minPrice: e.target.value })); setPriceError(""); }} placeholder={locale === "ar" ? "أي سعر" : "Any price"} className="w-full rounded-lg border border-border px-2.5 py-2 text-xs bg-white" />
+              </div>
+
+              <div>
+                <label htmlFor="public-max-price" className="block text-xs font-bold text-slate-600 mb-1">{locale === "ar" ? "السعر الأقصى" : "Maximum price"}</label>
+                <input id="public-max-price" type="number" min="0" step="1" inputMode="numeric" value={filters.maxPrice} onChange={(e) => { setFilters((f) => ({ ...f, maxPrice: e.target.value })); setPriceError(""); }} placeholder={locale === "ar" ? "أي سعر" : "Any price"} className="w-full rounded-lg border border-border px-2.5 py-2 text-xs bg-white" />
+              </div>
+
+              {priceError && <p role="alert" className="sm:col-span-2 md:col-span-4 text-xs font-medium text-red-600">{priceError}</p>}
 
               <div>
                 <label className="block text-xs font-bold text-slate-600 mb-1">{locale === "ar" ? "المحافظة" : "Governorate"}</label>

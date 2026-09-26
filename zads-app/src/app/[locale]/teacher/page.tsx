@@ -212,8 +212,8 @@ export default function TeacherDashboardPage() {
               </p>
               <p className="text-sm text-muted-foreground">
                 {locale === "ar"
-                  ? "أدر طلبات التواصل المباشر والردود وحجوزات الطلاب"
-                  : "Manage direct contact requests, replies, and student bookings"}
+                  ? "أدر طلبات التواصل المباشر والردود والتنسيق مع المتعلمين"
+                  : "Manage direct contact requests, replies, and coordination with learners"}
               </p>
             </div>
           </div>
