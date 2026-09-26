@@ -1,0 +1,5 @@
+.test-pgdata/
+node_modules/
+.env*
+serviceAccountKey.json
+tests/

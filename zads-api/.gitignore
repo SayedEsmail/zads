@@ -8,3 +8,4 @@ serviceAccountKey.json
 .vercel
 .test-pgdata
 .env.test
+.env*
