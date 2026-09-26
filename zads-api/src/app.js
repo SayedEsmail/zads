@@ -54,6 +54,8 @@ app.use('/uploads/images', express.static('public/uploads/images'));
 const { auth: requireAuth } = require('./middlewares/auth');
 const uploadCtrl = require('./controllers/upload.controller');
 app.get('/uploads/certificates/:filename', requireAuth, uploadCtrl.getCertificate);
+app.get('/api/uploads/certificates/:filename', requireAuth, uploadCtrl.getCertificate);
+app.get('/api/upload/certificates/:filename', requireAuth, uploadCtrl.getCertificate);
 
 // ==============================================
 // ROUTES

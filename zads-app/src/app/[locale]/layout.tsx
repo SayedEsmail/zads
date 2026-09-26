@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import { SessionProvider } from "next-auth/react";
 import { Toaster } from "@/components/ui/sonner";
+import { AttributionTracker } from "@/components/shared/AttributionTracker";
 import "../globals.css";
 
 export async function generateMetadata({
@@ -21,8 +22,8 @@ export async function generateMetadata({
       ? "زاد — منصة ربط المعلمين والطلاب في السادس من أكتوبر والجيزة"
       : "Zads — Direct Tutor Platform in 6th of October & Giza",
     description: isAr
-      ? "منصة تعليمية مباشرة بدون أي عمولات. تواصل مباشرة مع أفضل المعلمين الخصوصيين للحصص المنزلية والأونلاين."
-      : "Direct, commission-free platform connecting parents with verified private tutors for home and online sessions.",
+      ? "منصة تعليمية مباشرة لتسهيل التواصل مع أفضل المعلمين الخصوصيين للحصص المنزلية والأونلاين."
+      : "Direct platform connecting parents with verified private tutors for home and online sessions.",
     metadataBase: new URL(baseUrl),
     alternates: {
       canonical: `/${locale}/public`,
@@ -36,8 +37,8 @@ export async function generateMetadata({
         ? "زاد — منصة ربط المعلمين والطلاب"
         : "Zads — Direct Tutor Platform",
       description: isAr
-        ? "تواصل مباشرة مع معلمين معتمدين بدون أي عمولات وسيطة."
-        : "Connect directly with verified tutors with zero platform commissions.",
+        ? "تواصل مباشرة مع معلمين معتمدين لتنسيق الحصص المنزلية والأونلاين."
+        : "Connect directly with verified tutors for home and online sessions.",
       locale: isAr ? "ar_EG" : "en_US",
       type: "website",
     },
@@ -83,6 +84,7 @@ export default async function LocaleLayout({
         <SessionProvider>
           <NextIntlClientProvider messages={messages}>
             {children}
+            <AttributionTracker />
             <Toaster />
           </NextIntlClientProvider>
         </SessionProvider>

@@ -14,8 +14,8 @@ export default function Footer() {
             <img src="/logo.svg" alt="Zads Logo" className="h-8 w-auto object-contain" />
             <p className="text-xs text-muted-foreground max-w-xs text-center sm:text-start">
               {locale === "ar"
-                ? "منصة ربط تعليمي مباشر في السادس من أكتوبر والجيزة بدون أي عمولات وسيطة."
-                : "Direct educational connection platform in 6th of October & Giza with zero commissions."}
+                ? "منصة ربط وتنسيق تعليمي مباشر في السادس من أكتوبر والجيزة."
+                : "Direct educational connection platform in 6th of October & Giza."}
             </p>
           </div>
 

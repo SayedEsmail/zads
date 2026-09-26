@@ -6,6 +6,7 @@ import { MessageCircle, Phone, Check, X, Clock } from "lucide-react";
 import { useContactRequestsStore } from "@/stores/contact-requests";
 import { ErrorBanner } from "@/components/shared/ErrorBanner";
 import { PageSkeleton } from "@/components/shared/PageSkeleton";
+import api from "@/lib/api";
 import { toast } from "sonner";
 import type { ContactRequest } from "@/types";
 
@@ -17,6 +18,12 @@ export default function ClientContactsPage() {
 
     // Local state to hold inline message texts per request ID
     const [replyText, setReplyText] = useState<{ [id: string]: string }>({});
+
+    const handleContactClick = (requestId: string, channel: 'whatsapp' | 'phone') => {
+        api.post('/analytics/contact-click', { requestId, channel }).catch(() => {
+            // Non-blocking, analytics failure never interrupts user
+        });
+    };
 
     useEffect(() => {
         contactStore.fetch();
@@ -193,6 +200,7 @@ export default function ClientContactsPage() {
                                         <div className="flex gap-2 shrink-0">
                                             <a
                                                 href={`tel:${r.teacher.user.phone}`}
+                                                onClick={() => handleContactClick(r.id, 'phone')}
                                                 className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 rounded-lg bg-primary hover:bg-primary-dark text-white px-3 py-1.5 text-xs font-bold shadow-md shadow-primary/10 transition-colors"
                                             >
                                                 <Phone className="h-3.5 w-3.5" />
@@ -202,6 +210,7 @@ export default function ClientContactsPage() {
                                                 href={`https://wa.me/${r.teacher.user.phone}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
+                                                onClick={() => handleContactClick(r.id, 'whatsapp')}
                                                 className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 rounded-lg border border-emerald-200 text-emerald-600 bg-emerald-50/50 hover:bg-emerald-50 px-3 py-1.5 text-xs font-bold transition-colors"
                                             >
                                                 WhatsApp

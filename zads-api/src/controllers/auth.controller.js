@@ -69,6 +69,22 @@ const registerTeacher = async (req, res, next) => {
             { expiresIn: jwtExpiresIn }
         );
 
+        // Authoritative server-side analytics logging (NO sensitive PII)
+        try {
+            await prisma.platformEvent.create({
+                data: {
+                    eventType: 'registration_complete',
+                    userId: result.user.id,
+                    metadata: {
+                        userType: 'teacher',
+                        areaId: result.teacher.areaId || null
+                    }
+                }
+            });
+        } catch (analyticsErr) {
+            // Analytics logging should never fail user requests
+        }
+
         return response.created(res, {
             user: {
                 id: result.user.id,
@@ -138,6 +154,23 @@ const registerParent = async (req, res, next) => {
             jwtSecret,
             { expiresIn: jwtExpiresIn }
         );
+
+        // Authoritative server-side analytics logging (NO sensitive PII)
+        try {
+            await prisma.platformEvent.create({
+                data: {
+                    eventType: 'registration_complete',
+                    userId: result.user.id,
+                    metadata: {
+                        userType: 'parent',
+                        areaId: result.parent.areaId || null,
+                        clientAccountKind: clientAccountKind || 'parent'
+                    }
+                }
+            });
+        } catch (analyticsErr) {
+            // Analytics logging should never fail user requests
+        }
 
         return response.created(res, {
             user: {
@@ -280,7 +313,7 @@ const updateFcmToken = async (req, res, next) => {
  */
 const updateProfile = async (req, res, next) => {
     try {
-        const { name, email, avatarUrl, phone, password, currentPassword } = req.body;
+        const { name, email, avatarUrl, phone, password, newPassword, currentPassword } = req.body;
         const userId = req.user.id;
         const cleanPhone = phone ? normalizeEgyptianPhone(phone) : undefined;
 
@@ -301,15 +334,16 @@ const updateProfile = async (req, res, next) => {
             ...(cleanPhone && { phone: cleanPhone }),
         };
 
-        if (password) {
+        const targetNewPassword = password || newPassword;
+        if (targetNewPassword) {
             if (!currentPassword) {
                 return response.error(res, 'Current password is required to change password', 400);
             }
             const isMatch = await bcrypt.compare(currentPassword, req.user.passwordHash);
             if (!isMatch) {
-                return response.error(res, 'Current password is incorrect', 401);
+                return response.error(res, 'Current password is incorrect', 400);
             }
-            dataToUpdate.passwordHash = await bcrypt.hash(password, 10);
+            dataToUpdate.passwordHash = await bcrypt.hash(targetNewPassword, 10);
         }
 
         const updatedUser = await prisma.user.update({

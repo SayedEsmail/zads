@@ -1,7 +1,7 @@
 const { z } = require('zod');
 
-// Phone number regex for Egyptian numbers (matches 010/011/012/015 followed by 8 digits)
-const phoneRegex = /^(\+20|0020|20)?1[0125][0-9]{8}$/;
+// Phone number regex for Egyptian numbers (matches local 010/011/012/015 or international +20/0020/20)
+const phoneRegex = /^(\+20|0020|20)?0?1[0125][0-9]{8}$/;
 
 /**
  * Standardize Egyptian phone numbers to local 11-digit format (01xxxxxxxxx)
@@ -57,8 +57,9 @@ const updateProfileSchema = z.object({
     avatarUrl: z.string().url().optional().nullable(),
     phone: z.string().regex(phoneRegex, 'Invalid Egyptian phone number').optional(),
     currentPassword: z.string().min(1, 'Current password is required to change password').optional(),
-    password: z.string().min(6, 'Password must be at least 6 characters').optional()
-}).refine(data => !data.password || data.currentPassword, {
+    password: z.string().min(6, 'Password must be at least 6 characters').optional(),
+    newPassword: z.string().min(6, 'Password must be at least 6 characters').optional()
+}).refine(data => (!data.password && !data.newPassword) || data.currentPassword, {
     message: "Current password is required to set a new password",
     path: ["currentPassword"]
 });

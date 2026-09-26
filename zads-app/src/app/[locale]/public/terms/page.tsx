@@ -28,8 +28,8 @@ export default function TermsPage() {
             </h2>
             <p>
               {locale === "ar"
-                ? "منصة زاد هي منصة تقنية تربط بين أولياء الأمور والطلاب من جهة، والمعلمين والمدربين المستقلين من جهة أخرى، لتسهيل التنسيق والتواصل المباشر للحصص والدروس التعليمية. زاد ليست مركزاً تعليمياً (سنتر) ولا تقدم خدمات تدريس مباشرة بذاتها، ولا تتقاضى أي نسبة عمولة من قيمة الحصص المتفق عليها بين الطرفين."
-                : "Zads is a technology platform connecting independent tutors with parents and students for direct educational coordination. Zads is not an educational tutoring center and charges zero commissions on lesson fees agreed between parties."}
+                ? "منصة زاد هي منصة تقنية تربط بين أولياء الأمور والطلاب من جهة، والمعلمين والمدربين المستقلين من جهة أخرى، لتسهيل التنسيق والتواصل المباشر للحصص والدروس التعليمية. زاد ليست مركزاً تعليمياً (سنتر) ولا تقدم خدمات تدريس مباشرة بذاتها، ويتم الاتفاق وتنسيق الحصص مباشرة بين الطرفين."
+                : "Zads is a technology platform connecting independent tutors with parents and students for direct educational coordination. Zads is not an educational tutoring center and lesson agreements are coordinated directly between the parties."}
             </p>
           </section>
 

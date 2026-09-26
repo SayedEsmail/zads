@@ -71,10 +71,17 @@ export const useContactRequestsStore = create<ContactRequestsStore>()(
         set({ isLoading: true, error: null });
         try {
           await api.post("/contact-requests", payload);
-          await get().fetch();
         } catch (err) {
           set({ error: extractError(err), isLoading: false });
           throw err;
+        }
+
+        try {
+          await get().fetch();
+        } catch (fetchErr) {
+          console.warn("[CONTACT STORE] background refresh error:", fetchErr);
+        } finally {
+          set({ isLoading: false });
         }
       },
 
@@ -82,10 +89,17 @@ export const useContactRequestsStore = create<ContactRequestsStore>()(
         set({ isLoading: true, error: null });
         try {
           await api.post("/contact-requests/teacher", payload);
-          await get().fetchIncoming();
         } catch (err) {
           set({ error: extractError(err), isLoading: false });
           throw err;
+        }
+
+        try {
+          await get().fetchIncoming();
+        } catch (fetchErr) {
+          console.warn("[CONTACT STORE] background refresh error:", fetchErr);
+        } finally {
+          set({ isLoading: false });
         }
       },
 

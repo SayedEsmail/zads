@@ -19,12 +19,12 @@ class NotificationService {
 
             if (!user || !user.fcmToken) {
                 console.warn(`⚠️ User ${userId} has no FCM token. Notification skipped.`);
-                return false;
+                return { success: false, delivered: false, reason: 'NO_FCM_TOKEN' };
             }
 
             if (!admin.apps || !admin.apps.length) {
-                console.log(`[MOCK] Sending notification to ${userId}: ${title} - ${body}`);
-                return true;
+                console.warn(`[NOTIFICATIONS BLOCKED] Cannot send push notification to ${userId}: Firebase credentials unconfigured.`);
+                return { success: false, delivered: false, reason: 'FIREBASE_NOT_INITIALIZED' };
             }
 
             const message = {
@@ -37,11 +37,11 @@ class NotificationService {
             };
 
             const response = await admin.messaging().send(message);
-            console.log('✅ Notification sent:', response);
-            return true;
+            console.log('✅ Notification delivered via Firebase:', response);
+            return { success: true, delivered: true, messageId: response };
         } catch (error) {
-            console.error('❌ Error sending notification:', error);
-            return false;
+            console.error('❌ Error delivering notification via Firebase:', error);
+            return { success: false, delivered: false, error: error.message };
         }
     }
 

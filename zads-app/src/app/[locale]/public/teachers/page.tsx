@@ -121,8 +121,8 @@ export default function PublicTeachersPage() {
             </h1>
             <p className="mt-2 text-sm sm:text-base text-white/90">
               {locale === "ar"
-                ? "تواصل مباشرة مع معلمين متميزين للحصص المنزلية والأونلاين بدون عمولات أو وسطاء."
-                : "Connect directly with trusted teachers for home and online sessions with zero commissions."}
+                ? "تواصل مباشرة مع معلمين متميزين لتنسيق الحصص المنزلية والأونلاين."
+                : "Connect directly with trusted teachers for home and online sessions."}
             </p>
           </div>
         </div>
@@ -317,8 +317,8 @@ export default function PublicTeachersPage() {
             </h3>
             <p className="text-xs text-muted-foreground">
               {locale === "ar"
-                ? "انضم إلى منصة زاد التعليمية، استقبل طلبات أولياء الأمور مباشرة وبدون أي نسبة عمولة."
-                : "Join Zads platform, receive direct requests from parents with zero commissions."}
+                ? "انضم إلى منصة زاد التعليمية واستقبل طلبات أولياء الأمور مباشرة في منطقتك."
+                : "Join Zads platform and receive direct requests from parents in your area."}
             </p>
           </div>
           <Link

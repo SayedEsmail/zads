@@ -8,6 +8,7 @@ router.post('/', auth, isParent, controller.createRequest);
 router.get('/my', auth, isParent, controller.getMyRequestsAsParent);
 router.patch('/:requestId', auth, isParent, controller.updateRequestMessage);
 router.patch('/parent/:requestId/status', auth, isParent, controller.updateRequestStatusAsParent);
+router.patch('/:requestId/parent-status', auth, isParent, controller.updateRequestStatusAsParent);
 
 // Teacher routes
 router.post('/teacher', auth, isTeacher, controller.createRequestAsTeacher);

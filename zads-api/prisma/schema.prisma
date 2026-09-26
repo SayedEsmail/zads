@@ -258,6 +258,7 @@ model ContactRequest {
   teachingPlace String?             @map("teaching_place")
   preferredTime String?             @map("preferred_time")
   tutorRequestId String?            @map("tutor_request_id")
+  idempotencyKey String?            @unique @map("idempotency_key")
   createdAt    DateTime             @default(now()) @map("created_at")
   updatedAt    DateTime             @updatedAt @map("updated_at")
 
@@ -406,3 +407,20 @@ model TeacherAvailability {
   @@unique([teacherId, dayOfWeek, startTime, endTime])
   @@map("teacher_availabilities")
 }
+
+model PlatformEvent {
+  id          String   @id @default(uuid())
+  eventType   String   @map("event_type")
+  sessionId   String?  @map("session_id")
+  userId      String?  @map("user_id")
+  entityId    String?  @map("entity_id")
+  metadata    Json?
+  dedupKey    String?  @unique @map("dedup_key")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([eventType])
+  @@index([sessionId])
+  @@index([createdAt])
+  @@map("platform_events")
+}
+

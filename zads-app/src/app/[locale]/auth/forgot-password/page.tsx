@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import Link from "next/link";
-import { ShieldAlert, Phone, MessageSquare, ArrowLeft, ArrowRight, HelpCircle } from "lucide-react";
+import { ShieldAlert, Mail, MessageSquare, ArrowLeft, ArrowRight, HelpCircle, CheckCircle2, AlertTriangle } from "lucide-react";
 
 export default function ForgotPasswordPage() {
   const t = useTranslations("auth");
@@ -19,14 +19,20 @@ export default function ForgotPasswordPage() {
     setShowGuidance(true);
   };
 
-  const whatsappMessage = encodeURIComponent(
+  const emailSubject = encodeURIComponent(
     locale === "ar"
-      ? `مرحباً فريق دعم منصة زاد، أحتاج إلى استعادة كلمة المرور لحسابي المسجل برقم: ${phone}`
-      : `Hello Zads Support, I need assistance recovering the password for my account registered with phone: ${phone}`
+      ? `طلب استعادة حساب زاد - رقم: ${phone}`
+      : `Zads Account Recovery Request - Phone: ${phone}`
+  );
+
+  const emailBody = encodeURIComponent(
+    locale === "ar"
+      ? `مرحباً فريق دعم منصة زاد،\n\nأحتاج إلى استعادة كلمة المرور لحسابي.\n- رقم الهاتف المسجل: ${phone}\n- الاسم الكامل: \n- نوع الحساب (معلم / ولي أمر): \n\nأقر بأنني مالك هذا الحساب ومستعد لتقديم إثبات الملكية المطلوب.`
+      : `Hello Zads Support Team,\n\nI need assistance recovering my account password.\n- Registered Phone: ${phone}\n- Full Name: \n- Account Type (Teacher / Parent): \n\nI confirm ownership of this account and can provide the required verification details.`
   );
 
   return (
-    <div className="w-full bg-surface p-6 sm:p-8 rounded-2xl border border-slate-100 shadow-sm max-w-md mx-auto text-start">
+    <div className="w-full bg-surface p-6 sm:p-8 rounded-2xl border border-slate-100 shadow-sm max-w-lg mx-auto text-start">
       <div className="mb-6 flex flex-col items-center justify-center">
         <img src="/logo.svg" alt="Zads Logo" className="h-14 w-auto object-contain" />
       </div>
@@ -35,19 +41,22 @@ export default function ForgotPasswordPage() {
         <h1 className="text-xl font-bold text-slate-900">{t("forgotPassword")}</h1>
         <p className="text-xs text-muted-foreground">
           {locale === "ar"
-            ? "استعادة حسابك وتعيين كلمة المرور بأمان"
-            : "Recover your account and reset your password securely"}
+            ? "مسار استعادة الوصول والتحقق من ملكية الحساب"
+            : "Account access recovery & ownership verification"}
         </p>
       </div>
 
       {!showGuidance ? (
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="rounded-xl bg-blue-50/70 border border-blue-100 p-3.5 text-xs text-blue-900 flex items-start gap-2.5">
-            <HelpCircle className="h-4 w-4 text-blue-600 shrink-0 mt-0.5" />
-            <p className="leading-relaxed">
+          <div className="rounded-xl bg-amber-50/80 border border-amber-200 p-3.5 text-xs text-amber-950 space-y-1.5">
+            <div className="flex items-center gap-1.5 font-bold text-amber-900">
+              <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0" />
+              <span>{locale === "ar" ? "تنبيه تشغيلي حول الاستعادة الآلية" : "Operational Notice on Recovery"}</span>
+            </div>
+            <p className="leading-relaxed text-[11px] text-amber-800">
               {locale === "ar"
-                ? "حسابك في زاد مرتبط برقم هاتفك المصري. أدخل رقم هاتفك لنرشدك لخطوات الاسترجاع المعتمدة."
-                : "Your Zads account is linked to your Egyptian phone number. Enter it below for recovery instructions."}
+                ? "الاستعادة الآلية عبر رسائل SMS معلقة حالياً بانتظار تفعيل بوابة الرسائل القصيرة. يتم استرجاع الحسابات حالياً عبر مسار الدعم التشغيلي بإثبات الملكية لحماية خصوصية بياناتك."
+                : "Automated SMS recovery is currently awaiting SMS provider integration. Accounts are restored via our verified support channel with strict proof-of-ownership."}
             </p>
           </div>
 
@@ -68,48 +77,64 @@ export default function ForgotPasswordPage() {
             type="submit"
             className="w-full rounded-xl bg-primary px-4 py-3 text-sm font-bold text-white hover:bg-primary-dark shadow-sm transition-colors cursor-pointer"
           >
-            {locale === "ar" ? "متابعة استعادة الحساب" : "Proceed with Recovery"}
+            {locale === "ar" ? "عرض شروط وإجراءات الاستعادة" : "View Recovery Requirements"}
           </button>
         </form>
       ) : (
         <div className="space-y-5 animate-in fade-in duration-200">
-          <div className="rounded-xl bg-emerald-50 border border-emerald-100 p-4 text-xs text-emerald-950 space-y-2">
-            <p className="font-bold flex items-center gap-1.5 text-emerald-800">
-              <ShieldAlert className="h-4 w-4 text-emerald-600" />
-              <span>{locale === "ar" ? "إجراء الأمان المعتمد لاستعادة الحساب" : "Account Verification Procedure"}</span>
+          <div className="rounded-xl bg-slate-50 border border-slate-200 p-4 text-xs space-y-3">
+            <p className="font-bold flex items-center gap-1.5 text-slate-900">
+              <ShieldAlert className="h-4 w-4 text-primary" />
+              <span>{locale === "ar" ? "متطلبات إثبات ملكية الحساب" : "Proof of Ownership Requirements"}</span>
             </p>
-            <p className="leading-relaxed">
+            <p className="leading-relaxed text-slate-600 text-[11px]">
               {locale === "ar"
-                ? `لحماية خصوصية المعلمين والعائلات، يتم تأكيد ملكية الرقم (${phone}) وإعادة تعيين كلمة المرور مباشرة عبر فريق خدمة العملاء.`
-                : `To protect account privacy, ownership of (${phone}) is confirmed directly via our customer support team.`}
+                ? `لاستعادة الحساب المسجل برقم (${phone})، يلتزم مقدم الطلب بتقديم ما يثبت ملكيته للحساب لمنع انتحال الشخصية:`
+                : `To restore the account registered with (${phone}), the requester must provide proof of ownership to prevent impersonation:`}
             </p>
+            <ul className="space-y-1.5 text-[11px] text-slate-700 list-disc list-inside">
+              <li>
+                {locale === "ar"
+                  ? "التواصل من نفس رقم الهاتف المسجل أو استقبال مكالمة تأكيد على الرقم."
+                  : "Communication from the registered phone or answering a verification call."}
+              </li>
+              <li>
+                {locale === "ar"
+                  ? "مطابقة الاسم الكامل المسجل في الحساب مع بطاقة إثبات الهوية."
+                  : "Matching the registered account full name against an official identity document."}
+              </li>
+              <li>
+                {locale === "ar"
+                  ? "للمعلمين: تقديم تفاصيل شهادة التوثيق المرفوعة مسبقاً أو تخصص التدريس."
+                  : "For tutors: providing details of previously uploaded credentials or registered subjects."}
+              </li>
+            </ul>
           </div>
 
           <div className="space-y-2.5">
             <a
-              href={`https://wa.me/201000000000?text=${whatsappMessage}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 w-full rounded-xl bg-emerald-600 text-white py-3 text-sm font-bold hover:bg-emerald-700 shadow-sm transition-colors"
+              href={`mailto:support@zads.education?subject=${emailSubject}&body=${emailBody}`}
+              className="flex items-center justify-center gap-2 w-full rounded-xl bg-primary text-white py-3 text-sm font-bold hover:bg-primary-dark shadow-sm transition-colors"
             >
-              <MessageSquare className="h-4 w-4" />
-              <span>{locale === "ar" ? "تواصل عبر واتساب لاسترجاع الحساب" : "Contact via WhatsApp"}</span>
+              <Mail className="h-4 w-4" />
+              <span>{locale === "ar" ? "مراسلة الدعم الرسمي (support@zads.education)" : "Email Official Support"}</span>
             </a>
 
             <Link
               href={`/${locale}/public/contact`}
               className="flex items-center justify-center gap-2 w-full rounded-xl border border-slate-200 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
             >
-              <span>{locale === "ar" ? "قنوات الدعم الأخرى والاتصال" : "Other Support Channels"}</span>
+              <MessageSquare className="h-3.5 w-3.5" />
+              <span>{locale === "ar" ? "قنوات الدعم ومكتب المساعدة" : "Help Desk & Support Channels"}</span>
             </Link>
           </div>
 
           <button
             type="button"
             onClick={() => setShowGuidance(false)}
-            className="w-full text-center text-xs text-muted-foreground hover:underline"
+            className="w-full text-center text-xs text-muted-foreground hover:underline cursor-pointer"
           >
-            {locale === "ar" ? "تغيير رقم الهاتف" : "Change phone number"}
+            {locale === "ar" ? "العودة وتعديل رقم الهاتف" : "Go back and edit phone number"}
           </button>
         </div>
       )}

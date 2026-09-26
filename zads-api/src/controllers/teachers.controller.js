@@ -214,6 +214,27 @@ const searchTeachers = async (req, res, next) => {
         // Privacy: Strip certificateUrl from public search results
         const sanitizedTeachers = teachers.map(({ certificateUrl, ...rest }) => rest);
 
+        // Server-side authoritative event logging for search outcomes (no PII)
+        try {
+            await prisma.platformEvent.create({
+                data: {
+                    eventType: 'search_outcome',
+                    userId: req.user?.id || null,
+                    metadata: {
+                        stageId: stageId || null,
+                        subjectId: subjectId || null,
+                        studyMode: studyMode || null,
+                        cityId: cityId || null,
+                        areaId: areaId || null,
+                        resultsCount: total,
+                        isZeroResult: total === 0
+                    }
+                }
+            });
+        } catch (analyticsErr) {
+            // Analytics logging should never fail user requests
+        }
+
         return response.paginated(res, sanitizedTeachers, {
             page: parseInt(page),
             limit: parseInt(limit),
@@ -280,6 +301,23 @@ const getTeacherById = async (req, res, next) => {
             where: { id },
             data: { viewsCount: { increment: 1 } }
         });
+
+        // Server-side authoritative event logging for profile view (no PII)
+        try {
+            await prisma.platformEvent.create({
+                data: {
+                    eventType: 'profile_view',
+                    userId: req.user?.id || null,
+                    entityId: id,
+                    metadata: {
+                        isVerified: teacher.isVerified,
+                        subjectsCount: teacher.subjects?.length || 0
+                    }
+                }
+            });
+        } catch (analyticsErr) {
+            // Analytics logging should never fail user requests
+        }
 
         // Privacy: Hide certificateUrl unless requester is admin or the teacher themselves
         const isOwner = req.user?.userType === 'teacher' && req.user?.teacher?.id === teacher.id;

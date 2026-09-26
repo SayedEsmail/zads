@@ -18,12 +18,12 @@ export default function JoinTeacherPage() {
 
   const benefits = [
     {
-      icon: Percent,
-      title: locale === "ar" ? "بدون أي عمولة (0%)" : "0% Platform Commission",
+      icon: Users,
+      title: locale === "ar" ? "استقلالية تامة في الاتفاق" : "Independent Direct Agreements",
       desc:
         locale === "ar"
-          ? "أتعابك بالكامل لك وحدك. لا نقتطع أي نسبة مئوية من قيمة حصصك أو اشتراكاتك مع الطلاب."
-          : "Keep 100% of your earnings. We do not deduct any percentage from your session rates.",
+          ? "تواصل مباشر مع أولياء الأمور والطلاب دون أي شروط مجحفة، واتفاق تام على تفاصيل الدروس."
+          : "Direct coordination with parents and students, agreeing freely on lesson schedules and details.",
     },
     {
       icon: Users,
@@ -89,8 +89,8 @@ export default function JoinTeacherPage() {
           </span>
           <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight">
             {locale === "ar"
-              ? "درّس بكرامة ومرونة... وبدون عمولات وسيطة"
-              : "Teach with dignity and zero commission deductions"}
+              ? "درّس بكرامة ومرونة... وتواصل مباشر مع العائلات"
+              : "Teach with flexibility through direct family connections"}
           </h1>
           <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
             {locale === "ar"

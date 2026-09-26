@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, useCallback } from "react";
+import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { useLocale } from "next-intl";
 import { DataTable } from "@/components/admin/DataTable";
@@ -25,6 +26,7 @@ export default function AdminTeachersPage() {
   const tTeacher = useTranslations("teacher");
   const tCommon = useTranslations("common");
   const locale = useLocale();
+  const { data: session } = useSession();
 
   const { 
     teachers, 
@@ -149,11 +151,15 @@ export default function AdminTeachersPage() {
         }
 
         const isPdf = url.toLowerCase().endsWith(".pdf");
+        const token = (session as any)?.apiToken;
+        const authenticatedUrl = token
+          ? `${url}${url.includes('?') ? '&' : '?'}token=${token}`
+          : url;
 
         return (
           <div className="flex justify-start">
             <a
-              href={url}
+              href={authenticatedUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 rounded-xl bg-orange-50 border border-orange-100 hover:border-orange-200 px-2.5 py-1 text-xs font-semibold text-orange-600 shadow-sm transition-all hover:scale-[1.02]"

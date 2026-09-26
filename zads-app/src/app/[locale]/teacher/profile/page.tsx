@@ -20,7 +20,7 @@ export default function TeacherProfilePage() {
   const tAuth = useTranslations("auth");
   const tCommon = useTranslations("common");
   const tErr = useTranslations("errors");
-  const { update: updateSession } = useSession();
+  const { data: session, update: updateSession } = useSession();
   const teacherStore = useTeacherStore();
   const authStore = useAuthStore();
 
@@ -575,7 +575,11 @@ export default function TeacherProfilePage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <a
-                      href={teacherStore.data.certificateUrl}
+                      href={
+                        (session as any)?.apiToken
+                          ? `${teacherStore.data.certificateUrl}${teacherStore.data.certificateUrl.includes('?') ? '&' : '?'}token=${(session as any).apiToken}`
+                          : teacherStore.data.certificateUrl
+                      }
                       target="_blank"
                       rel="noopener noreferrer"
                       className="h-8 w-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-500 hover:text-primary hover:border-primary/30 transition-colors shadow-sm"

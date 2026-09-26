@@ -18,6 +18,8 @@ const createRequest = async (req, res, next) => {
             tutorRequestId
         } = req.body;
 
+        const idempotencyKey = req.headers['idempotency-key'] || req.body.idempotencyKey || null;
+
         if (!parentId) {
             return response.error(res, 'Parent profile not found', 404);
         }
@@ -38,44 +40,118 @@ const createRequest = async (req, res, next) => {
             return response.error(res, 'Teacher not found or inactive', 404);
         }
 
-        // Idempotency: Prevent duplicate pending requests for same parent + teacher + subject
+        // 1. Idempotency Key check: if an existing request has this exact key, return it immediately
+        if (idempotencyKey) {
+            const existingByKey = await prisma.contactRequest.findFirst({
+                where: { idempotencyKey },
+                include: {
+                    teacher: {
+                        include: { user: { select: { id: true, name: true, avatarUrl: true } } }
+                    },
+                    subject: true,
+                    stage: true
+                }
+            });
+            if (existingByKey) {
+                return response.success(res, existingByKey, 'Contact request returned (idempotent retry)', 200);
+            }
+        }
+
+        // 2. Pending duplicate check & lost-response retry handling
         const existingPending = await prisma.contactRequest.findFirst({
             where: {
                 parentId,
                 teacherId,
                 subjectId: subjectId || null,
                 status: 'pending'
-            }
-        });
-
-        if (existingPending) {
-            return response.error(res, 'A pending contact request already exists for this teacher and subject', 409);
-        }
-
-        const contactRequest = await prisma.contactRequest.create({
-            data: {
-                parentId,
-                teacherId,
-                subjectId: subjectId || null,
-                stageId: stageId || null,
-                message: message || null,
-                studyMode: studyMode || null,
-                teachingPlace: teachingPlace || null,
-                preferredTime: preferredTime || null,
-                tutorRequestId: tutorRequestId || null,
-                initiatedBy: 'parent',
-                status: 'pending'
             },
             include: {
                 teacher: {
-                    include: {
-                        user: { select: { id: true, name: true, avatarUrl: true } }
-                    }
+                    include: { user: { select: { id: true, name: true, avatarUrl: true } } }
                 },
                 subject: true,
                 stage: true
             }
         });
+
+        if (existingPending) {
+            // If the client sent an idempotency key or marked as retry, return the pending request gracefully
+            if (idempotencyKey || req.body.isRetry) {
+                return response.success(res, existingPending, 'Contact request returned (idempotent retry)', 200);
+            }
+            return response.error(res, 'A pending contact request already exists for this teacher and subject', 409);
+        }
+
+        let contactRequest;
+        try {
+            contactRequest = await prisma.contactRequest.create({
+                data: {
+                    parentId,
+                    teacherId,
+                    subjectId: subjectId || null,
+                    stageId: stageId || null,
+                    message: message || null,
+                    studyMode: studyMode || null,
+                    teachingPlace: teachingPlace || null,
+                    preferredTime: preferredTime || null,
+                    tutorRequestId: tutorRequestId || null,
+                    initiatedBy: 'parent',
+                    status: 'pending',
+                    idempotencyKey
+                },
+                include: {
+                    teacher: {
+                        include: {
+                            user: { select: { id: true, name: true, avatarUrl: true } }
+                        }
+                    },
+                    subject: true,
+                    stage: true
+                }
+            });
+        } catch (createErr) {
+            // Handle concurrent duplicate insertion race condition (Prisma P2002)
+            if (createErr.code === 'P2002') {
+                const winning = await prisma.contactRequest.findFirst({
+                    where: {
+                        parentId,
+                        teacherId,
+                        status: 'pending'
+                    },
+                    include: {
+                        teacher: {
+                            include: { user: { select: { id: true, name: true, avatarUrl: true } } }
+                        },
+                        subject: true,
+                        stage: true
+                    }
+                });
+                if (winning) {
+                    return response.success(res, winning, 'Contact request created (concurrent duplicate resolved)', 200);
+                }
+            }
+            throw createErr;
+        }
+
+        // Authoritative server-side analytics logging (NO sensitive PII)
+        try {
+            await prisma.platformEvent.create({
+                data: {
+                    eventType: 'contact_request_create',
+                    userId: req.user.id,
+                    entityId: contactRequest.id,
+                    metadata: {
+                        teacherId,
+                        initiatedBy: 'parent',
+                        studyMode: studyMode || null,
+                        hasSubject: !!subjectId,
+                        hasStage: !!stageId
+                    }
+                }
+            });
+        } catch (analyticsErr) {
+            console.warn('[ANALYTICS] event log error:', analyticsErr.message);
+        }
 
         return response.created(res, contactRequest, 'Contact request sent successfully');
 
@@ -101,6 +177,8 @@ const createRequestAsTeacher = async (req, res, next) => {
             tutorRequestId
         } = req.body;
 
+        const idempotencyKey = req.headers['idempotency-key'] || req.body.idempotencyKey || null;
+
         if (!teacherId) {
             return response.error(res, 'Teacher profile not found', 404);
         }
@@ -121,46 +199,118 @@ const createRequestAsTeacher = async (req, res, next) => {
             return response.error(res, 'Parent not found or inactive', 404);
         }
 
-        // Idempotency: Prevent duplicate pending requests
+        // 1. Idempotency Key check
+        if (idempotencyKey) {
+            const existingByKey = await prisma.contactRequest.findFirst({
+                where: { idempotencyKey },
+                include: {
+                    parent: {
+                        include: { user: { select: { id: true, name: true, avatarUrl: true } } }
+                    },
+                    subject: true,
+                    stage: true
+                }
+            });
+            if (existingByKey) {
+                return response.success(res, existingByKey, 'Contact request returned (idempotent retry)', 200);
+            }
+        }
+
+        // 2. Pending duplicate check & lost-response retry handling
         const existingPending = await prisma.contactRequest.findFirst({
             where: {
                 parentId,
                 teacherId,
                 subjectId: subjectId || null,
                 status: 'pending'
-            }
-        });
-
-        if (existingPending) {
-            return response.error(res, 'A pending contact request already exists for this parent and subject', 409);
-        }
-
-        const contactRequest = await prisma.contactRequest.create({
-            data: {
-                parentId,
-                teacherId,
-                subjectId: subjectId || null,
-                stageId: stageId || null,
-                message: message || null,
-                studyMode: studyMode || null,
-                teachingPlace: teachingPlace || null,
-                preferredTime: preferredTime || null,
-                tutorRequestId: tutorRequestId || null,
-                initiatedBy: 'teacher',
-                status: 'pending'
             },
             include: {
                 parent: {
-                    include: {
-                        user: { select: { id: true, name: true, avatarUrl: true } }
-                    }
+                    include: { user: { select: { id: true, name: true, avatarUrl: true } } }
                 },
                 subject: true,
                 stage: true
             }
         });
 
-        return response.created(res, contactRequest, 'Contact request sent to parent');
+        if (existingPending) {
+            if (idempotencyKey || req.body.isRetry) {
+                return response.success(res, existingPending, 'Contact request returned (idempotent retry)', 200);
+            }
+            return response.error(res, 'A pending contact request already exists for this parent and subject', 409);
+        }
+
+        let contactRequest;
+        try {
+            contactRequest = await prisma.contactRequest.create({
+                data: {
+                    parentId,
+                    teacherId,
+                    subjectId: subjectId || null,
+                    stageId: stageId || null,
+                    message: message || null,
+                    studyMode: studyMode || null,
+                    teachingPlace: teachingPlace || null,
+                    preferredTime: preferredTime || null,
+                    tutorRequestId: tutorRequestId || null,
+                    initiatedBy: 'teacher',
+                    status: 'pending',
+                    idempotencyKey
+                },
+                include: {
+                    parent: {
+                        include: {
+                            user: { select: { id: true, name: true, avatarUrl: true } }
+                        }
+                    },
+                    subject: true,
+                    stage: true
+                }
+            });
+        } catch (createErr) {
+            if (createErr.code === 'P2002') {
+                const winning = await prisma.contactRequest.findFirst({
+                    where: {
+                        parentId,
+                        teacherId,
+                        status: 'pending'
+                    },
+                    include: {
+                        parent: {
+                            include: { user: { select: { id: true, name: true, avatarUrl: true } } }
+                        },
+                        subject: true,
+                        stage: true
+                    }
+                });
+                if (winning) {
+                    return response.success(res, winning, 'Contact request created (concurrent duplicate resolved)', 200);
+                }
+            }
+            throw createErr;
+        }
+
+        // Authoritative server-side analytics logging (NO sensitive PII)
+        try {
+            await prisma.platformEvent.create({
+                data: {
+                    eventType: 'contact_request_create',
+                    userId: req.user.id,
+                    entityId: contactRequest.id,
+                    metadata: {
+                        parentId,
+                        initiatedBy: 'teacher',
+                        studyMode: studyMode || null,
+                        hasSubject: !!subjectId,
+                        hasStage: !!stageId
+                    }
+                }
+            });
+        } catch (analyticsErr) {
+            console.warn('[ANALYTICS] event log error:', analyticsErr.message);
+        }
+
+        return response.created(res, contactRequest, 'Contact request sent to client successfully');
 
     } catch (error) {
         next(error);
@@ -285,33 +435,42 @@ const updateRequestStatus = async (req, res, next) => {
             return response.error(res, 'Invalid status. Must be accepted or rejected', 400);
         }
 
-        const existing = await prisma.contactRequest.findFirst({
+        // Recipient-only atomic transition: only update if currently pending and recipient is teacher
+        const updateResult = await prisma.contactRequest.updateMany({
             where: {
                 id: requestId,
-                teacherId
-            }
-        });
-
-        if (!existing) {
-            return response.error(res, 'Contact request not found', 404);
-        }
-
-        // Initiator cannot accept/reject their own request
-        if (existing.initiatedBy === 'teacher') {
-            return response.error(res, 'You cannot accept or reject a request that you initiated', 403);
-        }
-
-        // State Machine: Can only transition from pending
-        if (existing.status !== 'pending') {
-            return response.error(res, `Cannot change status of a request that is already ${existing.status}`, 400);
-        }
-
-        const updated = await prisma.contactRequest.update({
-            where: { id: requestId },
+                teacherId,
+                status: 'pending',
+                initiatedBy: 'parent'
+            },
             data: {
                 status,
                 ...(replyMessage !== undefined && { replyMessage })
-            },
+            }
+        });
+
+        if (updateResult.count === 0) {
+            const existing = await prisma.contactRequest.findUnique({
+                where: { id: requestId }
+            });
+
+            if (!existing) {
+                return response.error(res, 'Contact request not found', 404);
+            }
+            if (existing.teacherId !== teacherId) {
+                return response.error(res, 'You do not have permission to update this request', 403);
+            }
+            if (existing.initiatedBy === 'teacher') {
+                return response.error(res, 'You cannot accept or reject a request that you initiated', 403);
+            }
+            if (existing.status !== 'pending') {
+                return response.error(res, `Cannot change status of a request that is already ${existing.status}`, 409);
+            }
+            return response.error(res, 'Could not transition request', 400);
+        }
+
+        const updated = await prisma.contactRequest.findUnique({
+            where: { id: requestId },
             include: {
                 parent: {
                     include: {
@@ -322,6 +481,24 @@ const updateRequestStatus = async (req, res, next) => {
                 stage: true
             }
         });
+
+        // Authoritative server-side analytics logging
+        try {
+            await prisma.platformEvent.create({
+                data: {
+                    eventType: 'contact_request_transition',
+                    userId: req.user.id,
+                    entityId: requestId,
+                    metadata: {
+                        newStatus: status,
+                        previousStatus: 'pending',
+                        transitionedBy: 'teacher'
+                    }
+                }
+            });
+        } catch (analyticsErr) {
+            console.warn('[ANALYTICS] event log error:', analyticsErr.message);
+        }
 
         // If rejected, keep phone hidden
         if (status !== 'accepted' && updated.parent?.user) {
@@ -394,33 +571,42 @@ const updateRequestStatusAsParent = async (req, res, next) => {
             return response.error(res, 'Invalid status. Must be accepted or rejected', 400);
         }
 
-        const existing = await prisma.contactRequest.findFirst({
+        // Recipient-only atomic transition: only update if currently pending and recipient is parent
+        const updateResult = await prisma.contactRequest.updateMany({
             where: {
                 id: requestId,
-                parentId
-            }
-        });
-
-        if (!existing) {
-            return response.error(res, 'Contact request not found', 404);
-        }
-
-        // Initiator cannot accept/reject their own request
-        if (existing.initiatedBy !== 'teacher') {
-            return response.error(res, 'You cannot accept or reject a request that you initiated', 403);
-        }
-
-        // State Machine: Can only transition from pending
-        if (existing.status !== 'pending') {
-            return response.error(res, `Cannot change status of a request that is already ${existing.status}`, 400);
-        }
-
-        const updated = await prisma.contactRequest.update({
-            where: { id: requestId },
+                parentId,
+                status: 'pending',
+                initiatedBy: 'teacher'
+            },
             data: {
                 status,
                 ...(replyMessage !== undefined && { replyMessage })
-            },
+            }
+        });
+
+        if (updateResult.count === 0) {
+            const existing = await prisma.contactRequest.findUnique({
+                where: { id: requestId }
+            });
+
+            if (!existing) {
+                return response.error(res, 'Contact request not found', 404);
+            }
+            if (existing.parentId !== parentId) {
+                return response.error(res, 'You do not have permission to update this request', 403);
+            }
+            if (existing.initiatedBy === 'parent') {
+                return response.error(res, 'You cannot accept or reject a request that you initiated', 403);
+            }
+            if (existing.status !== 'pending') {
+                return response.error(res, `Cannot change status of a request that is already ${existing.status}`, 409);
+            }
+            return response.error(res, 'Could not transition request', 400);
+        }
+
+        const updated = await prisma.contactRequest.findUnique({
+            where: { id: requestId },
             include: {
                 teacher: {
                     include: {
@@ -431,6 +617,24 @@ const updateRequestStatusAsParent = async (req, res, next) => {
                 stage: true
             }
         });
+
+        // Authoritative server-side analytics logging
+        try {
+            await prisma.platformEvent.create({
+                data: {
+                    eventType: 'contact_request_transition',
+                    userId: req.user.id,
+                    entityId: requestId,
+                    metadata: {
+                        newStatus: status,
+                        previousStatus: 'pending',
+                        transitionedBy: 'parent'
+                    }
+                }
+            });
+        } catch (analyticsErr) {
+            console.warn('[ANALYTICS] event log error:', analyticsErr.message);
+        }
 
         // If rejected, keep phone hidden
         if (status !== 'accepted' && updated.teacher?.user) {

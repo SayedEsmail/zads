@@ -159,12 +159,12 @@ export default function LandingPage() {
           <ShieldCheck className="h-10 w-10 text-primary shrink-0" />
           <div className="space-y-1">
             <h3 className="font-bold text-sm text-slate-900">
-              {locale === "ar" ? "نموذج وساطة شفاف وبدون عمولات مخفية" : "Direct & Commission-Free Platform"}
+              {locale === "ar" ? "نموذج تنسيق مباشر وشفاف" : "Direct & Transparent Coordination"}
             </h3>
             <p className="text-xs text-muted-foreground leading-relaxed">
               {locale === "ar"
-                ? "منصة زاد تربط أولياء الأمور والطلاب بالمعلمين مباشرة. نحن لسنا سنترًا ولا نتدخل في الاتفاق المالي بينكم، مما يوفر أعلى جودة بأفضل سعر."
-                : "Zads directly connects parents and students with educators. We are not a tutoring center and take zero commissions on your classes."}
+                ? "منصة زاد تربط أولياء الأمور والطلاب بالمعلمين مباشرة لتسهيل التواصل والاتفاق المباشر وفق احتياجات المتعلم."
+                : "Zads directly connects parents and students with educators for straightforward coordination according to student needs."}
             </p>
           </div>
         </div>
