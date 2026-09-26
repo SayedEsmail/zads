@@ -1,8 +1,19 @@
 import axios from "axios";
 import { getSession, signOut } from "next-auth/react";
 
+function forceSameOriginBase(config: { baseURL?: string; url?: string }) {
+  // Always same-origin BFF. Neutralize stale absolute bases from old bundles/env.
+  config.baseURL = "/api";
+  if (typeof config.url === "string") {
+    config.url = config.url
+      .replace(/^https?:\/\/(www\.)?api\.zads\.app\/api(?=\/|$)/i, "")
+      .replace(/^https?:\/\/(www\.)?api\.zads\.app(?=\/|$)/i, "")
+      .replace(/^https?:\/\/(www\.)?zads\.app\/api(?=\/|$)/i, "");
+  }
+  return config;
+}
+
 const api = axios.create({
-  // Always use the same-origin proxy; upstream configuration belongs in API_BASE_URL.
   baseURL: "/api",
   headers: {
     "Content-Type": "application/json",
@@ -16,12 +27,17 @@ export const publicApi = axios.create({
   timeout: 15000,
 });
 
-// Request interceptor: attach JWT from NextAuth session
 api.interceptors.request.use(async (config) => {
+  forceSameOriginBase(config);
   const session = await getSession();
   if (session?.apiToken) {
     config.headers.Authorization = `Bearer ${session.apiToken}`;
   }
+  return config;
+});
+
+publicApi.interceptors.request.use((config) => {
+  forceSameOriginBase(config);
   return config;
 });
 

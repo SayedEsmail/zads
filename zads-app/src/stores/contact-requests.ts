@@ -90,9 +90,9 @@ export const useContactRequestsStore = create<ContactRequestsStore>()(
         const body = { ...payload, idempotencyKey };
 
         try {
-          await api.post("/contact-requests", body, {
-            headers: { "Idempotency-Key": idempotencyKey },
-          });
+          // Idempotency lives in the JSON body so browsers never need a
+          // cross-origin preflight just for the Idempotency-Key header.
+          await api.post("/contact-requests", body);
           pendingIntentKeys.delete(intent);
         } catch (err) {
           set({ error: extractError(err), isLoading: false });
@@ -115,9 +115,7 @@ export const useContactRequestsStore = create<ContactRequestsStore>()(
         const body = { ...payload, idempotencyKey };
 
         try {
-          await api.post("/contact-requests/teacher", body, {
-            headers: { "Idempotency-Key": idempotencyKey },
-          });
+          await api.post("/contact-requests/teacher", body);
           pendingIntentKeys.delete(intent);
         } catch (err) {
           set({ error: extractError(err), isLoading: false });

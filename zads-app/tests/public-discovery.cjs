@@ -56,10 +56,12 @@ function load(relative, overrides = {}) {
   api.default.defaults.adapter = async (config) => {
     assert.equal(config.baseURL, '/api');
     assert.equal(config.headers.Authorization, 'Bearer local-test-token');
-    assert.equal(config.headers['Idempotency-Key'], 'local-test-intent');
+    assert.equal(config.headers['Idempotency-Key'], undefined);
+    const payload = typeof config.data === 'string' ? JSON.parse(config.data) : config.data;
+    assert.equal(payload.idempotencyKey, 'local-test-intent');
     return { status: 200, statusText: 'OK', headers: {}, config, data: { success: true } };
   };
-  await api.default.post('/contact-requests', {}, { headers: { 'Idempotency-Key': 'local-test-intent' } });
+  await api.default.post('/contact-requests', { idempotencyKey: 'local-test-intent' });
 
   const React = require('react');
   const { renderToString } = require('react-dom/server');

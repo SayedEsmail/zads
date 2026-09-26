@@ -75,17 +75,8 @@ const nextConfig: NextConfig = {
     ];
   },
 
-  // Proxy /api/* to the Express backend
-  // We exclude NextAuth routes so they hit our local API, but allow /api/auth/profile to proxy to backend
-  async rewrites() {
-    const apiBase = process.env.API_BASE_URL || "https://api.zads.app";
-    return [
-      {
-        source: "/api/:path((?!auth/(?:callback|csrf|error|providers|session|signin|signout|verify-request)).*)",
-        destination: `${apiBase}/api/:path*`,
-      },
-    ];
-  },
+  // Backend proxy is implemented in src/app/api/[...backend]/route.ts so we can
+  // strip upstream Helmet headers and keep dashboard calls same-origin.
 };
 
 export default withNextIntl(nextConfig);

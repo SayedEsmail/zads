@@ -34,6 +34,16 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Collapse legacy doubled role homes before auth/RSC so prefetch does not 404.
+  const doubled = pathname.match(/^\/([^/]+)\/(client|teacher|admin)\/\2(?=\/|$)/);
+  if (doubled) {
+    const fixed = pathname.replace(
+      /^(\/[^/]+)\/(client|teacher|admin)\/\2/,
+      "$1/$2"
+    );
+    return NextResponse.redirect(new URL(fixed + request.nextUrl.search, request.url), 308);
+  }
+
   // Extract locale from path (first segment)
   const locale = pathname.split("/")[1] || routing.defaultLocale;
 

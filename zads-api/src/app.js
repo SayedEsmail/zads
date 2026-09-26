@@ -26,26 +26,37 @@ const app = express();
 // MIDDLEWARES
 // ==============================================
 
-// Security — allow cross-origin reads from zads.app (Helmet defaults to
-// Cross-Origin-Resource-Policy: same-origin, which browsers surface as
-// ERR_FAILED / Network Error even when Access-Control-Allow-Origin is set).
+// API serves JSON, not documents. Disable HTML-oriented Helmet defaults that
+// browsers surface as ERR_FAILED / CORS noise when responses are read cross-origin
+// or forwarded through the frontend BFF.
 app.use(helmet({
+    contentSecurityPolicy: false,
+    crossOriginEmbedderPolicy: false,
+    crossOriginOpenerPolicy: false,
     crossOriginResourcePolicy: { policy: 'cross-origin' },
 }));
 
-const corsOrigins = (process.env.CORS_ORIGIN || 'https://zads.app')
+const corsOrigins = (process.env.CORS_ORIGIN || 'https://zads.app,https://www.zads.app')
     .split(',')
     .map((value) => value.trim())
     .filter(Boolean);
 
+const isAllowedOrigin = (origin) => {
+    if (!origin) return true;
+    if (corsOrigins.includes('*') || corsOrigins.includes(origin)) return true;
+    try {
+        const { hostname, protocol } = new URL(origin);
+        if (protocol !== 'https:' && protocol !== 'http:') return false;
+        return hostname === 'zads.app' || hostname.endsWith('.zads.app');
+    } catch {
+        return false;
+    }
+};
+
 // CORS
 app.use(cors({
     origin(origin, callback) {
-        if (!origin || corsOrigins.includes('*') || corsOrigins.includes(origin)) {
-            callback(null, true);
-            return;
-        }
-        callback(null, false);
+        callback(null, isAllowedOrigin(origin));
     },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: [
@@ -53,8 +64,11 @@ app.use(cors({
         'Authorization',
         'Idempotency-Key',
         'idempotency-key',
+        'Accept',
+        'X-Requested-With',
     ],
     credentials: true,
+    maxAge: 0,
     optionsSuccessStatus: 204,
 }));
 
