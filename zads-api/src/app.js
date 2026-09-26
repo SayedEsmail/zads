@@ -26,14 +26,36 @@ const app = express();
 // MIDDLEWARES
 // ==============================================
 
-// Security
-app.use(helmet());
+// Security — allow cross-origin reads from zads.app (Helmet defaults to
+// Cross-Origin-Resource-Policy: same-origin, which browsers surface as
+// ERR_FAILED / Network Error even when Access-Control-Allow-Origin is set).
+app.use(helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+}));
+
+const corsOrigins = (process.env.CORS_ORIGIN || 'https://zads.app')
+    .split(',')
+    .map((value) => value.trim())
+    .filter(Boolean);
 
 // CORS
 app.use(cors({
-    origin: process.env.CORS_ORIGIN || '*',
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Idempotency-Key']
+    origin(origin, callback) {
+        if (!origin || corsOrigins.includes('*') || corsOrigins.includes(origin)) {
+            callback(null, true);
+            return;
+        }
+        callback(null, false);
+    },
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: [
+        'Content-Type',
+        'Authorization',
+        'Idempotency-Key',
+        'idempotency-key',
+    ],
+    credentials: true,
+    optionsSuccessStatus: 204,
 }));
 
 // Logging

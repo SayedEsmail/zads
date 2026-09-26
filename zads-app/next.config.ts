@@ -41,6 +41,37 @@ const nextConfig: NextConfig = {
         destination: "/:locale/public/how-it-works",
         permanent: true,
       },
+      // Legacy doubled role homes (/client/client, /teacher/teacher, /admin/admin)
+      {
+        source: "/:locale/client/client",
+        destination: "/:locale/client",
+        permanent: true,
+      },
+      {
+        source: "/:locale/client/client/:path*",
+        destination: "/:locale/client/:path*",
+        permanent: true,
+      },
+      {
+        source: "/:locale/teacher/teacher",
+        destination: "/:locale/teacher",
+        permanent: true,
+      },
+      {
+        source: "/:locale/teacher/teacher/:path*",
+        destination: "/:locale/teacher/:path*",
+        permanent: true,
+      },
+      {
+        source: "/:locale/admin/admin",
+        destination: "/:locale/admin",
+        permanent: true,
+      },
+      {
+        source: "/:locale/admin/admin/:path*",
+        destination: "/:locale/admin/:path*",
+        permanent: true,
+      },
     ];
   },
 

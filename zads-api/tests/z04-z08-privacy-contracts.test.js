@@ -131,6 +131,12 @@ async function runTests() {
     for (const name of ['authorization', 'content-type', 'idempotency-key']) {
       assert(allowedHeaders.includes(name), `CORS must permit ${name}`);
     }
+    const corp = (preflight.headers['cross-origin-resource-policy'] || '').toLowerCase();
+    assert.notStrictEqual(
+      corp,
+      'same-origin',
+      'CORP same-origin blocks browser reads from zads.app and surfaces as ERR_FAILED'
+    );
     for (const [route, token] of [
       ['/api/parents/me', parentToken],
       ['/api/teachers/me/subjects', teacherToken],

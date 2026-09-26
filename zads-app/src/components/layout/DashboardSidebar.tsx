@@ -95,14 +95,21 @@ export default function DashboardSidebar({ role }: Props) {
 
       {/* Nav */}
       <nav className="flex-1 space-y-1 overflow-y-auto p-3">
-        {navItems.map(({ href, label, icon: Icon }) => (
+        {navItems.map(({ href, label, icon: Icon }) => {
+          const roleHome = `/${locale}/${role}`;
+          const isActive =
+            href === roleHome
+              ? pathname === href
+              : pathname === href || pathname.startsWith(`${href}/`);
+
+          return (
           <Link
             key={href}
             href={href}
             onClick={() => setMobileOpen(false)}
             className={cn(
               "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-              (href === `/${locale}/${role}/${role}` ? pathname === href : (pathname === href || pathname.startsWith(href + "/")))
+              isActive
                 ? "bg-primary/10 text-primary"
                 : "text-foreground hover:bg-muted"
             )}
@@ -110,7 +117,8 @@ export default function DashboardSidebar({ role }: Props) {
             <Icon className="h-4 w-4 shrink-0" />
             {label}
           </Link>
-        ))}
+          );
+        })}
       </nav>
 
       {/* Sign out */}
@@ -130,7 +138,7 @@ export default function DashboardSidebar({ role }: Props) {
     <>
       {/* Global Top Header (Desktop & Mobile) */}
       <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-border/50 bg-white/80 backdrop-blur-md px-6 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] shrink-0">
-        <Link href={`/${locale}/${role}/${role}`} className="flex items-center">
+        <Link href={`/${locale}/${role}`} className="flex items-center">
           <img src="/logo.svg" alt="Zads Logo" className="h-10 md:h-12 w-auto object-contain" />
         </Link>
         <div className="flex items-center gap-3">
