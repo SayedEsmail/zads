@@ -498,11 +498,12 @@ async function runSuite() {
     // ----------------------------------------------------
     console.log('\n--- TEST 8: Full Analytics Funnel & No-PII Audit ---');
     // Log attribution
+    const auditSessionId = `sess_audit_${Date.now()}`;
     const attr1 = await makeRequest(port, 'POST', '/api/analytics/attribution', {}, {
       utmSource: 'google_search',
       utmCampaign: 'october_math',
       landingPage: '/ar/public',
-      sessionId: 'sess_audit_999'
+      sessionId: auditSessionId
     });
     assert.strictEqual(attr1.status, 201, 'Attribution creation must return 201');
 
@@ -510,7 +511,7 @@ async function runSuite() {
       utmSource: 'google_search',
       utmCampaign: 'october_math',
       landingPage: '/ar/public',
-      sessionId: 'sess_audit_999'
+      sessionId: auditSessionId
     });
     assert.strictEqual(attr2.status, 200, 'Duplicate attribution within window must return 200');
     assert.strictEqual(attr2.body.data.deduplicated, true, 'Must report deduplicated');
