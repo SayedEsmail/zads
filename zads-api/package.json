@@ -12,7 +12,8 @@
     "db:migrate": "prisma migrate dev",
     "db:migrate:prod": "prisma migrate deploy",
     "db:seed": "node prisma/seed.js",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "test:local": "node scripts/test-local.js"
   },
   "prisma": {
     "seed": "node prisma/seed.js"

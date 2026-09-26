@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState, useCallback } from "react";
-import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { useLocale } from "next-intl";
+import api from "@/lib/api";
 import { DataTable } from "@/components/admin/DataTable";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { AdminTeacher } from "@/types";
@@ -26,7 +26,6 @@ export default function AdminTeachersPage() {
   const tTeacher = useTranslations("teacher");
   const tCommon = useTranslations("common");
   const locale = useLocale();
-  const { data: session } = useSession();
 
   const { 
     teachers, 
@@ -43,6 +42,27 @@ export default function AdminTeachersPage() {
   const [togglingVerify, setTogglingVerify] = useState<string | null>(null);
   const [togglingStatus, setTogglingStatus] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+
+  const handleViewCertificate = async (certificateUrl: string) => {
+    const preview = window.open("about:blank", "_blank");
+    if (!preview) {
+      toast.error(locale === "ar" ? "يرجى السماح بالنوافذ المنبثقة لعرض المستند" : "Allow pop-ups to view this document");
+      return;
+    }
+    try {
+      const filename = new URL(certificateUrl, window.location.origin).pathname.split("/").pop();
+      if (!filename || filename.includes("\\")) throw new Error("Invalid certificate path");
+      const res = await api.get(`/upload/certificates/${encodeURIComponent(decodeURIComponent(filename))}`, {
+        responseType: "blob",
+      });
+      const blobUrl = URL.createObjectURL(res.data);
+      preview.location.replace(blobUrl);
+      window.setTimeout(() => URL.revokeObjectURL(blobUrl), 60_000);
+    } catch {
+      preview.close();
+      toast.error(locale === "ar" ? "تعذر فتح المستند" : "Unable to open document");
+    }
+  };
   const [statusFilter, setStatusFilter] = useState<string>("");
   const [verificationFilter, setVerificationFilter] = useState<string>("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -151,23 +171,18 @@ export default function AdminTeachersPage() {
         }
 
         const isPdf = url.toLowerCase().endsWith(".pdf");
-        const token = (session as any)?.apiToken;
-        const authenticatedUrl = token
-          ? `${url}${url.includes('?') ? '&' : '?'}token=${token}`
-          : url;
 
         return (
           <div className="flex justify-start">
-            <a
-              href={authenticatedUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 rounded-xl bg-orange-50 border border-orange-100 hover:border-orange-200 px-2.5 py-1 text-xs font-semibold text-orange-600 shadow-sm transition-all hover:scale-[1.02]"
+            <button
+              type="button"
+              onClick={() => handleViewCertificate(url)}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-orange-50 border border-orange-100 hover:border-orange-200 px-2.5 py-1 text-xs font-semibold text-orange-600 shadow-sm transition-all hover:scale-[1.02] cursor-pointer"
             >
               <FileText className="w-3.5 h-3.5 shrink-0" />
               <span>{isPdf ? "PDF" : (locale === "ar" ? "صورة" : "Image")}</span>
               <ExternalLink className="w-3 h-3 shrink-0" />
-            </a>
+            </button>
           </div>
         );
       }

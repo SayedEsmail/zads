@@ -14,7 +14,7 @@ try {
         });
         console.log('🔥 Firebase Admin initialized successfully');
     } else {
-        console.warn('⚠️ Firebase serviceAccountKey.json not found. Push notifications will be mocked.');
+        console.warn('⚠️ Firebase serviceAccountKey.json not found. Push delivery is disabled.');
     }
 } catch (error) {
     console.error('❌ Failed to initialize Firebase Admin:', error.message);

@@ -1,3 +1,4 @@
+require('./require-test-database');
 const assert = require('assert');
 const http = require('http');
 const fs = require('fs');
@@ -285,31 +286,76 @@ async function runSuite() {
     assert.strictEqual(crossUserRes.status, 409, 'Reusing another user\'s idempotency key must return 409 Conflict');
     assert.strictEqual(crossUserRes.body.data, undefined, 'Must NEVER return another user\'s contact request');
 
-    // Concurrent duplicate insertion attempt
+    // Changed payload retry with same idempotency key
+    const changedPayloadRes = await makeRequest(
+      port,
+      'POST',
+      '/api/contact-requests',
+      { 'Authorization': `Bearer ${testParentToken}`, 'idempotency-key': testIdempotencyKey },
+      {
+        teacherId: testTeacher.id,
+        subjectId: testSubject.id,
+        stageId: testStage.id,
+        studyMode: 'offline',
+        teachingPlace: 'at_student',
+        message: 'رسالة مختلفة تماماً بنفس المفتاح'
+      }
+    );
+    assert.strictEqual(changedPayloadRes.status, 409, 'Reusing key with changed payload must return 409 Conflict');
+
+    // Duplicate pending request attempt with different key
+    const duplicatePendingRes = await makeRequest(
+      port,
+      'POST',
+      '/api/contact-requests',
+      { 'Authorization': `Bearer ${testParentToken}`, 'idempotency-key': `diff-key-${Date.now()}` },
+      {
+        teacherId: testTeacher.id,
+        subjectId: testSubject.id,
+        stageId: testStage.id,
+        studyMode: 'offline',
+        teachingPlace: 'at_student',
+        message: 'محاولة إرسال طلب جديد مع وجود طلب معلق'
+      }
+    );
+    assert.strictEqual(duplicatePendingRes.status, 409, 'Duplicate pending request must return 409 Conflict');
+
+    // Concurrent identical duplicate insertion attempt with SAME key (lost response race)
+    const concKey = `conc-race-${Date.now()}`;
     const [c1, c2] = await Promise.all([
       makeRequest(
         port,
         'POST',
         '/api/contact-requests',
-        { 'Authorization': `Bearer ${testParentToken}`, 'idempotency-key': `conc-${Date.now()}-1` },
-        { teacherId: testTeacher.id, subjectId: testSubject.id, isRetry: true }
+        { 'Authorization': `Bearer ${testParent2Token}`, 'idempotency-key': concKey },
+        {
+          teacherId: testTeacher.id,
+          subjectId: testSubject.id,
+          stageId: testStage.id,
+          studyMode: 'offline',
+          teachingPlace: 'at_student',
+          message: 'طلب متزامن متطابق'
+        }
       ),
       makeRequest(
         port,
         'POST',
         '/api/contact-requests',
-        { 'Authorization': `Bearer ${testParentToken}`, 'idempotency-key': `conc-${Date.now()}-2` },
-        { teacherId: testTeacher.id, subjectId: testSubject.id, isRetry: true }
+        { 'Authorization': `Bearer ${testParent2Token}`, 'idempotency-key': concKey },
+        {
+          teacherId: testTeacher.id,
+          subjectId: testSubject.id,
+          stageId: testStage.id,
+          studyMode: 'offline',
+          teachingPlace: 'at_student',
+          message: 'طلب متزامن متطابق'
+        }
       )
     ]);
-    assert([200, 201].includes(c1.status), 'Concurrent request 1 must succeed gracefully');
-    assert([200, 201].includes(c2.status), 'Concurrent request 2 must succeed gracefully');
-
-    const pendingCount = await prisma.contactRequest.count({
-      where: { parentId: testParent.id, teacherId: testTeacher.id, subjectId: testSubject.id, status: 'pending' }
-    });
-    assert.strictEqual(pendingCount, 1, 'Strictly only ONE active pending request may exist');
-    console.log('✅ TEST 3 PASSED: True idempotency, lost-response retry, and concurrency resistance verified.');
+    const statuses = [c1.status, c2.status].sort();
+    assert.deepStrictEqual(statuses, [200, 201], 'Concurrent writes with same key must resolve to one 201 and one 200');
+    assert.strictEqual(c1.body.data.id, c2.body.data.id, 'Concurrent writes must resolve to the identical record ID');
+    console.log('✅ TEST 3 PASSED: True idempotency, lost-response retry, changed payload rejection, and concurrency resistance verified.');
 
     // ----------------------------------------------------
     // TEST 4: PENDING PRIVACY & RECIPIENT-ONLY ATOMIC STATE MACHINE
@@ -404,7 +450,7 @@ async function runSuite() {
     // ----------------------------------------------------
     // TEST 5: CERTIFICATE ACCESS CONTROL & BROWSER AUTHENTICATION
     // ----------------------------------------------------
-    console.log('\n--- TEST 5: Certificate Access Security & Browser Authentication ---');
+    console.log('\n--- TEST 5: Certificate Access Security & HTTP Authentication ---');
     // Unauthenticated GET
     const unauthCert = await makeRequest(port, 'GET', `/uploads/certificates/${testCertFilename}`);
     assert.strictEqual(unauthCert.status, 401, 'Unauthenticated static certificate access must return 401');
@@ -441,31 +487,52 @@ async function runSuite() {
     assert.strictEqual(ownerCertHeader.status, 200, 'Owner teacher with Bearer header must receive 200 OK');
     assert(ownerCertHeader.text.includes('%PDF'), 'Document body must be delivered');
 
-    // Teacher owner access in browser via query param: ?token=<jwt>
+    // Admin access with Bearer header
+    const adminCertHeader = await makeRequest(
+      port,
+      'GET',
+      `/uploads/certificates/${testCertFilename}`,
+      { 'Authorization': `Bearer ${testAdminToken}` }
+    );
+    assert.strictEqual(adminCertHeader.status, 200, 'Admin with Bearer header must receive 200 OK');
+
+    // Reject query param: ?token=<jwt> (R1 security requirement: NO account JWTs in query strings!)
     const ownerCertQuery = await makeRequest(
       port,
       'GET',
       `/uploads/certificates/${testCertFilename}?token=${testTeacherToken}`
     );
-    assert.strictEqual(ownerCertQuery.status, 200, 'Browser access via ?token=<jwt> must receive 200 OK');
-    assert(ownerCertQuery.text.includes('%PDF'), 'Document body must be delivered via query token');
+    assert.strictEqual(ownerCertQuery.status, 401, 'Document endpoint must strictly reject ?token= in query parameter (401)');
 
-    // Admin access in browser via query param: ?token=<jwt>
-    const adminCertQuery = await makeRequest(
+    // Attempt to set hostile external URL in updateTeacher
+    const updateHostileUrlRes = await makeRequest(
       port,
-      'GET',
-      `/uploads/certificates/${testCertFilename}?token=${testAdminToken}`
+      'PUT',
+      '/api/teachers/me',
+      { 'Authorization': `Bearer ${testTeacherToken}` },
+      { certificateUrl: 'https://evil-attacker.example.com/exploit.pdf' }
     );
-    assert.strictEqual(adminCertQuery.status, 200, 'Admin browser access via ?token=<jwt> must receive 200 OK');
+    assert.strictEqual(updateHostileUrlRes.status, 400, 'External certificate URL must be rejected with 400');
 
-    // General API endpoint must reject ?token= in query string (preventing log/history leakage)
-    const queryAuthOnStandardRoute = await makeRequest(
+    // Verify changing/removing certificate invalidates previous verification decision
+    const removeCertRes = await makeRequest(
       port,
-      'GET',
-      `/api/contact-requests/my?token=${testParentToken}`
+      'PUT',
+      '/api/teachers/me',
+      { 'Authorization': `Bearer ${testTeacherToken}` },
+      { certificateUrl: null }
     );
-    assert.strictEqual(queryAuthOnStandardRoute.status, 401, 'Standard API routes must strictly reject ?token= query parameter');
-    console.log('✅ TEST 5 PASSED: Certificate access strictly protected; browser ?token auth verified and restricted to documents.');
+    assert.strictEqual(removeCertRes.status, 200);
+    const dbTeacherAfterRemoval = await prisma.teacher.findUnique({ where: { id: testTeacher.id } });
+    assert.strictEqual(dbTeacherAfterRemoval.isVerified, false, 'Removing certificate must reset isVerified to false');
+
+    // Restore certificate for subsequent tests
+    await prisma.teacher.update({
+      where: { id: testTeacher.id },
+      data: { certificateUrl: `/uploads/certificates/${testCertFilename}`, isVerified: true }
+    });
+
+    console.log('✅ TEST 5 PASSED: Certificate ownership strictly enforced; query token rejected; external URLs blocked; verification invalidated on removal.');
 
     // ----------------------------------------------------
     // TEST 6: ACCOUNT SECURITY & CHANGE PASSWORD
@@ -600,10 +667,179 @@ async function runSuite() {
       assert(!meta.includes('Password123'), `Event ${ev.id} leaked password!`);
       assert(!meta.includes('درسين في الأسبوع'), `Event ${ev.id} leaked private message!`);
     }
-    console.log('✅ TEST 8 PASSED: Full analytics funnel verified; strictly zero PII detected in metadata.');
+    console.log('✅ TEST 8 PASSED: Expected server event types present; tested PII fixtures absent from metadata.');
+
+    // ----------------------------------------------------
+    // TEST 9: TEACHER-INITIATED CONTACT & TUTOR REQUEST ELIGIBILITY (R5 & R7)
+    // ----------------------------------------------------
+    console.log('\n--- TEST 9: Teacher-Initiated Contact & Tutor Request Eligibility (R5 & R7) ---');
+    // Create an active tutor request by Parent 1
+    const tutorReq = await prisma.tutorRequest.create({
+      data: {
+        parentId: testParent.id,
+        subjectId: testSubject.id,
+        stageId: testStage.id,
+        status: 'active',
+        description: 'أبحث عن معلم رياضيات ممتاز'
+      }
+    });
+
+    // 1. Teacher attempts to initiate contact WITHOUT tutorRequestId -> 400
+    const noTutorReqRes = await makeRequest(
+      port,
+      'POST',
+      '/api/contact-requests/teacher',
+      { 'Authorization': `Bearer ${testTeacherToken}` },
+      { parentId: testParent.id, subjectId: testSubject.id, message: 'عرض تدريس' }
+    );
+    assert.strictEqual(noTutorReqRes.status, 400, 'Unsolicited offer without tutorRequestId must be rejected with 400');
+
+    // 2. Teacher attempts to initiate contact for CLOSED tutor request -> 400
+    const closedTutorReq = await prisma.tutorRequest.create({
+      data: {
+        parentId: testParent.id,
+        subjectId: testSubject.id,
+        stageId: testStage.id,
+        status: 'closed',
+        description: 'طلب تدريس مغلق'
+      }
+    });
+    const closedReqRes = await makeRequest(
+      port,
+      'POST',
+      '/api/contact-requests/teacher',
+      { 'Authorization': `Bearer ${testTeacherToken}` },
+      { parentId: testParent.id, tutorRequestId: closedTutorReq.id, message: 'عرض تدريس' }
+    );
+    assert.strictEqual(closedReqRes.status, 400, 'Offer for closed tutor request must be rejected with 400');
+
+    // 3. Teacher initiates contact for ACTIVE tutor request -> 201
+    const teacherIdemKey = `idem-teacher-${Date.now()}`;
+    const validOfferRes = await makeRequest(
+      port,
+      'POST',
+      '/api/contact-requests/teacher',
+      { 'Authorization': `Bearer ${testTeacherToken}`, 'idempotency-key': teacherIdemKey },
+      {
+        parentId: testParent.id,
+        tutorRequestId: tutorReq.id,
+        subjectId: testSubject.id,
+        stageId: testStage.id,
+        message: 'يسعدني تدريس مادة الرياضيات لابنكم'
+      }
+    );
+    assert.strictEqual(validOfferRes.status, 201, 'Valid teacher offer must return 201 Created');
+    assert.strictEqual(validOfferRes.body.data.initiatedBy, 'teacher');
+    const teacherOfferId = validOfferRes.body.data.id;
+
+    // 4. Identical retry with same idempotency key -> 200 OK
+    const teacherRetryRes = await makeRequest(
+      port,
+      'POST',
+      '/api/contact-requests/teacher',
+      { 'Authorization': `Bearer ${testTeacherToken}`, 'idempotency-key': teacherIdemKey },
+      {
+        parentId: testParent.id,
+        tutorRequestId: tutorReq.id,
+        subjectId: testSubject.id,
+        stageId: testStage.id,
+        message: 'يسعدني تدريس مادة الرياضيات لابنكم'
+      }
+    );
+    assert.strictEqual(teacherRetryRes.status, 200, 'Identical retry must return 200 OK');
+    assert.strictEqual(teacherRetryRes.body.data.id, teacherOfferId);
+
+    // 5. Changed payload retry with same key -> 409 Conflict
+    const teacherChangedRes = await makeRequest(
+      port,
+      'POST',
+      '/api/contact-requests/teacher',
+      { 'Authorization': `Bearer ${testTeacherToken}`, 'idempotency-key': teacherIdemKey },
+      {
+        parentId: testParent.id,
+        tutorRequestId: tutorReq.id,
+        subjectId: testSubject.id,
+        stageId: testStage.id,
+        message: 'رسالة مختلفة بمفتاح مكرر'
+      }
+    );
+    assert.strictEqual(teacherChangedRes.status, 409, 'Changed payload with same key must return 409 Conflict');
+
+    // 6. Recipient Parent accepts teacher offer -> 200, reveals teacher phone (R7)
+    const parentAcceptRes = await makeRequest(
+      port,
+      'PATCH',
+      `/api/contact-requests/parent/${teacherOfferId}/status`,
+      { 'Authorization': `Bearer ${testParentToken}` },
+      { status: 'accepted', replyMessage: 'أهلاً بك، تم قبول العرض' }
+    );
+    assert.strictEqual(parentAcceptRes.status, 200, 'Parent accept must return 200 OK');
+    assert.strictEqual(parentAcceptRes.body.data.status, 'accepted');
+    assert(parentAcceptRes.body.data.teacher.user.phone, 'Accepted teacher contact must reveal phone');
+    console.log('✅ TEST 9 PASSED: Teacher-initiated requests, tutor request eligibility, and parent acceptance verified.');
+
+    // ----------------------------------------------------
+    // TEST 10: SEARCH MODE, PRICE, AND GEOGRAPHIC CONSISTENCY (R6)
+    // ----------------------------------------------------
+    console.log('\n--- TEST 10: Search Mode, Price, and Geographic Consistency (R6) ---');
+    // Create counterexample teacher: online = 500, offline = 100
+    const counterexampleUser = await prisma.user.create({
+      data: {
+        phone: '01077770001',
+        passwordHash: hash,
+        name: 'أستاذ التجربة الرقمية',
+        userType: 'teacher',
+        status: 'active'
+      }
+    });
+    const counterexampleTeacher = await prisma.teacher.create({
+      data: {
+        userId: counterexampleUser.id,
+        bio: 'معلم اختبار الأسعار',
+        areaId: testArea.id
+      }
+    });
+    await prisma.teacherSubject.create({
+      data: {
+        teacherId: counterexampleTeacher.id,
+        subjectId: testSubject.id,
+        stageId: testStage.id,
+        priceOnline: 500,
+        priceOffline: 100,
+        isOnline: true,
+        isOffline: true
+      }
+    });
+
+    // Searching studyMode=online with maxPrice=150 MUST exclude this teacher!
+    const onlineSearchRes = await makeRequest(
+      port,
+      'GET',
+      `/api/teachers?studyMode=online&maxPrice=150`
+    );
+    assert.strictEqual(onlineSearchRes.status, 200);
+    const foundCounter = onlineSearchRes.body.data.find(t => t.id === counterexampleTeacher.id);
+    assert(!foundCounter, 'Counterexample teacher (online=500, offline=100) must NOT pass online + maxPrice=150 search');
+
+    // Searching studyMode=offline with maxPrice=150 MUST include this teacher!
+    const offlineSearchRes = await makeRequest(
+      port,
+      'GET',
+      `/api/teachers?studyMode=offline&maxPrice=150`
+    );
+    assert.strictEqual(offlineSearchRes.status, 200);
+    const foundInOffline = offlineSearchRes.body.data.find(t => t.id === counterexampleTeacher.id);
+    assert(foundInOffline, 'Counterexample teacher must be included when searching offline + maxPrice=150');
+
+    // Online discovery without location filter discovers online teachers without restriction
+    const allOnlineRes = await makeRequest(port, 'GET', '/api/teachers?studyMode=online');
+    assert.strictEqual(allOnlineRes.status, 200);
+    assert(allOnlineRes.body.data.length >= 2, 'Online search without location filter discovers online teachers anywhere');
+
+    console.log('✅ TEST 10 PASSED: Cross-column price matching eliminated, search mode consistency confirmed.');
 
     console.log('\n======================================================');
-    console.log('🎉 ALL E2E & SECURITY CHECKS PASSED WITH FULL EVIDENCE');
+    console.log('🎉 ALL HTTP INTEGRATION CHECKS PASSED (BROWSER NOT TESTED)');
     console.log('======================================================');
 
   } finally {

@@ -133,6 +133,8 @@ export interface TeacherSubject {
   /** PE-1 */
   priceOffline?: number | null;
   priceNegotiable: boolean;
+  isOnline: boolean;
+  isOffline: boolean;
   durationMinutes: number;
   isActive: boolean;
   createdAt: string;
@@ -284,4 +286,3 @@ export type AdminContactRequest = ContactRequest & {
   teacher: Teacher & { user: User };
   parent: ClientProfile & { user: User };
 };
-

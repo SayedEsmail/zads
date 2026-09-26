@@ -16,7 +16,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const isAr = locale === "ar";
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://zads.education";
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://zads.app";
 
   return {
     title: isAr

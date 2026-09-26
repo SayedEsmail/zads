@@ -1,3 +1,4 @@
+require('./require-test-database');
 const assert = require('assert');
 const http = require('http');
 const jwt = require('jsonwebtoken');

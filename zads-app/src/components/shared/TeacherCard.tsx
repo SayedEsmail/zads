@@ -139,10 +139,10 @@ export function TeacherCard({
         {/* Online/Offline pricing */}
         {subjects && subjects.length > 0 && variant === "full" && (
           <div className="mt-1.5 flex gap-3 text-xs text-muted-foreground">
-            {subjects[0].priceOnline != null && (
+            {subjects[0].isOnline && subjects[0].priceOnline != null && (
               <span>{tCommon("online")}: <strong className="text-foreground">{formatPrice(subjects[0].priceOnline)}</strong></span>
             )}
-            {subjects[0].priceOffline != null && (
+            {subjects[0].isOffline && subjects[0].priceOffline != null && (
               <span>{tCommon("offline")}: <strong className="text-foreground">{formatPrice(subjects[0].priceOffline)}</strong></span>
             )}
           </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
@@ -9,6 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAuthStore } from "@/stores/auth";
 import { ErrorBanner } from "@/components/shared/ErrorBanner";
+import { sanitizeInternalCallbackUrl } from "@/lib/utils";
 import type { ClientAccountKind } from "@/types";
 import { Eye, EyeOff } from "lucide-react";
 
@@ -26,7 +27,10 @@ export default function RegisterClientPage() {
   const tErr = useTranslations("errors");
   const locale = useLocale();
   const router = useRouter();
-  const { registerClient, isLoading, error } = useAuthStore();
+  const searchParams = useSearchParams();
+  const rawCallback = searchParams.get("callbackUrl");
+  const callbackUrl = sanitizeInternalCallbackUrl(rawCallback);
+  const { registerClient, isLoading, error, registrationComplete } = useAuthStore();
   const [showPassword, setShowPassword] = useState(false);
 
   const {
@@ -43,13 +47,18 @@ export default function RegisterClientPage() {
   const accountKind = watch("clientAccountKind");
 
   const onSubmit = async (data: FormValues) => {
-    await registerClient({
+    const signedIn = await registerClient({
       name: data.name,
       phone: data.phone,
       password: data.password,
       clientAccountKind: data.clientAccountKind,
     });
-    router.replace(`/${locale}/client`);
+    if (!signedIn) return;
+    if (callbackUrl) {
+      router.replace(callbackUrl);
+    } else {
+      router.replace(`/${locale}/client`);
+    }
     router.refresh();
   };
 
@@ -62,6 +71,20 @@ export default function RegisterClientPage() {
       <h2 className="mb-6 text-xl font-semibold">{t("registerClient")}</h2>
 
       <ErrorBanner error={error} className="mb-4" />
+
+      {registrationComplete && (
+        <p className="mb-4 rounded-xl bg-blue-50 p-3 text-sm text-blue-800">
+          {locale === "ar"
+            ? "تم إنشاء الحساب. يرجى تسجيل الدخول للمتابعة."
+            : "Your account has been created. Please sign in to continue."}{" "}
+          <Link
+            href={callbackUrl ? `/${locale}/auth/login?callbackUrl=${encodeURIComponent(callbackUrl)}` : `/${locale}/auth/login`}
+            className="font-bold underline"
+          >
+            {t("signInNow")}
+          </Link>
+        </p>
+      )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
         {/* Account Kind segmented control */}
@@ -132,7 +155,7 @@ export default function RegisterClientPage() {
 
         <button
           type="submit"
-          disabled={isLoading}
+          disabled={isLoading || registrationComplete}
           className="mt-4 w-full rounded-[1.25rem] bg-primary py-4 text-sm font-bold text-white shadow-lg shadow-primary/20 transition-all hover:bg-primary-dark hover:shadow-primary/30 hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
         >
           {isLoading ? "..." : t("registerClient")}
@@ -141,7 +164,14 @@ export default function RegisterClientPage() {
 
       <p className="mt-6 text-center text-sm text-muted-foreground">
         {t("haveAccount")}{" "}
-        <Link href={`/${locale}/auth/login`} className="font-medium text-primary hover:underline">
+        <Link
+          href={
+            callbackUrl
+              ? `/${locale}/auth/login?callbackUrl=${encodeURIComponent(callbackUrl)}`
+              : `/${locale}/auth/login`
+          }
+          className="font-medium text-primary hover:underline"
+        >
           {t("signInNow")}
         </Link>
       </p>

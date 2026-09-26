@@ -50,7 +50,6 @@ export default function AdminContactRequestsPage() {
   const [currentPage, setCurrentPage] = useState(1);
 
   const loadStats = useCallback(() => {
-    setStatsLoading(true);
     api
       .get<{ data: ContactStats }>("/admin/stats/contacts")
       .then((res) => setStats(res.data.data))

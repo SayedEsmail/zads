@@ -2,6 +2,21 @@ const prisma = require('../config/database');
 const response = require('../utils/response');
 const notificationService = require('../services/notification.service');
 
+const normalizeOptionalText = value => {
+    if (value === undefined || value === null) return null;
+    const normalized = String(value).trim();
+    return normalized || null;
+};
+
+const sameRequestPayload = (request, payload) =>
+    (request.subjectId || null) === (payload.subjectId || null) &&
+    (request.stageId || null) === (payload.stageId || null) &&
+    normalizeOptionalText(request.message) === normalizeOptionalText(payload.message) &&
+    (request.studyMode || null) === (payload.studyMode || null) &&
+    normalizeOptionalText(request.teachingPlace) === normalizeOptionalText(payload.teachingPlace) &&
+    normalizeOptionalText(request.preferredTime) === normalizeOptionalText(payload.preferredTime) &&
+    (request.tutorRequestId || null) === (payload.tutorRequestId || null);
+
 /**
  * Create contact request (parent to teacher)
  */
@@ -41,7 +56,22 @@ const createRequest = async (req, res, next) => {
             return response.error(res, 'Teacher not found or inactive', 404);
         }
 
-        // 1. Idempotency Key check: if an existing request has this exact key, verify ownership before returning
+        // Validate learner-selected teaching offer server-side (R5)
+        if (subjectId) {
+            const teachesOffer = await prisma.teacherSubject.findFirst({
+                where: {
+                    teacherId,
+                    subjectId,
+                    ...(stageId ? { stageId } : {}),
+                    isActive: true
+                }
+            });
+            if (!teachesOffer) {
+                return response.error(res, 'The selected teacher does not offer this subject or stage', 400);
+            }
+        }
+
+        // 1. Idempotency Key check with normalized material payload comparison (R5)
         if (idempotencyKey) {
             const existingByKey = await prisma.contactRequest.findFirst({
                 where: { idempotencyKey },
@@ -54,36 +84,33 @@ const createRequest = async (req, res, next) => {
                 }
             });
             if (existingByKey) {
-                // Security check: Must belong to THIS parent for THIS teacher
-                if (existingByKey.parentId !== parentId || existingByKey.teacherId !== teacherId) {
+                // Must be initiated by parent, belonging to this parent, for this teacher
+                if (existingByKey.initiatedBy !== 'parent' || existingByKey.parentId !== parentId || existingByKey.teacherId !== teacherId) {
                     return response.error(res, 'Idempotency key collision or unauthorized request retry', 409);
                 }
+
+                // Normalized material payload comparison
+                if (!sameRequestPayload(existingByKey, {
+                    subjectId, stageId, message, studyMode, teachingPlace, preferredTime, tutorRequestId
+                })) {
+                    return response.error(res, 'Idempotency key reused with different request payload', 409);
+                }
+
                 return response.success(res, existingByKey, 'Contact request returned (idempotent retry)', 200);
             }
         }
 
-        // 2. Pending duplicate check & lost-response retry handling
+        // 2. Pending duplicate check (do not silently return different intent)
         const existingPending = await prisma.contactRequest.findFirst({
             where: {
                 parentId,
                 teacherId,
                 subjectId: subjectId || null,
                 status: 'pending'
-            },
-            include: {
-                teacher: {
-                    include: { user: { select: { id: true, name: true, avatarUrl: true } } }
-                },
-                subject: true,
-                stage: true
             }
         });
 
         if (existingPending) {
-            // If the client sent an idempotency key or marked as retry, return the pending request gracefully
-            if (idempotencyKey || req.body.isRetry) {
-                return response.success(res, existingPending, 'Contact request returned (idempotent retry)', 200);
-            }
             return response.error(res, 'A pending contact request already exists for this teacher and subject', 409);
         }
 
@@ -115,14 +142,13 @@ const createRequest = async (req, res, next) => {
                 }
             });
         } catch (createErr) {
+            if (createErr.code === 'P2002' && !idempotencyKey) {
+                return response.error(res, 'A conflicting contact request was created concurrently', 409);
+            }
             // Handle concurrent duplicate insertion race condition (Prisma P2002)
-            if (createErr.code === 'P2002') {
+            if (createErr.code === 'P2002' && idempotencyKey) {
                 const winning = await prisma.contactRequest.findFirst({
-                    where: {
-                        parentId,
-                        teacherId,
-                        ...(idempotencyKey ? { idempotencyKey } : { status: 'pending' })
-                    },
+                    where: { idempotencyKey },
                     include: {
                         teacher: {
                             include: { user: { select: { id: true, name: true, avatarUrl: true } } }
@@ -131,9 +157,14 @@ const createRequest = async (req, res, next) => {
                         stage: true
                     }
                 });
-                if (winning && winning.parentId === parentId) {
-                    return response.success(res, winning, 'Contact request created (concurrent duplicate resolved)', 200);
+                if (winning && winning.initiatedBy === 'parent' && winning.parentId === parentId && winning.teacherId === teacherId) {
+                    if (sameRequestPayload(winning, {
+                        subjectId, stageId, message, studyMode, teachingPlace, preferredTime, tutorRequestId
+                    })) {
+                        return response.success(res, winning, 'Contact request returned (idempotent retry)', 200);
+                    }
                 }
+                return response.error(res, 'Idempotency key collision or conflicting write', 409);
             }
             throw createErr;
         }
@@ -202,6 +233,56 @@ const createRequestAsTeacher = async (req, res, next) => {
             return response.error(res, 'Parent ID is required', 400);
         }
 
+        // Validate tutor request eligibility (R5: teacher contact requires an active, matching tutor request)
+        if (!tutorRequestId) {
+            return response.error(res, 'Teacher-initiated contact requires a valid tutor request ID', 400);
+        }
+
+        const tutorRequest = await prisma.tutorRequest.findUnique({
+            where: { id: tutorRequestId }
+        });
+
+        if (!tutorRequest) {
+            return response.error(res, 'Tutor request not found', 404);
+        }
+
+        if (tutorRequest.status !== 'active') {
+            return response.error(res, 'Tutor request is closed or no longer active', 400);
+        }
+
+        if (tutorRequest.expiresAt && tutorRequest.expiresAt <= new Date()) {
+            return response.error(res, 'Tutor request has expired', 400);
+        }
+
+        if (tutorRequest.parentId !== parentId) {
+            return response.error(res, 'Tutor request does not belong to the specified parent', 400);
+        }
+
+        if (subjectId && tutorRequest.subjectId && tutorRequest.subjectId !== subjectId) {
+            return response.error(res, 'Subject does not match the tutor request', 400);
+        }
+
+        if (stageId && tutorRequest.stageId && tutorRequest.stageId !== stageId) {
+            return response.error(res, 'Stage does not match the tutor request', 400);
+        }
+
+        const resolvedSubjectId = subjectId || tutorRequest.subjectId;
+        const resolvedStageId = stageId || tutorRequest.stageId;
+
+        // Validate teacher actually offers the requested subject
+        const teacherTeaches = await prisma.teacherSubject.findFirst({
+            where: {
+                teacherId,
+                subjectId: resolvedSubjectId,
+                ...(resolvedStageId ? { stageId: resolvedStageId } : {}),
+                isActive: true
+            }
+        });
+
+        if (!teacherTeaches) {
+            return response.error(res, 'Teacher does not offer the requested subject and stage', 400);
+        }
+
         // Validate parent exists and is active
         const parent = await prisma.parent.findFirst({
             where: {
@@ -214,7 +295,7 @@ const createRequestAsTeacher = async (req, res, next) => {
             return response.error(res, 'Parent not found or inactive', 404);
         }
 
-        // 1. Idempotency Key check: if an existing request has this exact key, verify ownership before returning
+        // 1. Idempotency Key check with normalized material payload comparison (R5)
         if (idempotencyKey) {
             const existingByKey = await prisma.contactRequest.findFirst({
                 where: { idempotencyKey },
@@ -227,36 +308,34 @@ const createRequestAsTeacher = async (req, res, next) => {
                 }
             });
             if (existingByKey) {
-                // Security check: Must belong to THIS teacher for THIS parent
-                if (existingByKey.teacherId !== teacherId || existingByKey.parentId !== parentId) {
+                // Must be initiated by teacher, belonging to this teacher, for this parent
+                if (existingByKey.initiatedBy !== 'teacher' || existingByKey.teacherId !== teacherId || existingByKey.parentId !== parentId) {
                     return response.error(res, 'Idempotency key collision or unauthorized request retry', 409);
                 }
+
+                // Normalized material payload comparison
+                if (!sameRequestPayload(existingByKey, {
+                    subjectId: resolvedSubjectId, stageId: resolvedStageId, message, studyMode,
+                    teachingPlace, preferredTime, tutorRequestId
+                })) {
+                    return response.error(res, 'Idempotency key reused with different request payload', 409);
+                }
+
                 return response.success(res, existingByKey, 'Contact request returned (idempotent retry)', 200);
             }
         }
 
-        // 2. Pending duplicate check & lost-response retry handling
+        // 2. Pending duplicate check
         const existingPending = await prisma.contactRequest.findFirst({
             where: {
-                parentId,
                 teacherId,
-                subjectId: subjectId || null,
+                tutorRequestId,
                 status: 'pending'
-            },
-            include: {
-                parent: {
-                    include: { user: { select: { id: true, name: true, avatarUrl: true } } }
-                },
-                subject: true,
-                stage: true
             }
         });
 
         if (existingPending) {
-            if (idempotencyKey || req.body.isRetry) {
-                return response.success(res, existingPending, 'Contact request returned (idempotent retry)', 200);
-            }
-            return response.error(res, 'A pending contact request already exists for this parent and subject', 409);
+            return response.error(res, 'A pending contact request already exists for this tutor request', 409);
         }
 
         let contactRequest;
@@ -265,13 +344,13 @@ const createRequestAsTeacher = async (req, res, next) => {
                 data: {
                     parentId,
                     teacherId,
-                    subjectId: subjectId || null,
-                    stageId: stageId || null,
+                    subjectId: resolvedSubjectId || null,
+                    stageId: resolvedStageId || null,
                     message: message || null,
                     studyMode: studyMode || null,
                     teachingPlace: teachingPlace || null,
                     preferredTime: preferredTime || null,
-                    tutorRequestId: tutorRequestId || null,
+                    tutorRequestId,
                     initiatedBy: 'teacher',
                     status: 'pending',
                     idempotencyKey
@@ -287,13 +366,12 @@ const createRequestAsTeacher = async (req, res, next) => {
                 }
             });
         } catch (createErr) {
-            if (createErr.code === 'P2002') {
+            if (createErr.code === 'P2002' && !idempotencyKey) {
+                return response.error(res, 'A conflicting contact request was created concurrently', 409);
+            }
+            if (createErr.code === 'P2002' && idempotencyKey) {
                 const winning = await prisma.contactRequest.findFirst({
-                    where: {
-                        parentId,
-                        teacherId,
-                        ...(idempotencyKey ? { idempotencyKey } : { status: 'pending' })
-                    },
+                    where: { idempotencyKey },
                     include: {
                         parent: {
                             include: { user: { select: { id: true, name: true, avatarUrl: true } } }
@@ -302,9 +380,15 @@ const createRequestAsTeacher = async (req, res, next) => {
                         stage: true
                     }
                 });
-                if (winning && winning.teacherId === teacherId) {
-                    return response.success(res, winning, 'Contact request created (concurrent duplicate resolved)', 200);
+                if (winning && winning.initiatedBy === 'teacher' && winning.teacherId === teacherId && winning.parentId === parentId) {
+                    if (sameRequestPayload(winning, {
+                        subjectId: resolvedSubjectId, stageId: resolvedStageId, message, studyMode,
+                        teachingPlace, preferredTime, tutorRequestId
+                    })) {
+                        return response.success(res, winning, 'Contact request returned (idempotent retry)', 200);
+                    }
                 }
+                return response.error(res, 'Idempotency key collision or conflicting write', 409);
             }
             throw createErr;
         }

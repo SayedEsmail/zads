@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import Link from "next/link";
-import { ShieldAlert, Mail, MessageSquare, ArrowLeft, ArrowRight, HelpCircle, CheckCircle2, AlertTriangle } from "lucide-react";
+import { ShieldAlert, MessageSquare, ArrowLeft, ArrowRight, HelpCircle, CheckCircle2, AlertTriangle } from "lucide-react";
 
 export default function ForgotPasswordPage() {
   const t = useTranslations("auth");
@@ -18,18 +18,6 @@ export default function ForgotPasswordPage() {
     if (!phone.trim()) return;
     setShowGuidance(true);
   };
-
-  const emailSubject = encodeURIComponent(
-    locale === "ar"
-      ? `طلب استعادة حساب زاد - رقم: ${phone}`
-      : `Zads Account Recovery Request - Phone: ${phone}`
-  );
-
-  const emailBody = encodeURIComponent(
-    locale === "ar"
-      ? `مرحباً فريق دعم منصة زاد،\n\nأحتاج إلى استعادة كلمة المرور لحسابي.\n- رقم الهاتف المسجل: ${phone}\n- الاسم الكامل: \n- نوع الحساب (معلم / ولي أمر): \n\nأقر بأنني مالك هذا الحساب ومستعد لتقديم إثبات الملكية المطلوب.`
-      : `Hello Zads Support Team,\n\nI need assistance recovering my account password.\n- Registered Phone: ${phone}\n- Full Name: \n- Account Type (Teacher / Parent): \n\nI confirm ownership of this account and can provide the required verification details.`
-  );
 
   return (
     <div className="w-full bg-surface p-6 sm:p-8 rounded-2xl border border-slate-100 shadow-sm max-w-lg mx-auto text-start">
@@ -112,20 +100,12 @@ export default function ForgotPasswordPage() {
           </div>
 
           <div className="space-y-2.5">
-            <a
-              href={`mailto:support@zads.education?subject=${emailSubject}&body=${emailBody}`}
-              className="flex items-center justify-center gap-2 w-full rounded-xl bg-primary text-white py-3 text-sm font-bold hover:bg-primary-dark shadow-sm transition-colors"
-            >
-              <Mail className="h-4 w-4" />
-              <span>{locale === "ar" ? "مراسلة الدعم الرسمي (support@zads.education)" : "Email Official Support"}</span>
-            </a>
-
             <Link
               href={`/${locale}/public/contact`}
-              className="flex items-center justify-center gap-2 w-full rounded-xl border border-slate-200 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+              className="flex items-center justify-center gap-2 w-full rounded-xl bg-primary text-white py-3 text-sm font-bold hover:bg-primary-dark shadow-sm transition-colors"
             >
-              <MessageSquare className="h-3.5 w-3.5" />
-              <span>{locale === "ar" ? "قنوات الدعم ومكتب المساعدة" : "Help Desk & Support Channels"}</span>
+              <MessageSquare className="h-4 w-4" />
+              <span>{locale === "ar" ? "تقديم طلب الاستعادة لإدارة المنصة" : "Submit Recovery Request to Administration"}</span>
             </Link>
           </div>
 

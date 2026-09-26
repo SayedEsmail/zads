@@ -22,7 +22,7 @@ export default function TeacherSubjectsPage() {
   const [showPrices, setShowPrices] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [dialogError, setDialogError] = useState<string | null>(null);
-  const [form, setForm] = useState({ subjectId: "", stageId: "", priceOnline: "", priceOffline: "", priceAtTeacher: "", priceAtStudent: "", durationMinutes: "60" });
+  const [form, setForm] = useState({ subjectId: "", stageId: "", priceOnline: "", priceOffline: "", priceAtTeacher: "", priceAtStudent: "", isOnline: false, isOffline: true, durationMinutes: "60" });
 
   useEffect(() => {
     subjectStore.fetch();
@@ -33,6 +33,10 @@ export default function TeacherSubjectsPage() {
   const handleSave = async () => {
     if (!form.subjectId || !form.stageId) {
       setDialogError(locale === "ar" ? "يرجى اختيار المادة والمرحلة الدراسية" : "Please select subject and stage");
+      return;
+    }
+    if (!form.isOnline && !form.isOffline) {
+      setDialogError(locale === "ar" ? "يرجى اختيار طريقة تدريس واحدة على الأقل" : "Select at least one teaching mode");
       return;
     }
 
@@ -61,6 +65,8 @@ export default function TeacherSubjectsPage() {
         priceOffline: showPrices && form.priceOffline ? Number(form.priceOffline) : null,
         priceAtTeacher: showPrices && form.priceAtTeacher ? Number(form.priceAtTeacher) : null,
         priceAtStudent: showPrices && form.priceAtStudent ? Number(form.priceAtStudent) : null,
+        isOnline: form.isOnline,
+        isOffline: form.isOffline,
         durationMinutes: Number(form.durationMinutes) || 60,
       };
 
@@ -89,7 +95,7 @@ export default function TeacherSubjectsPage() {
         <button
           onClick={() => {
             setEditingId(null);
-            setForm({ subjectId: "", stageId: "", priceOnline: "", priceOffline: "", priceAtTeacher: "", priceAtStudent: "", durationMinutes: "60" });
+            setForm({ subjectId: "", stageId: "", priceOnline: "", priceOffline: "", priceAtTeacher: "", priceAtStudent: "", isOnline: false, isOffline: true, durationMinutes: "60" });
             setShowPrices(false);
             setShowDialog(true);
           }}
@@ -111,7 +117,7 @@ export default function TeacherSubjectsPage() {
           <button
             onClick={() => {
               setEditingId(null);
-              setForm({ subjectId: "", stageId: "", priceOnline: "", priceOffline: "", priceAtTeacher: "", priceAtStudent: "", durationMinutes: "60" });
+              setForm({ subjectId: "", stageId: "", priceOnline: "", priceOffline: "", priceAtTeacher: "", priceAtStudent: "", isOnline: false, isOffline: true, durationMinutes: "60" });
               setShowPrices(false);
               setShowDialog(true);
             }}
@@ -146,6 +152,8 @@ export default function TeacherSubjectsPage() {
                         priceOffline: String(s.priceOffline ?? ""),
                         priceAtTeacher: String(s.priceAtTeacher ?? ""),
                         priceAtStudent: String(s.priceAtStudent ?? ""),
+                        isOnline: s.isOnline ?? s.priceOnline != null,
+                        isOffline: s.isOffline ?? (s.priceOffline != null || s.priceAtTeacher != null || s.priceAtStudent != null),
                         durationMinutes: String(s.durationMinutes)
                       });
                       setShowPrices(!!(s.priceOnline || s.priceOffline || s.priceAtTeacher || s.priceAtStudent));
@@ -267,6 +275,32 @@ export default function TeacherSubjectsPage() {
                   className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" 
                 />
               </div>
+
+              <fieldset className="space-y-2 text-start">
+                <legend className="text-xs font-semibold text-slate-600">
+                  {locale === "ar" ? "طرق التدريس المتاحة" : "Available teaching modes"}
+                </legend>
+                <div className="flex flex-wrap gap-x-5 gap-y-2">
+                  <label className="flex items-center gap-2 text-sm text-slate-700">
+                    <input
+                      type="checkbox"
+                      checked={form.isOnline}
+                      onChange={(e) => setForm((f) => ({ ...f, isOnline: e.target.checked }))}
+                      className="h-4 w-4 accent-primary"
+                    />
+                    {locale === "ar" ? "أونلاين" : "Online"}
+                  </label>
+                  <label className="flex items-center gap-2 text-sm text-slate-700">
+                    <input
+                      type="checkbox"
+                      checked={form.isOffline}
+                      onChange={(e) => setForm((f) => ({ ...f, isOffline: e.target.checked }))}
+                      className="h-4 w-4 accent-primary"
+                    />
+                    {locale === "ar" ? "حضوري" : "In person"}
+                  </label>
+                </div>
+              </fieldset>
 
               {/* Specify Prices Checkbox */}
               <div className="flex items-center gap-2.5 py-1 text-start">

@@ -22,6 +22,7 @@ interface ContactRequestsStore {
     teachingPlace?: string;
     preferredTime?: string;
     tutorRequestId?: string;
+    idempotencyKey?: string;
   }) => Promise<void>;
   createRequestAsTeacher: (payload: {
     parentId: string;
@@ -31,7 +32,8 @@ interface ContactRequestsStore {
     studyMode?: "online" | "offline";
     teachingPlace?: string;
     preferredTime?: string;
-    tutorRequestId?: string;
+    tutorRequestId: string;
+    idempotencyKey?: string;
   }) => Promise<void>;
   updateStatus: (id: string, status: ContactRequestStatus, replyMessage?: string) => Promise<void>;
   updateParentStatus: (id: string, status: ContactRequestStatus, replyMessage?: string) => Promise<void>;
@@ -41,7 +43,21 @@ interface ContactRequestsStore {
 
 export const useContactRequestsStore = create<ContactRequestsStore>()(
   devtools(
-    (set, get) => ({
+    (set, get) => {
+      // Reuse a key while an identical submit is pending so a lost response can
+      // be retried safely. A successful submit clears it for the next intent.
+      const pendingIntentKeys = new Map<string, string>();
+      const keyForIntent = (prefix: string, payload: object) => {
+        const intent = `${prefix}:${JSON.stringify(payload)}`;
+        let key = pendingIntentKeys.get(intent);
+        if (!key) {
+          key = `${prefix}_${typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `${Date.now()}_${Math.random().toString(36).slice(2)}`}`;
+          pendingIntentKeys.set(intent, key);
+        }
+        return { intent, key };
+      };
+
+      return ({
       sent: null,
       incoming: null,
       isLoading: false,
@@ -69,8 +85,15 @@ export const useContactRequestsStore = create<ContactRequestsStore>()(
 
       createRequest: async (payload) => {
         set({ isLoading: true, error: null });
+        const { intent, key: generatedKey } = keyForIntent("cr_p", payload);
+        const idempotencyKey = payload.idempotencyKey || generatedKey;
+        const body = { ...payload, idempotencyKey };
+
         try {
-          await api.post("/contact-requests", payload);
+          await api.post("/contact-requests", body, {
+            headers: { "Idempotency-Key": idempotencyKey },
+          });
+          pendingIntentKeys.delete(intent);
         } catch (err) {
           set({ error: extractError(err), isLoading: false });
           throw err;
@@ -87,8 +110,15 @@ export const useContactRequestsStore = create<ContactRequestsStore>()(
 
       createRequestAsTeacher: async (payload) => {
         set({ isLoading: true, error: null });
+        const { intent, key: generatedKey } = keyForIntent("cr_t", payload);
+        const idempotencyKey = payload.idempotencyKey || generatedKey;
+        const body = { ...payload, idempotencyKey };
+
         try {
-          await api.post("/contact-requests/teacher", payload);
+          await api.post("/contact-requests/teacher", body, {
+            headers: { "Idempotency-Key": idempotencyKey },
+          });
+          pendingIntentKeys.delete(intent);
         } catch (err) {
           set({ error: extractError(err), isLoading: false });
           throw err;
@@ -105,48 +135,55 @@ export const useContactRequestsStore = create<ContactRequestsStore>()(
 
       updateStatus: async (id, status, replyMessage) => {
         try {
-          await api.patch(`/contact-requests/${id}/status`, { status, replyMessage });
+          const res = await api.patch<{ data: ContactRequest }>(`/contact-requests/${id}/status`, { status, replyMessage });
+          const updated = res.data?.data;
           set((s) => ({
             incoming:
               s.incoming?.map((r) =>
-                r.id === id ? { ...r, status, replyMessage: replyMessage !== undefined ? replyMessage : r.replyMessage } : r
+                r.id === id ? { ...r, ...updated, status, replyMessage: replyMessage !== undefined ? replyMessage : r.replyMessage } : r
               ) ?? null,
           }));
         } catch (err) {
           set({ error: extractError(err) });
+          throw err;
         }
       },
 
       updateParentStatus: async (id, status, replyMessage) => {
         try {
-          await api.patch(`/contact-requests/parent/${id}/status`, { status, replyMessage });
+          const res = await api.patch<{ data: ContactRequest }>(`/contact-requests/parent/${id}/status`, { status, replyMessage });
+          const updated = res.data?.data;
           set((s) => ({
             sent:
               s.sent?.map((r) =>
-                r.id === id ? { ...r, status, replyMessage: replyMessage !== undefined ? replyMessage : r.replyMessage } : r
+                r.id === id ? { ...r, ...updated, status, replyMessage: replyMessage !== undefined ? replyMessage : r.replyMessage } : r
               ) ?? null,
           }));
         } catch (err) {
           set({ error: extractError(err) });
+          throw err;
         }
       },
 
       updateParentMessage: async (id, message) => {
         try {
-          await api.patch(`/contact-requests/${id}`, { message });
+          const res = await api.patch<{ data: ContactRequest }>(`/contact-requests/${id}`, { message });
+          const updated = res.data?.data;
           set((s) => ({
             sent:
               s.sent?.map((r) =>
-                r.id === id ? { ...r, message } : r
+                r.id === id ? { ...r, ...updated, message } : r
               ) ?? null,
           }));
         } catch (err) {
           set({ error: extractError(err) });
+          throw err;
         }
       },
 
       reset: () => set({ sent: null, incoming: null, isLoading: false, error: null }),
-    }),
+      });
+    },
     { name: "contact-requests-store" }
   )
 );

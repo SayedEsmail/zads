@@ -33,7 +33,7 @@ app.use(helmet());
 app.use(cors({
     origin: process.env.CORS_ORIGIN || '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    allowedHeaders: ['Content-Type', 'Authorization', 'Idempotency-Key']
 }));
 
 // Logging
@@ -50,7 +50,7 @@ app.use(express.urlencoded({ extended: true }));
 // Static files: avatars and public images only
 app.use('/uploads/images', express.static('public/uploads/images'));
 
-// Protected certificate document access (restricted query ?token= or Bearer strictly for document streaming)
+// Protected certificate document access requires an Authorization bearer header.
 const { certificateAuth } = require('./middlewares/auth');
 const uploadCtrl = require('./controllers/upload.controller');
 app.get('/uploads/certificates/:filename', certificateAuth, uploadCtrl.getCertificate);
@@ -108,4 +108,3 @@ if (require.main === module) {
 
 module.exports = app;
 // Force nodemon reload after prisma client generation
-

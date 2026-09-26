@@ -13,6 +13,8 @@ interface AddSubjectPayload {
   priceAtStudent?: number | null;
   priceGroup?: number | null;
   priceNegotiable?: boolean;
+  isOnline?: boolean;
+  isOffline?: boolean;
   durationMinutes?: number;
 }
 

@@ -13,6 +13,7 @@ import { getInitials } from "@/lib/utils";
 import { useSession } from "next-auth/react";
 import { useLocale } from "next-intl";
 import { toast } from "sonner";
+import api from "@/lib/api";
 
 export default function TeacherProfilePage() {
   const locale = useLocale();
@@ -155,6 +156,29 @@ export default function TeacherProfilePage() {
       toast.success(locale === "ar" ? "تم إزالة الملف بنجاح" : "Certificate removed successfully");
     } catch {
       toast.error(locale === "ar" ? "فشل حذف الملف" : "Failed to remove certificate");
+    }
+  };
+
+  const handleViewCertificate = async () => {
+    const preview = window.open("about:blank", "_blank");
+    if (!preview) {
+      toast.error(locale === "ar" ? "يرجى السماح بالنوافذ المنبثقة لعرض المستند" : "Allow pop-ups to view this document");
+      return;
+    }
+    try {
+      const certUrl = teacherStore.data?.certificateUrl;
+      if (!certUrl) throw new Error("Certificate is unavailable");
+      const filename = new URL(certUrl, window.location.origin).pathname.split("/").pop();
+      if (!filename || filename.includes("\\")) throw new Error("Invalid certificate path");
+      const res = await api.get(`/upload/certificates/${encodeURIComponent(decodeURIComponent(filename))}`, {
+        responseType: "blob",
+      });
+      const blobUrl = URL.createObjectURL(res.data);
+      preview.location.replace(blobUrl);
+      window.setTimeout(() => URL.revokeObjectURL(blobUrl), 60_000);
+    } catch {
+      preview.close();
+      toast.error(locale === "ar" ? "تعذر فتح المستند" : "Unable to open document");
     }
   };
 
@@ -574,19 +598,14 @@ export default function TeacherProfilePage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <a
-                      href={
-                        (session as any)?.apiToken
-                          ? `${teacherStore.data.certificateUrl}${teacherStore.data.certificateUrl.includes('?') ? '&' : '?'}token=${(session as any).apiToken}`
-                          : teacherStore.data.certificateUrl
-                      }
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="h-8 w-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-500 hover:text-primary hover:border-primary/30 transition-colors shadow-sm"
+                    <button
+                      type="button"
+                      onClick={handleViewCertificate}
+                      className="h-8 w-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-500 hover:text-primary hover:border-primary/30 transition-colors shadow-sm cursor-pointer"
                       title={locale === "ar" ? "عرض المستند" : "View Document"}
                     >
                       <ExternalLink className="h-4 w-4" />
-                    </a>
+                    </button>
                     <button
                       onClick={handleRemoveCertificate}
                       className="h-8 w-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-red-600 hover:border-red-200 transition-colors shadow-sm"

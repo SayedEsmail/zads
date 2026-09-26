@@ -51,33 +51,21 @@ export default function ContactPage() {
           <div className="md:col-span-2 space-y-4">
             <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-2xs space-y-4">
               <h2 className="text-base font-bold text-slate-900 border-b border-slate-100 pb-3">
-                {locale === "ar" ? "قنوات الدعم المباشر" : "Direct Channels"}
+                {locale === "ar" ? "قنوات الدعم التشغيلي" : "Operational Support"}
               </h2>
 
               <div className="space-y-4 text-xs text-slate-600">
-                <div className="flex items-start gap-3">
-                  <Mail className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                  <div>
-                    <strong className="block text-slate-900 text-xs">{locale === "ar" ? "البريد الإلكتروني" : "Email"}</strong>
-                    <a href="mailto:support@zads.education" className="text-primary hover:underline font-medium">
-                      support@zads.education
-                    </a>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <Phone className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                  <div>
-                    <strong className="block text-slate-900 text-xs">{locale === "ar" ? "خدمة العملاء وواتساب" : "Support & WhatsApp"}</strong>
-                    <span className="font-medium text-slate-800" dir="ltr">+20 100 000 0000</span>
-                  </div>
+                <div className="rounded-xl bg-amber-50/70 border border-amber-200/60 p-3 text-amber-900 leading-relaxed text-[11px]">
+                  {locale === "ar"
+                    ? "خلال مرحلة الإطلاق التجريبي (Pilot)، يتم استقبال استفسارات الدعم عبر النموذج المرفق وتتم متابعتها مباشرة من إدارة المنصة. ستعلن قنوات الاتصال المباشر فور اعتمادها رسمياً."
+                    : "During the initial pilot release, support inquiries submitted through the contact form are reviewed directly by platform administration. Dedicated public lines will be published upon commercial launch."}
                 </div>
 
                 <div className="flex items-start gap-3">
                   <MapPin className="h-4 w-4 text-primary shrink-0 mt-0.5" />
                   <div>
-                    <strong className="block text-slate-900 text-xs">{locale === "ar" ? "المنطقة الرئيسية" : "Main Operational Area"}</strong>
-                    <span>{locale === "ar" ? "مدينة السادس من أكتوبر والجيزة، مصر" : "6th of October City & Giza, Egypt"}</span>
+                    <strong className="block text-slate-900 text-xs">{locale === "ar" ? "النطاق الجغرافي للتشغيل" : "Operational Coverage"}</strong>
+                    <span>{locale === "ar" ? "مدينة السادس من أكتوبر ومحافظة الجيزة، مصر" : "6th of October City & Giza Governorate, Egypt"}</span>
                   </div>
                 </div>
               </div>

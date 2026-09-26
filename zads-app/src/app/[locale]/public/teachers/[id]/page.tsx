@@ -43,7 +43,6 @@ export default function PublicTeacherDetailPage({
 
   useEffect(() => {
     let cancelled = false;
-    setIsLoading(true);
     api
       .get<{ data: Teacher }>(`/teachers/${id}`)
       .then((res) => {
@@ -235,19 +234,19 @@ export default function PublicTeacherDetailPage({
                   </div>
 
                   <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
-                    {sub.priceOnline != null && (
+                    {sub.isOnline && sub.priceOnline != null && (
                       <div>
                         <span className="text-slate-400 block text-[10px]">{locale === "ar" ? "أونلاين" : "Online"}</span>
                         <strong className="text-primary font-bold">{formatPrice(sub.priceOnline)}</strong>
                       </div>
                     )}
-                    {sub.priceOffline != null && (
+                    {sub.isOffline && sub.priceOffline != null && (
                       <div>
                         <span className="text-slate-400 block text-[10px]">{locale === "ar" ? "حضوري منزلي" : "In-Person"}</span>
                         <strong className="text-primary font-bold">{formatPrice(sub.priceOffline)}</strong>
                       </div>
                     )}
-                    {sub.priceOnline == null && sub.priceOffline == null && (
+                    {((sub.isOnline && sub.priceOnline == null) || (sub.isOffline && sub.priceOffline == null)) && (
                       <span className="text-emerald-700 font-semibold text-xs bg-emerald-50 px-2 py-0.5 rounded-full">
                         {locale === "ar" ? "السعر حسب الاتفاق" : "Rate negotiable"}
                       </span>

@@ -1,6 +1,10 @@
+"use client";
+
 import { useTranslations, useLocale } from "next-intl";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { GraduationCap, User2 } from "lucide-react";
+import { sanitizeInternalCallbackUrl } from "@/lib/utils";
 
 export default function RegisterPage() {
   return <RegisterPageClient />;
@@ -9,6 +13,15 @@ export default function RegisterPage() {
 function RegisterPageClient() {
   const t = useTranslations("auth");
   const locale = useLocale();
+  const searchParams = useSearchParams();
+  const rawCallback = searchParams.get("callbackUrl");
+  const callbackUrl = sanitizeInternalCallbackUrl(rawCallback);
+
+  const getTargetUrl = (path: string) => {
+    return callbackUrl
+      ? `${path}?callbackUrl=${encodeURIComponent(callbackUrl)}`
+      : path;
+  };
 
   return (
     <div className="w-full p-4 sm:p-8">
@@ -25,7 +38,7 @@ function RegisterPageClient() {
 
       <div className="space-y-4">
         <Link
-          href={`/${locale}/auth/register/client`}
+          href={getTargetUrl(`/${locale}/auth/register/client`)}
           className="group flex items-center gap-4 rounded-[1.25rem] bg-slate-50 p-5 transition-all hover:bg-white hover:shadow-lg hover:shadow-blue-500/10 hover:-translate-y-0.5 border border-transparent hover:border-blue-100"
         >
           <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-600 transition-transform group-hover:scale-110">
@@ -43,7 +56,7 @@ function RegisterPageClient() {
         </Link>
 
         <Link
-          href={`/${locale}/auth/register/teacher`}
+          href={getTargetUrl(`/${locale}/auth/register/teacher`)}
           className="group flex items-center gap-4 rounded-[1.25rem] bg-slate-50 p-5 transition-all hover:bg-white hover:shadow-lg hover:shadow-orange-500/10 hover:-translate-y-0.5 border border-transparent hover:border-orange-100"
         >
           <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-orange-100 text-orange-600 transition-transform group-hover:scale-110">
@@ -63,7 +76,7 @@ function RegisterPageClient() {
 
       <div className="mt-10 text-center text-sm font-medium text-muted-foreground">
         {t("haveAccount")}{" "}
-        <Link href={`/${locale}/auth/login`} className="text-primary hover:text-primary-dark hover:underline">
+        <Link href={getTargetUrl(`/${locale}/auth/login`)} className="text-primary hover:text-primary-dark hover:underline">
           {t("signInNow")}
         </Link>
       </div>

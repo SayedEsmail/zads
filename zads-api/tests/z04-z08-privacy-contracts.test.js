@@ -1,3 +1,4 @@
+require('./require-test-database');
 const assert = require('assert');
 const http = require('http');
 const jwt = require('jsonwebtoken');
@@ -165,6 +166,15 @@ async function runTests() {
     assert(filterRes.body.pagination, 'Pagination contract must be present');
     console.log('  ✓ Search filter with studyMode and minPrice/maxPrice executed cleanly');
 
+    const tutorBrowseRes = await makeRequest(server, {
+      hostname: '127.0.0.1',
+      port,
+      path: '/api/tutor-requests',
+      method: 'GET',
+      headers: { Authorization: `Bearer ${teacherToken}` }
+    });
+    assert.strictEqual(tutorBrowseRes.status, 200, 'Teacher tutor-request browse must use fields present in the current schema');
+
     // ==========================================
     // TEST 4: Contact Request Persistence & Privacy (Z05, Z07, Z04)
     // ==========================================
@@ -192,7 +202,8 @@ async function runTests() {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${parentToken}`
+        Authorization: `Bearer ${parentToken}`,
+        'Idempotency-Key': `parent-retry-${parent.id}-${teacher.id}`
       }
     }, createPayload);
 
@@ -204,6 +215,51 @@ async function runTests() {
     assert.strictEqual(createdReq.status, 'pending');
     assert.strictEqual(createdReq.initiatedBy, 'parent');
     console.log('  ✓ Contact request created with full persistent contracts');
+
+    const retryHeaders = {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${parentToken}`,
+      'Idempotency-Key': `parent-retry-${parent.id}-${teacher.id}`
+    };
+    const sameIntentRetry = await makeRequest(server, {
+      hostname: '127.0.0.1', port, path: '/api/contact-requests', method: 'POST', headers: retryHeaders
+    }, createPayload);
+    assert.strictEqual(sameIntentRetry.status, 200, 'Identical intent retry must return the original request');
+
+    const changedIntentRetry = await makeRequest(server, {
+      hostname: '127.0.0.1', port, path: '/api/contact-requests', method: 'POST', headers: retryHeaders
+    }, { ...createPayload, preferredTime: 'Monday 18:00 - 19:30' });
+    assert.strictEqual(changedIntentRetry.status, 409, 'Changed preferred time must conflict on idempotency-key reuse');
+
+    if (subject && stage) {
+      const expiredTutorRequest = await prisma.tutorRequest.create({
+        data: {
+          parentId: parent.id,
+          subjectId: subject.id,
+          stageId: stage.id,
+          expiresAt: new Date(Date.now() - 60_000),
+          status: 'active'
+        }
+      });
+      const expiredOffer = await makeRequest(server, {
+        hostname: '127.0.0.1',
+        port,
+        path: '/api/contact-requests/teacher',
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${teacherToken}`
+        }
+      }, {
+        parentId: parent.id,
+        subjectId: subject.id,
+        stageId: stage.id,
+        tutorRequestId: expiredTutorRequest.id
+      });
+      assert.strictEqual(expiredOffer.status, 400, 'Expired tutor requests cannot be used for teacher-initiated offers');
+      await prisma.tutorRequest.delete({ where: { id: expiredTutorRequest.id } });
+
+    }
 
     // Duplicate check
     const dupRes = await makeRequest(server, {
@@ -271,6 +327,66 @@ async function runTests() {
     assert.strictEqual(teacherAcceptRes.status, 200);
     assert.strictEqual(teacherAcceptRes.body.data.status, 'accepted');
     assert.strictEqual(teacherAcceptRes.body.data.replyMessage, 'Welcome! I will call you.');
+
+    if (subject && stage) {
+      await prisma.teacherSubject.upsert({
+        where: { teacherId_subjectId_stageId: { teacherId: teacher.id, subjectId: subject.id, stageId: stage.id } },
+        update: { isActive: true, isOnline: true, isOffline: true },
+        create: {
+          teacherId: teacher.id, subjectId: subject.id, stageId: stage.id,
+          isOnline: true, isOffline: true, priceOnline: 150, priceOffline: 200, isActive: true
+        }
+      });
+      const activeTutorRequest = await prisma.tutorRequest.create({
+        data: { parentId: parent.id, subjectId: subject.id, stageId: stage.id }
+      });
+      const teacherPayload = {
+        parentId: parent.id,
+        subjectId: subject.id,
+        stageId: stage.id,
+        tutorRequestId: activeTutorRequest.id,
+        message: 'Offer for requested subject',
+        studyMode: 'online',
+        teachingPlace: 'online',
+        preferredTime: 'Tuesday 17:00'
+      };
+      const teacherHeaders = {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${teacherToken}`,
+        'Idempotency-Key': `teacher-retry-${teacher.id}-${activeTutorRequest.id}`
+      };
+      const teacherCreate = await makeRequest(server, {
+        hostname: '127.0.0.1', port, path: '/api/contact-requests/teacher', method: 'POST', headers: teacherHeaders
+      }, teacherPayload);
+      assert.strictEqual(teacherCreate.status, 201, 'Teacher offer must be accepted for a matching active tutor request');
+      const teacherRetry = await makeRequest(server, {
+        hostname: '127.0.0.1', port, path: '/api/contact-requests/teacher', method: 'POST', headers: teacherHeaders
+      }, teacherPayload);
+      assert.strictEqual(teacherRetry.status, 200, 'Identical teacher offer retry must return the original request');
+      const changedTeacherRetry = await makeRequest(server, {
+        hostname: '127.0.0.1', port, path: '/api/contact-requests/teacher', method: 'POST', headers: teacherHeaders
+      }, { ...teacherPayload, studyMode: 'offline' });
+      assert.strictEqual(changedTeacherRetry.status, 409, 'Changed study mode must conflict on teacher idempotency-key reuse');
+      await prisma.contactRequest.delete({ where: { id: teacherCreate.body.data.id } });
+      await prisma.tutorRequest.delete({ where: { id: activeTutorRequest.id } });
+    }
+
+    const raceKey = `parent-race-${parent.id}-${teacher.id}`;
+    const racePayloads = [
+      { ...createPayload, preferredTime: 'Wednesday 18:00' },
+      { ...createPayload, preferredTime: 'Thursday 18:00' }
+    ];
+    const raceResults = await Promise.all(racePayloads.map(payload => makeRequest(server, {
+      hostname: '127.0.0.1', port, path: '/api/contact-requests', method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${parentToken}`,
+        'Idempotency-Key': raceKey
+      }
+    }, payload)));
+    assert.deepStrictEqual(raceResults.map(result => result.status).sort(), [201, 409],
+      'Concurrent changed intents sharing an idempotency key must produce one write and one conflict');
+    await prisma.contactRequest.deleteMany({ where: { idempotencyKey: raceKey } });
 
     // Now phone must be visible!
     const parentListAccepted = await makeRequest(server, {

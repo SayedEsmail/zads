@@ -25,6 +25,33 @@ const createRequest = async (req, res, next) => {
             areaId
         } = req.body;
 
+        if (!subjectId || !stageId) {
+            return response.error(res, 'Subject and stage are required', 400);
+        }
+
+        const resolvedTarget = requestTarget ?? (parentChildId ? 'dependent' : 'self');
+        if (!['self', 'dependent'].includes(resolvedTarget)) {
+            return response.error(res, 'Invalid request target', 400);
+        }
+
+        if (resolvedTarget === 'dependent') {
+            if (!parentChildId) {
+                return response.error(res, 'A child profile is required for a dependent request', 400);
+            }
+            const child = await prisma.parentChild.findFirst({
+                where: { id: parentChildId, parentId },
+                select: { id: true, stageId: true }
+            });
+            if (!child) {
+                return response.error(res, 'Child profile not found for this parent', 404);
+            }
+            if (child.stageId !== stageId) {
+                return response.error(res, 'Stage does not match the selected child', 400);
+            }
+        } else if (parentChildId) {
+            return response.error(res, 'A self request cannot include a child profile', 400);
+        }
+
         // Set expiry to 30 days from now
         const expiresAt = new Date();
         expiresAt.setDate(expiresAt.getDate() + 30);
@@ -36,12 +63,12 @@ const createRequest = async (req, res, next) => {
                 stageId,
                 description,
                 preferredLessonType,
-                requestTarget: requestTarget ?? (parentChildId ? 'dependent' : 'self'),
+                requestTarget: resolvedTarget,
                 studyMode: studyMode ?? 'both',
                 parentChildId: parentChildId ?? null,
                 budgetMin,
                 budgetMax,
-                areaId,
+                areaId: areaId ?? req.user.parent.areaId ?? null,
                 expiresAt
             },
             include: {
@@ -74,7 +101,12 @@ const getTutorRequests = async (req, res, next) => {
 
         if (subjectId) where.subjectId = subjectId;
         if (stageId) where.stageId = stageId;
-        if (req.query.studyMode) where.studyMode = req.query.studyMode;
+        const studyMode = req.query.studyMode;
+        if (studyMode && !['online', 'offline', 'both'].includes(studyMode)) {
+            return response.error(res, 'Invalid study mode', 400);
+        }
+        if (studyMode === 'online') where.studyMode = { in: ['online', 'both'] };
+        if (studyMode === 'offline') where.studyMode = { in: ['offline', 'both'] };
         if (req.query.requestTarget) where.requestTarget = req.query.requestTarget;
 
         // Determine active location filters (defaulting to logged-in teacher's location if no search filters provided)
@@ -83,7 +115,8 @@ const getTutorRequests = async (req, res, next) => {
         let activeGovId = governorateId;
 
         const teacher = req.user?.teacher;
-        if (teacher?.areaId && !areaId && !cityId && !governorateId) {
+        const isOnlineSearch = studyMode === 'online';
+        if (teacher?.areaId && !areaId && !cityId && !governorateId && !isOnlineSearch) {
             const teacherArea = await prisma.area.findUnique({
                 where: { id: teacher.areaId },
                 include: { city: true }
@@ -128,15 +161,6 @@ const getTutorRequests = async (req, res, next) => {
                 },
                 subject: true,
                 stage: true,
-                parentChild: {
-                    select: {
-                        id: true,
-                        name: true,
-                        gender: true,
-                        schoolType: true,
-                        stage: true
-                    }
-                },
                 area: {
                     include: {
                         city: {

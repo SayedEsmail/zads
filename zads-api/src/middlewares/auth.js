@@ -47,26 +47,21 @@ const auth = async (req, res, next) => {
 
 /**
  * Certificate Access Authentication middleware
- * Restricted strictly to certificate retrieval endpoints to allow secure browser navigation
- * Accepts Authorization Bearer header OR ?token= query parameter
+ * Restricted strictly to certificate retrieval endpoints
+ * Strictly requires Authorization: Bearer <token> (no query string token exposure)
  */
 const certificateAuth = async (req, res, next) => {
     try {
-        let token = null;
         const authHeader = req.headers.authorization;
 
-        if (authHeader && authHeader.startsWith('Bearer ')) {
-            token = authHeader.split(' ')[1];
-        } else if (req.query && req.query.token) {
-            token = req.query.token;
-        }
-
-        if (!token) {
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
             return res.status(401).json({
                 success: false,
                 message: 'No token provided for document access'
             });
         }
+
+        const token = authHeader.split(' ')[1];
 
         const decoded = jwt.verify(token, jwtSecret);
 

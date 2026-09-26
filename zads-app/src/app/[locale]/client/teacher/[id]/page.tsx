@@ -188,9 +188,9 @@ export default function TeacherDetailPage() {
                   if (teacher.subjects && teacher.subjects.length > 0) {
                     const firstSub = teacher.subjects[0];
                     setSelectedSubjectId(firstSub.id);
-                    if (firstSub.priceOnline != null) {
+                    if (firstSub.isOnline) {
                       setStudyMode("online");
-                    } else if (firstSub.priceOffline != null) {
+                    } else if (firstSub.isOffline) {
                       setStudyMode("offline");
                     }
                   }
@@ -320,22 +320,22 @@ export default function TeacherDetailPage() {
                 </div>
 
                 <div className="flex flex-wrap gap-2 text-xs">
-                  {item.priceOnline != null && (
+                  {item.isOnline && item.priceOnline != null && (
                     <span className="rounded-xl bg-sky-50 border border-sky-100/50 px-3 py-1 font-bold text-sky-700 shadow-[0_1px_2px_rgba(14,165,233,0.03)]">
                       💻 {tCommon("online")} {formatPrice(item.priceOnline)}
                     </span>
                   )}
-                  {item.priceOffline != null && (
+                  {item.isOffline && item.priceOffline != null && (
                     <span className="rounded-xl bg-amber-50 border border-amber-100/50 px-3 py-1 font-bold text-amber-700 shadow-[0_1px_2px_rgba(245,158,11,0.03)]">
                       🏠 {tCommon("offline")} {formatPrice(item.priceOffline)}
                     </span>
                   )}
-                  {item.priceAtTeacher != null && (
+                  {item.isOffline && item.priceAtTeacher != null && (
                     <span className="rounded-xl bg-indigo-50 border border-indigo-100/50 px-3 py-1 font-bold text-indigo-700 shadow-[0_1px_2px_rgba(99,102,241,0.03)]">
                       🏫 {tCommon("atTeacher") || "عند المعلم"} {formatPrice(item.priceAtTeacher)}
                     </span>
                   )}
-                  {item.priceAtStudent != null && (
+                  {item.isOffline && item.priceAtStudent != null && (
                     <span className="rounded-xl bg-purple-50 border border-purple-100/50 px-3 py-1 font-bold text-purple-700 shadow-[0_1px_2px_rgba(168,85,247,0.03)]">
                       🎒 {tCommon("atStudent") || "عند الطالب"} {formatPrice(item.priceAtStudent)}
                     </span>
@@ -388,9 +388,9 @@ export default function TeacherDetailPage() {
                     setSelectedSubjectId(subId);
                     const subRate = teacher.subjects?.find((s) => s.id === subId);
                     if (subRate) {
-                      if (subRate.priceOnline != null) {
+                      if (subRate.isOnline) {
                         setStudyMode("online");
-                      } else if (subRate.priceOffline != null) {
+                      } else if (subRate.isOffline) {
                         setStudyMode("offline");
                       }
                     }
@@ -416,7 +416,7 @@ export default function TeacherDetailPage() {
                   <button
                     type="button"
                     onClick={() => setStudyMode("online")}
-                    disabled={selectedSubjectRate?.priceOnline == null && selectedSubjectRate?.priceOffline != null}
+                    disabled={!selectedSubjectRate?.isOnline}
                     className={`rounded-xl py-2.5 text-xs font-bold border transition-all cursor-pointer ${
                       studyMode === "online"
                         ? "border-primary bg-primary/5 text-primary"
@@ -428,7 +428,7 @@ export default function TeacherDetailPage() {
                   <button
                     type="button"
                     onClick={() => setStudyMode("offline")}
-                    disabled={selectedSubjectRate?.priceOffline == null && selectedSubjectRate?.priceOnline != null}
+                    disabled={!selectedSubjectRate?.isOffline}
                     className={`rounded-xl py-2.5 text-xs font-bold border transition-all cursor-pointer ${
                       studyMode === "offline"
                         ? "border-primary bg-primary/5 text-primary"
