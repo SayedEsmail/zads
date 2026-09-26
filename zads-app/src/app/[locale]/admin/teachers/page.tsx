@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { useLocale } from "next-intl";
 import { DataTable } from "@/components/admin/DataTable";
@@ -28,6 +28,9 @@ export default function AdminTeachersPage() {
 
   const { 
     teachers, 
+    totalTeachers,
+    teachersPage,
+    teachersTotalPages,
     isLoading, 
     error, 
     fetchTeachers, 
@@ -37,10 +40,30 @@ export default function AdminTeachersPage() {
 
   const [togglingVerify, setTogglingVerify] = useState<string | null>(null);
   const [togglingStatus, setTogglingStatus] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("");
+  const [verificationFilter, setVerificationFilter] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const loadTeachers = useCallback((page = currentPage, query = search, status = statusFilter, isVerified = verificationFilter) => {
+    fetchTeachers({
+      page,
+      limit: 20,
+      search: query || undefined,
+      status: status || undefined,
+      isVerified: isVerified !== "" ? isVerified === "true" : undefined,
+    });
+  }, [fetchTeachers, currentPage, search, statusFilter, verificationFilter]);
 
   useEffect(() => {
-    fetchTeachers();
-  }, [fetchTeachers]);
+    loadTeachers(currentPage, search, statusFilter, verificationFilter);
+  }, [currentPage, statusFilter, verificationFilter, loadTeachers]);
+
+  const handleSearchChange = (val: string) => {
+    setSearch(val);
+    setCurrentPage(1);
+    loadTeachers(1, val, statusFilter, verificationFilter);
+  };
 
   const handleToggleVerification = async (teacherId: string, currentStatus: boolean) => {
     setTogglingVerify(teacherId);
@@ -234,9 +257,38 @@ export default function AdminTeachersPage() {
               : "Review uploaded degrees and verification credentials, verify teachers, or suspend accounts."}
           </p>
         </div>
+
+        {/* Operational Filters */}
+        <div className="flex flex-wrap items-center gap-2.5">
+          <select
+            value={verificationFilter}
+            onChange={(e) => {
+              setVerificationFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary/20"
+          >
+            <option value="">{locale === "ar" ? "كل حالات التوثيق" : "All Verification"}</option>
+            <option value="true">{locale === "ar" ? "موثق فقط" : "Verified Only"}</option>
+            <option value="false">{locale === "ar" ? "غير موثق" : "Unverified Only"}</option>
+          </select>
+
+          <select
+            value={statusFilter}
+            onChange={(e) => {
+              setStatusFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary/20"
+          >
+            <option value="">{locale === "ar" ? "كل الحسابات" : "All Accounts"}</option>
+            <option value="active">{locale === "ar" ? "نشط" : "Active"}</option>
+            <option value="suspended">{locale === "ar" ? "موقوف" : "Suspended"}</option>
+          </select>
+        </div>
       </div>
 
-      <ErrorBanner error={error} />
+      <ErrorBanner error={error} onRetry={() => loadTeachers(currentPage, search, statusFilter, verificationFilter)} />
 
       <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.04)]">
         <DataTable
@@ -244,6 +296,13 @@ export default function AdminTeachersPage() {
           columns={columns}
           isLoading={isLoading}
           searchPlaceholder={t("searchTeacher")}
+          manualPagination={true}
+          page={teachersPage}
+          totalPages={teachersTotalPages}
+          totalRows={totalTeachers}
+          searchValue={search}
+          onSearchChange={handleSearchChange}
+          onPageChange={(p) => setCurrentPage(p)}
         />
       </div>
     </div>

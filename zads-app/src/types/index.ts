@@ -178,13 +178,18 @@ export interface ContactRequest {
   replyMessage?: string | null;
   status: ContactRequestStatus;
   initiatedBy?: "parent" | "teacher";
+  studyMode?: StudyMode | null;
+  teachingPlace?: string | null;
+  preferredTime?: string | null;
+  tutorRequestId?: string | null;
   createdAt: string;
   updatedAt: string;
   // Relations
-  teacher?: Pick<Teacher, "id"> & { user: Pick<User, "name" | "avatarUrl" | "phone"> };
-  parent?: Pick<ClientProfile, "id"> & { user: Pick<User, "name" | "phone" | "avatarUrl"> };
+  teacher?: Pick<Teacher, "id"> & { isVerified?: boolean; user: Pick<User, "name" | "avatarUrl" | "phone"> };
+  parent?: Pick<ClientProfile, "id"> & { clientAccountKind?: ClientAccountKind; user: Pick<User, "name" | "phone" | "avatarUrl"> };
   subject?: Subject;
   stage?: Stage;
+  tutorRequest?: TutorRequest;
 }
 
 export interface Favorite {
@@ -273,5 +278,10 @@ export type AdminParent = ClientProfile & {
 
 export type AdminTeacher = Teacher & {
   user: User;
+};
+
+export type AdminContactRequest = ContactRequest & {
+  teacher: Teacher & { user: User };
+  parent: ClientProfile & { user: User };
 };
 

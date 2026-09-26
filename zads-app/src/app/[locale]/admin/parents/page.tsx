@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useTranslations } from "next-intl";
 import { useLocale } from "next-intl";
@@ -12,7 +12,6 @@ import {
   UserMinus, 
   UserCheck, 
   Loader2,
-  AlertCircle,
   Mail,
   Smartphone
 } from "lucide-react";
@@ -26,6 +25,9 @@ export default function AdminParentsPage() {
 
   const { 
     parents, 
+    totalParents,
+    parentsPage,
+    parentsTotalPages,
     isLoading, 
     error, 
     fetchParents, 
@@ -33,10 +35,26 @@ export default function AdminParentsPage() {
   } = useAdminStore();
 
   const [togglingStatus, setTogglingStatus] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const loadParents = useCallback((page = currentPage, query = search) => {
+    fetchParents({
+      page,
+      limit: 20,
+      search: query || undefined,
+    });
+  }, [fetchParents, currentPage, search]);
 
   useEffect(() => {
-    fetchParents();
-  }, [fetchParents]);
+    loadParents(currentPage, search);
+  }, [currentPage, loadParents]);
+
+  const handleSearchChange = (val: string) => {
+    setSearch(val);
+    setCurrentPage(1);
+    loadParents(1, val);
+  };
 
   const handleToggleUserStatus = async (userId: string, currentStatus: "active" | "suspended") => {
     setTogglingStatus(userId);
@@ -172,7 +190,7 @@ export default function AdminParentsPage() {
         </div>
       </div>
 
-      <ErrorBanner error={error} />
+      <ErrorBanner error={error} onRetry={() => loadParents(currentPage, search)} />
 
       <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.04)]">
         <DataTable
@@ -180,6 +198,13 @@ export default function AdminParentsPage() {
           columns={columns}
           isLoading={isLoading}
           searchPlaceholder={t("searchClient")}
+          manualPagination={true}
+          page={parentsPage}
+          totalPages={parentsTotalPages}
+          totalRows={totalParents}
+          searchValue={search}
+          onSearchChange={handleSearchChange}
+          onPageChange={(p) => setCurrentPage(p)}
         />
       </div>
     </div>

@@ -18,31 +18,90 @@ interface DataTableProps<TData> {
   columns: ColumnDef<TData, unknown>[];
   searchPlaceholder?: string;
   isLoading?: boolean;
+  manualPagination?: boolean;
+  page?: number; // 1-indexed
+  totalPages?: number;
+  totalRows?: number;
+  onPageChange?: (newPage: number) => void;
+  searchValue?: string;
+  onSearchChange?: (newSearch: string) => void;
 }
 
-export function DataTable<TData>({ data, columns, searchPlaceholder = "Search...", isLoading }: DataTableProps<TData>) {
+export function DataTable<TData>({
+  data,
+  columns,
+  searchPlaceholder = "Search...",
+  isLoading,
+  manualPagination = false,
+  page = 1,
+  totalPages = 1,
+  totalRows,
+  onPageChange,
+  searchValue,
+  onSearchChange,
+}: DataTableProps<TData>) {
   const [sorting, setSorting] = useState<SortingState>([]);
-  const [globalFilter, setGlobalFilter] = useState("");
+  const [localGlobalFilter, setLocalGlobalFilter] = useState("");
+
+  const effectiveSearch = manualPagination ? (searchValue ?? "") : localGlobalFilter;
 
   const table = useReactTable({
     data,
     columns,
-    state: { sorting, globalFilter },
+    state: {
+      sorting,
+      ...(!manualPagination && { globalFilter: localGlobalFilter }),
+    },
     onSortingChange: setSorting,
-    onGlobalFilterChange: setGlobalFilter,
+    onGlobalFilterChange: setLocalGlobalFilter,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    initialState: { pagination: { pageSize: 15 } },
+    ...(manualPagination
+      ? { manualPagination: true, pageCount: totalPages }
+      : {
+          getPaginationRowModel: getPaginationRowModel(),
+          getSortedRowModel: getSortedRowModel(),
+          getFilteredRowModel: getFilteredRowModel(),
+          initialState: { pagination: { pageSize: 15 } },
+        }),
   });
+
+  const handleSearchChange = (val: string) => {
+    if (manualPagination) {
+      onSearchChange?.(val);
+    } else {
+      setLocalGlobalFilter(val);
+    }
+  };
+
+  const currentPage = manualPagination ? page : table.getState().pagination.pageIndex + 1;
+  const maxPage = manualPagination ? Math.max(1, totalPages) : Math.max(1, table.getPageCount());
+  const rowsCount = manualPagination ? (totalRows ?? data.length) : table.getFilteredRowModel().rows.length;
+
+  const canPrevious = manualPagination ? currentPage > 1 && !isLoading : table.getCanPreviousPage();
+  const canNext = manualPagination ? currentPage < maxPage && !isLoading : table.getCanNextPage();
+
+  const handlePrevious = () => {
+    if (manualPagination) {
+      if (currentPage > 1) onPageChange?.(currentPage - 1);
+    } else {
+      table.previousPage();
+    }
+  };
+
+  const handleNext = () => {
+    if (manualPagination) {
+      if (currentPage < maxPage) onPageChange?.(currentPage + 1);
+    } else {
+      table.nextPage();
+    }
+  };
 
   return (
     <div className="space-y-3">
       {/* Search */}
       <input
-        value={globalFilter}
-        onChange={(e) => setGlobalFilter(e.target.value)}
+        value={effectiveSearch}
+        onChange={(e) => handleSearchChange(e.target.value)}
         placeholder={searchPlaceholder}
         className="w-full max-w-xs rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
       />
@@ -115,7 +174,7 @@ export function DataTable<TData>({ data, columns, searchPlaceholder = "Search...
         {table.getRowModel().rows.map((row) => (
           <div key={row.id} className="rounded-xl border border-border bg-surface p-4">
             {row.getVisibleCells().map((cell) => {
-              const header = table.getHeaderGroups()[0].headers.find(h => h.id === cell.column.id);
+              const header = table.getHeaderGroups()[0].headers.find((h) => h.id === cell.column.id);
               return (
                 <div key={cell.id} className="flex justify-between py-1 text-sm">
                   <span className="text-muted-foreground">
@@ -132,23 +191,25 @@ export function DataTable<TData>({ data, columns, searchPlaceholder = "Search...
       {/* Pagination */}
       <div className="flex items-center justify-between text-sm text-muted-foreground">
         <p>
-          Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
-          {" · "}{table.getFilteredRowModel().rows.length} rows
+          Page {currentPage} of {maxPage}
+          {" · "}{rowsCount} rows
         </p>
         <div className="flex gap-2">
           <button
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-            className="rounded-lg border border-border p-1.5 disabled:opacity-40"
+            onClick={handlePrevious}
+            disabled={!canPrevious}
+            className="rounded-lg border border-border p-1.5 disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed"
+            title="Previous Page"
           >
-            <ChevronRight className="h-4 w-4" />
+            <ChevronRight className="h-4 w-4 rtl:rotate-0 rotate-180" />
           </button>
           <button
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-            className="rounded-lg border border-border p-1.5 disabled:opacity-40"
+            onClick={handleNext}
+            disabled={!canNext}
+            className="rounded-lg border border-border p-1.5 disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed"
+            title="Next Page"
           >
-            <ChevronLeft className="h-4 w-4" />
+            <ChevronLeft className="h-4 w-4 rtl:rotate-0 rotate-180" />
           </button>
         </div>
       </div>
