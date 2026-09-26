@@ -1,5 +1,6 @@
 const prisma = require('../config/database');
 const response = require('../utils/response');
+const notificationService = require('../services/notification.service');
 
 /**
  * Create contact request (parent to teacher)
@@ -40,7 +41,7 @@ const createRequest = async (req, res, next) => {
             return response.error(res, 'Teacher not found or inactive', 404);
         }
 
-        // 1. Idempotency Key check: if an existing request has this exact key, return it immediately
+        // 1. Idempotency Key check: if an existing request has this exact key, verify ownership before returning
         if (idempotencyKey) {
             const existingByKey = await prisma.contactRequest.findFirst({
                 where: { idempotencyKey },
@@ -53,6 +54,10 @@ const createRequest = async (req, res, next) => {
                 }
             });
             if (existingByKey) {
+                // Security check: Must belong to THIS parent for THIS teacher
+                if (existingByKey.parentId !== parentId || existingByKey.teacherId !== teacherId) {
+                    return response.error(res, 'Idempotency key collision or unauthorized request retry', 409);
+                }
                 return response.success(res, existingByKey, 'Contact request returned (idempotent retry)', 200);
             }
         }
@@ -116,7 +121,7 @@ const createRequest = async (req, res, next) => {
                     where: {
                         parentId,
                         teacherId,
-                        status: 'pending'
+                        ...(idempotencyKey ? { idempotencyKey } : { status: 'pending' })
                     },
                     include: {
                         teacher: {
@@ -126,11 +131,21 @@ const createRequest = async (req, res, next) => {
                         stage: true
                     }
                 });
-                if (winning) {
+                if (winning && winning.parentId === parentId) {
                     return response.success(res, winning, 'Contact request created (concurrent duplicate resolved)', 200);
                 }
             }
             throw createErr;
+        }
+
+        // Trigger notification to recipient teacher (non-blocking)
+        if (teacher.userId) {
+            notificationService.sendToUser(
+                teacher.userId,
+                'طلب تواصل جديد',
+                'تلقيت طلب تواصل جديد على منصة زاد',
+                { type: 'contact_request', requestId: contactRequest.id, initiatedBy: 'parent' }
+            ).catch(notifErr => console.warn('[NOTIFICATION] failed to notify teacher:', notifErr.message));
         }
 
         // Authoritative server-side analytics logging (NO sensitive PII)
@@ -199,7 +214,7 @@ const createRequestAsTeacher = async (req, res, next) => {
             return response.error(res, 'Parent not found or inactive', 404);
         }
 
-        // 1. Idempotency Key check
+        // 1. Idempotency Key check: if an existing request has this exact key, verify ownership before returning
         if (idempotencyKey) {
             const existingByKey = await prisma.contactRequest.findFirst({
                 where: { idempotencyKey },
@@ -212,6 +227,10 @@ const createRequestAsTeacher = async (req, res, next) => {
                 }
             });
             if (existingByKey) {
+                // Security check: Must belong to THIS teacher for THIS parent
+                if (existingByKey.teacherId !== teacherId || existingByKey.parentId !== parentId) {
+                    return response.error(res, 'Idempotency key collision or unauthorized request retry', 409);
+                }
                 return response.success(res, existingByKey, 'Contact request returned (idempotent retry)', 200);
             }
         }
@@ -273,7 +292,7 @@ const createRequestAsTeacher = async (req, res, next) => {
                     where: {
                         parentId,
                         teacherId,
-                        status: 'pending'
+                        ...(idempotencyKey ? { idempotencyKey } : { status: 'pending' })
                     },
                     include: {
                         parent: {
@@ -283,11 +302,21 @@ const createRequestAsTeacher = async (req, res, next) => {
                         stage: true
                     }
                 });
-                if (winning) {
+                if (winning && winning.teacherId === teacherId) {
                     return response.success(res, winning, 'Contact request created (concurrent duplicate resolved)', 200);
                 }
             }
             throw createErr;
+        }
+
+        // Trigger notification to recipient parent (non-blocking)
+        if (parent.userId) {
+            notificationService.sendToUser(
+                parent.userId,
+                'عرض تواصل جديد من معلّم',
+                'تلقيت عرض تواصل من معلّم بخصوص طلبك على منصة زاد',
+                { type: 'contact_request', requestId: contactRequest.id, initiatedBy: 'teacher' }
+            ).catch(notifErr => console.warn('[NOTIFICATION] failed to notify parent:', notifErr.message));
         }
 
         // Authoritative server-side analytics logging (NO sensitive PII)
@@ -500,6 +529,18 @@ const updateRequestStatus = async (req, res, next) => {
             console.warn('[ANALYTICS] event log error:', analyticsErr.message);
         }
 
+        // Trigger notification to sender parent (non-blocking)
+        if (updated.parent?.user?.id) {
+            notificationService.sendToUser(
+                updated.parent.user.id,
+                status === 'accepted' ? 'تم قبول طلب التواصل' : 'اعتذار عن طلب التواصل',
+                status === 'accepted'
+                    ? 'وافق المعلّم على طلب التواصل، يمكنك الآن التنسيق مباشرة'
+                    : 'اعتذر المعلّم عن قبول طلب التواصل في الوقت الحالي',
+                { type: 'contact_request_status', requestId, status }
+            ).catch(notifErr => console.warn('[NOTIFICATION] failed to notify parent of status update:', notifErr.message));
+        }
+
         // If rejected, keep phone hidden
         if (status !== 'accepted' && updated.parent?.user) {
             updated.parent.user.phone = null;
@@ -634,6 +675,18 @@ const updateRequestStatusAsParent = async (req, res, next) => {
             });
         } catch (analyticsErr) {
             console.warn('[ANALYTICS] event log error:', analyticsErr.message);
+        }
+
+        // Trigger notification to sender teacher (non-blocking)
+        if (updated.teacher?.user?.id) {
+            notificationService.sendToUser(
+                updated.teacher.user.id,
+                status === 'accepted' ? 'تم قبول عرض التواصل' : 'اعتذار عن عرض التواصل',
+                status === 'accepted'
+                    ? 'وافق العميل على عرض التواصل، يمكنك الآن التنسيق مباشرة'
+                    : 'اعتذر العميل عن قبول عرض التواصل في الوقت الحالي',
+                { type: 'contact_request_status', requestId, status }
+            ).catch(notifErr => console.warn('[NOTIFICATION] failed to notify teacher of status update:', notifErr.message));
         }
 
         // If rejected, keep phone hidden

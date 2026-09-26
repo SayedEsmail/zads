@@ -2,17 +2,31 @@ const crypto = require('crypto');
 const prisma = require('../config/database');
 const response = require('../utils/response');
 
-// Helper to sanitize metadata and strip any sensitive PII
-const sanitizeMetadata = (meta) => {
-    if (!meta || typeof meta !== 'object') return {};
-    const clean = { ...meta };
-    const forbidden = ['phone', 'password', 'token', 'email', 'secret', 'childname', 'message', 'child'];
-    for (const key of Object.keys(clean)) {
-        if (forbidden.some(f => key.toLowerCase().includes(f))) {
-            delete clean[key];
+// Helper to recursively sanitize metadata and strip any sensitive PII at all depths
+const sanitizeMetadata = (val) => {
+    if (val === null || val === undefined) return val;
+    if (Array.isArray(val)) {
+        return val.map(item => sanitizeMetadata(item));
+    }
+    if (typeof val === 'object') {
+        const clean = {};
+        const forbidden = ['phone', 'password', 'token', 'email', 'secret', 'childname', 'message', 'child', 'cert'];
+        for (const [key, v] of Object.entries(val)) {
+            if (forbidden.some(f => key.toLowerCase().includes(f))) {
+                continue; // strip key
+            }
+            clean[key] = sanitizeMetadata(v);
+        }
+        return clean;
+    }
+    if (typeof val === 'string') {
+        const trimmed = val.trim();
+        // Redact values that look like phone numbers or emails
+        if (/^(\+20|0020|20)?0?1[0125][0-9]{8}$/.test(trimmed) || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+            return '[REDACTED]';
         }
     }
-    return clean;
+    return val;
 };
 
 /**
@@ -100,9 +114,13 @@ const logAuthorizedContactClick = async (req, res, next) => {
             return response.error(res, 'requestId is required', 400);
         }
 
-        // Verify request is actually accepted
+        // Verify request is actually accepted and caller is a participant
         const contactReq = await prisma.contactRequest.findUnique({
-            where: { id: requestId }
+            where: { id: requestId },
+            include: {
+                parent: { select: { userId: true } },
+                teacher: { select: { userId: true } }
+            }
         });
 
         if (!contactReq) {
@@ -111,6 +129,17 @@ const logAuthorizedContactClick = async (req, res, next) => {
 
         if (contactReq.status !== 'accepted') {
             return response.error(res, 'Cannot log contact click for non-accepted request', 403);
+        }
+
+        const callerUserId = req.user?.id;
+        const isParticipant = callerUserId && (
+            contactReq.parent?.userId === callerUserId ||
+            contactReq.teacher?.userId === callerUserId ||
+            req.user?.userType === 'admin'
+        );
+
+        if (!isParticipant) {
+            return response.error(res, 'Unauthorized: you are not a participant in this contact request', 403);
         }
 
         const bucket = Math.floor(Date.now() / 60000);

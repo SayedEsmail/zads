@@ -50,7 +50,7 @@ async function runSuite() {
 
   let testTeacherUser, testTeacher, testTeacherToken;
   let testOtherTeacherUser, testOtherTeacher, testOtherTeacherToken;
-  let testParentUser, testParent, testParentToken;
+  let testParentUser, testParent, testParentToken, testParent2Token;
   let testAdminUser, testAdminToken;
   let testSubject, testStage, testArea, testCity, testGov;
   let testCertFilename;
@@ -91,7 +91,7 @@ async function runSuite() {
 
     // Cleanup previous runs
     await prisma.user.deleteMany({
-      where: { phone: { in: ['01011119001', '01011119002', '01055559999', '01099999999'] } }
+      where: { phone: { in: ['01011119001', '01011119002', '01055559999', '01055558888', '01099999999'] } }
     });
 
     const hash = await bcrypt.hash('Password123', 10);
@@ -213,8 +213,18 @@ async function runSuite() {
     });
     assert(regEvent, 'Authoritative registration_complete event must be logged');
     assert.strictEqual(regEvent.metadata.userType, 'parent');
-    assert.strictEqual(regEvent.metadata.phone, undefined, 'PII must NOT be in analytics metadata');
-    console.log('✅ TEST 2 PASSED: Parent registered and server event logged without PII.');
+    // Register second parent for isolation testing
+    const regRes2 = await makeRequest(port, 'POST', '/api/auth/register/parent', {}, {
+      phone: '01055558888',
+      password: 'ParentSecret123',
+      name: 'ولي أمر ثانٍ',
+      areaId: testArea.id,
+      clientAccountKind: 'student'
+    });
+    assert.strictEqual(regRes2.status, 201);
+    testParent2Token = regRes2.body.data.token;
+
+    console.log('✅ TEST 2 PASSED: Parents registered and server event logged without PII.');
 
     // ----------------------------------------------------
     // TEST 3: CONTACT REQUEST IDEMPOTENCY & LOST-RESPONSE RETRY
@@ -257,6 +267,23 @@ async function runSuite() {
     );
     assert.strictEqual(retryRes.status, 200, 'Lost response retry with same idempotencyKey must return 200 OK');
     assert.strictEqual(retryRes.body.data.id, createdRequestId, 'Must return the previously created request');
+
+    // Cross-user idempotency isolation test:
+    // Another parent/user attempts to send the same idempotency key
+    const crossUserRes = await makeRequest(
+      port,
+      'POST',
+      '/api/contact-requests',
+      { 'Authorization': `Bearer ${testParent2Token}`, 'idempotency-key': testIdempotencyKey },
+      {
+        teacherId: testTeacher.id,
+        subjectId: testSubject.id,
+        stageId: testStage.id,
+        message: 'محاولة اختراق بمفتاح مكرر'
+      }
+    );
+    assert.strictEqual(crossUserRes.status, 409, 'Reusing another user\'s idempotency key must return 409 Conflict');
+    assert.strictEqual(crossUserRes.body.data, undefined, 'Must NEVER return another user\'s contact request');
 
     // Concurrent duplicate insertion attempt
     const [c1, c2] = await Promise.all([
@@ -353,7 +380,7 @@ async function runSuite() {
     assert.strictEqual(acceptedMyItem.status, 'accepted');
     assert.strictEqual(acceptedMyItem.teacher.user.phone, '01011119001', 'Teacher phone unlocked for parent');
 
-    // Authorized contact click logging
+    // Authorized contact click logging by legitimate participant (parent)
     const clickRes = await makeRequest(
       port,
       'POST',
@@ -362,6 +389,16 @@ async function runSuite() {
       { requestId: createdRequestId, channel: 'whatsapp' }
     );
     assert.strictEqual(clickRes.status, 201, 'Authorized contact click must return 201');
+
+    // Unauthorized non-participant attempts to log contact click
+    const unauthClickRes = await makeRequest(
+      port,
+      'POST',
+      '/api/analytics/contact-click',
+      { 'Authorization': `Bearer ${testOtherTeacherToken}` },
+      { requestId: createdRequestId, channel: 'whatsapp' }
+    );
+    assert.strictEqual(unauthClickRes.status, 403, 'Unauthorized non-participant must receive 403 on contact click');
     console.log('✅ TEST 4 PASSED: Recipient-only atomic transition, phone unlock, and authorized contact click verified.');
 
     // ----------------------------------------------------
@@ -420,7 +457,15 @@ async function runSuite() {
       `/uploads/certificates/${testCertFilename}?token=${testAdminToken}`
     );
     assert.strictEqual(adminCertQuery.status, 200, 'Admin browser access via ?token=<jwt> must receive 200 OK');
-    console.log('✅ TEST 5 PASSED: Certificate access strictly protected; browser ?token auth verified.');
+
+    // General API endpoint must reject ?token= in query string (preventing log/history leakage)
+    const queryAuthOnStandardRoute = await makeRequest(
+      port,
+      'GET',
+      `/api/contact-requests/my?token=${testParentToken}`
+    );
+    assert.strictEqual(queryAuthOnStandardRoute.status, 401, 'Standard API routes must strictly reject ?token= query parameter');
+    console.log('✅ TEST 5 PASSED: Certificate access strictly protected; browser ?token auth verified and restricted to documents.');
 
     // ----------------------------------------------------
     // TEST 6: ACCOUNT SECURITY & CHANGE PASSWORD
@@ -515,6 +560,27 @@ async function runSuite() {
     });
     assert.strictEqual(attr2.status, 200, 'Duplicate attribution within window must return 200');
     assert.strictEqual(attr2.body.data.deduplicated, true, 'Must report deduplicated');
+
+    // Deep nested recursive sanitization test
+    const deepEventRes = await makeRequest(port, 'POST', '/api/analytics/event', {}, {
+      eventType: 'custom_deep_test',
+      metadata: {
+        nestedUser: {
+          phone: '01011119001',
+          email: 'nested_leak@zads.education'
+        },
+        deepList: [
+          { token: 'secret_leak_jwt', counter: 99 }
+        ]
+      }
+    });
+    assert([200, 201].includes(deepEventRes.status));
+    const deepSaved = await prisma.platformEvent.findFirst({ where: { eventType: 'custom_deep_test' } });
+    const deepMetaStr = JSON.stringify(deepSaved.metadata || {});
+    assert(!deepMetaStr.includes('01011119001'), 'Deep nested phone must be stripped');
+    assert(!deepMetaStr.includes('nested_leak@zads.education'), 'Deep nested email must be stripped');
+    assert(!deepMetaStr.includes('secret_leak_jwt'), 'Deep nested token must be stripped');
+    assert(deepMetaStr.includes('99'), 'Non-sensitive nested properties must be preserved');
 
     // Query all platform_events and assert NO PII
     const allEvents = await prisma.platformEvent.findMany();

@@ -50,12 +50,12 @@ app.use(express.urlencoded({ extended: true }));
 // Static files: avatars and public images only
 app.use('/uploads/images', express.static('public/uploads/images'));
 
-// Protected certificate document access
-const { auth: requireAuth } = require('./middlewares/auth');
+// Protected certificate document access (restricted query ?token= or Bearer strictly for document streaming)
+const { certificateAuth } = require('./middlewares/auth');
 const uploadCtrl = require('./controllers/upload.controller');
-app.get('/uploads/certificates/:filename', requireAuth, uploadCtrl.getCertificate);
-app.get('/api/uploads/certificates/:filename', requireAuth, uploadCtrl.getCertificate);
-app.get('/api/upload/certificates/:filename', requireAuth, uploadCtrl.getCertificate);
+app.get('/uploads/certificates/:filename', certificateAuth, uploadCtrl.getCertificate);
+app.get('/api/uploads/certificates/:filename', certificateAuth, uploadCtrl.getCertificate);
+app.get('/api/upload/certificates/:filename', certificateAuth, uploadCtrl.getCertificate);
 
 // ==============================================
 // ROUTES

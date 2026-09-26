@@ -6,6 +6,7 @@ import { routing } from "@/i18n/routing";
 import { SessionProvider } from "next-auth/react";
 import { Toaster } from "@/components/ui/sonner";
 import { AttributionTracker } from "@/components/shared/AttributionTracker";
+import { PushNotificationRegistrar } from "@/components/shared/PushNotificationRegistrar";
 import "../globals.css";
 
 export async function generateMetadata({
@@ -85,6 +86,7 @@ export default async function LocaleLayout({
           <NextIntlClientProvider messages={messages}>
             {children}
             <AttributionTracker />
+            <PushNotificationRegistrar />
             <Toaster />
           </NextIntlClientProvider>
         </SessionProvider>

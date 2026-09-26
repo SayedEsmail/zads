@@ -8,6 +8,50 @@ const prisma = require('../config/database');
  */
 const auth = async (req, res, next) => {
     try {
+        const authHeader = req.headers.authorization;
+
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return res.status(401).json({
+                success: false,
+                message: 'No token provided'
+            });
+        }
+
+        const token = authHeader.split(' ')[1];
+        const decoded = jwt.verify(token, jwtSecret);
+
+        const user = await prisma.user.findUnique({
+            where: { id: decoded.userId },
+            include: {
+                teacher: true,
+                parent: true
+            }
+        });
+
+        if (!user || user.status !== 'active') {
+            return res.status(401).json({
+                success: false,
+                message: 'User not found or inactive'
+            });
+        }
+
+        req.user = user;
+        next();
+    } catch (error) {
+        return res.status(401).json({
+            success: false,
+            message: 'Invalid or expired token'
+        });
+    }
+};
+
+/**
+ * Certificate Access Authentication middleware
+ * Restricted strictly to certificate retrieval endpoints to allow secure browser navigation
+ * Accepts Authorization Bearer header OR ?token= query parameter
+ */
+const certificateAuth = async (req, res, next) => {
+    try {
         let token = null;
         const authHeader = req.headers.authorization;
 
@@ -20,7 +64,7 @@ const auth = async (req, res, next) => {
         if (!token) {
             return res.status(401).json({
                 success: false,
-                message: 'No token provided'
+                message: 'No token provided for document access'
             });
         }
 
@@ -44,7 +88,10 @@ const auth = async (req, res, next) => {
         req.user = user;
         next();
     } catch (error) {
-        next(error);
+        return res.status(401).json({
+            success: false,
+            message: 'Invalid or expired document token'
+        });
     }
 };
 
@@ -124,4 +171,4 @@ const isAdmin = (req, res, next) => {
     next();
 };
 
-module.exports = { auth, optionalAuth, isTeacher, isParent, isAdmin };
+module.exports = { auth, optionalAuth, isTeacher, isParent, isAdmin, certificateAuth };
