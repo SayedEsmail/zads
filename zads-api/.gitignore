@@ -6,3 +6,5 @@ node_modules
 public/uploads
 serviceAccountKey.json
 .vercel
+.test-pgdata
+.env.test

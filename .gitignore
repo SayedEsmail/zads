@@ -23,6 +23,8 @@ Thumbs.db
 .env.*.local
 .env.production
 .env.development
+.env.test
+.test-pgdata
 
 # ===================================
 # IDE / Editors

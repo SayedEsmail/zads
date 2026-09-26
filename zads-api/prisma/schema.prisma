@@ -1,4 +1,4 @@
-// Prisma Schema for Mo3alemy API
+// Prisma Schema for Zads API
 // Database: PostgreSQL
 
 generator client {
@@ -97,6 +97,9 @@ model Teacher {
   lessonTypes     Json     @default("[\"at_teacher\", \"at_student\"]") @map("lesson_types")
   isVerified      Boolean  @default(false) @map("is_verified")
   certificateUrl  String?  @map("certificate_url")
+  verifiedAt      DateTime? @map("verified_at")
+  verifiedBy      String?   @map("verified_by")
+  verificationNotes String? @map("verification_notes")
   viewsCount      Int      @default(0) @map("views_count")
   avgRating       Decimal  @default(0) @map("avg_rating") @db.Decimal(2, 1)
   ratingCount     Int      @default(0) @map("rating_count")
@@ -210,6 +213,8 @@ model TeacherSubject {
   priceGroup      Int?     @map("price_group")
   priceOnline     Int?     @map("price_online")
   priceOffline    Int?     @map("price_offline")
+  isOnline        Boolean  @default(false) @map("is_online")
+  isOffline       Boolean  @default(true) @map("is_offline")
   priceNegotiable Boolean  @default(false) @map("price_negotiable")
   durationMinutes Int      @default(60) @map("duration_minutes")
   isActive        Boolean  @default(true) @map("is_active")
@@ -249,16 +254,22 @@ model ContactRequest {
   replyMessage String?              @map("reply_message")
   status       ContactRequestStatus @default(pending)
   initiatedBy  String               @default("parent") @map("initiated_by")
+  studyMode    StudyMode?           @map("study_mode")
+  teachingPlace String?             @map("teaching_place")
+  preferredTime String?             @map("preferred_time")
+  tutorRequestId String?            @map("tutor_request_id")
   createdAt    DateTime             @default(now()) @map("created_at")
   updatedAt    DateTime             @updatedAt @map("updated_at")
 
-  parent  Parent   @relation(fields: [parentId], references: [id], onDelete: Cascade)
-  teacher Teacher  @relation(fields: [teacherId], references: [id], onDelete: Cascade)
-  subject Subject? @relation(fields: [subjectId], references: [id])
-  stage   Stage?   @relation(fields: [stageId], references: [id])
+  parent       Parent        @relation(fields: [parentId], references: [id], onDelete: Cascade)
+  teacher      Teacher       @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  subject      Subject?      @relation(fields: [subjectId], references: [id])
+  stage        Stage?        @relation(fields: [stageId], references: [id])
+  tutorRequest TutorRequest? @relation(fields: [tutorRequestId], references: [id], onDelete: SetNull)
 
   @@index([teacherId, status])
   @@index([parentId])
+  @@index([tutorRequestId])
   @@map("contact_requests")
 }
 
@@ -284,6 +295,7 @@ model TutorRequest {
   subject     Subject      @relation(fields: [subjectId], references: [id])
   stage       Stage        @relation(fields: [stageId], references: [id])
   area        Area?        @relation(fields: [areaId], references: [id])
+  contactRequests ContactRequest[]
 
   @@index([areaId, subjectId, stageId, status])
   @@index([parentId])
