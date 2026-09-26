@@ -96,78 +96,78 @@
     "availability": "Availability Schedule"
   },
   "landing": {
-    "heroTitle": "Zads — Direct Tutor Platform",
-    "heroSubtitle": "Connect directly with trusted tutors in your area for home and online sessions",
+    "heroTitle": "Zads — Connecting Teachers and Learners",
+    "heroSubtitle": "Find teachers and learners, then connect to coordinate learning around your needs.",
     "startNow": "Get Started",
     "exploreTeachers": "Teachers Directory",
     "featuresTitle": "Why Zads?",
     "howItWorksTitle": "How Zads Works",
     "features": {
       "local": {
-        "title": "Local Neighborhood Tutors",
-        "desc": "Find educators nearby in 6th of October & Giza for easy coordination"
+        "title": "Find Teachers Nearby",
+        "desc": "Explore teachers by area and connect directly to discuss learning needs"
       },
       "onlineOffline": {
-        "title": "Home & Online Sessions",
-        "desc": "Coordinate in-person sessions at home or online with direct agreements"
+        "title": "Flexible Learning",
+        "desc": "Discuss the learning format and arrangements directly with a teacher"
       },
       "verified": {
-        "title": "Verified Tutors",
-        "desc": "Document audits grant official verified badges for peace of mind"
+        "title": "Teacher Profiles",
+        "desc": "Review teacher profiles, subjects, experience, and any verification status shown"
       },
       "family": {
-        "title": "For You & Your Children",
-        "desc": "Coordinate tutoring for multiple children under one family account"
+        "title": "For Every Learner",
+        "desc": "Learners can use an account for themselves or manage profiles for dependents"
       }
     },
     "steps": {
       "find": {
         "title": "Find a Teacher",
-        "desc": "Use filters to find the right tutor by subject, area, and mode"
+        "desc": "Use filters to explore teachers by subject, stage, area, and learning mode"
       },
       "connect": {
         "title": "Connect & Coordinate",
-        "desc": "Contact the tutor directly and set up your first session"
+        "desc": "Contact a teacher to discuss learning needs and arrangements"
       },
       "start": {
         "title": "Start Learning",
-        "desc": "Begin your learning journey online or in-person"
+        "desc": "Agree on the next steps and begin learning together"
       }
     },
     "readyToStart": "Ready to start?"
   },
   "about": {
     "title": "About Zad",
-    "intro": "Zad is a local learning platform that connects learners with tutors in the same area. We believe quality education starts in your neighborhood — where teacher and student can meet easily, whether online or face-to-face.",
+    "intro": "Zads is a platform where teachers and learners can discover one another and connect around learning needs. Profiles help learners explore subjects, experience, and location before starting a conversation.",
     "missionTitle": "Our Mission",
-    "missionDesc": "Make local tutoring easy to find and coordinate for every family and every learner, regardless of their level, subject, or preferred study mode.",
+    "missionDesc": "Make it easier for teachers and learners to find a suitable connection and coordinate learning directly.",
     "whyUsTitle": "What Sets Us Apart",
     "whyUs": {
-      "geo": "Geographic search — find a tutor in the same neighborhood or city",
-      "flex": "Online & offline lessons — flexibility in how you learn",
-      "account": "One account for the learner and all their dependents",
-      "ratings": "Real ratings from previous students"
+      "geo": "Search for teachers by area",
+      "flex": "Explore learning formats and arrangements with teachers",
+      "account": "Manage a learner profile and profiles for dependents",
+      "ratings": "Explore subjects and experience listed in teacher profiles"
     }
   },
   "howItWorks": {
     "title": "How Zad Works",
-    "subtitle": "Four simple steps to start your learning journey",
+    "subtitle": "A few simple steps to connect around learning",
     "steps": {
       "account": {
         "title": "Create your account",
-        "desc": "Sign up as a client (for yourself or your children) or as a teacher. Registration takes less than a minute."
+        "desc": "Create an account as a learner (for yourself or dependents) or as a teacher."
       },
       "find": {
-        "title": "Find a tutor",
-        "desc": "Use filters for subject, stage, area, and study mode (online/offline) to find the perfect match."
+        "title": "Explore teachers",
+        "desc": "Use filters for subject, stage, area, and learning mode to find a teacher to contact."
       },
       "connect": {
         "title": "Connect & Coordinate",
-        "desc": "Message the tutor directly through the platform and set up your schedule."
+        "desc": "Contact the teacher and discuss learning needs, timing, and arrangements."
       },
       "start": {
         "title": "Start your journey",
-        "desc": "Begin your sessions and enjoy a personal, local learning experience."
+        "desc": "Agree on the next steps and begin learning together."
       }
     }
   },

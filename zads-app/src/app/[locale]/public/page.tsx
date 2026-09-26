@@ -52,7 +52,7 @@ export default function LandingPage() {
         <div className="mx-auto max-w-3xl">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3.5 py-1 text-xs font-bold text-primary mb-4">
             <CheckCircle className="h-3.5 w-3.5" />
-            {locale === "ar" ? "منصة التعليم المباشر الأولى في السادس من أكتوبر" : "Direct Tutoring in 6th of October & Giza"}
+            {locale === "ar" ? "منصة تربط المعلمين بالمتعلمين" : "A platform connecting teachers and learners"}
           </span>
           <h1 className="mb-4 text-3xl font-extrabold leading-tight text-primary sm:text-4xl lg:text-5xl">
             {t("heroTitle")}
@@ -84,19 +84,19 @@ export default function LandingPage() {
             <div>
               <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
                 <MapPin className="h-5 w-5 text-primary" />
-                <span>{locale === "ar" ? "تغطية شاملة لمدينة السادس من أكتوبر ومحيطها" : "Covering 6th of October & Surroundings"}</span>
+                <span>{locale === "ar" ? "اكتشف المعلمين حسب المنطقة" : "Find teachers by area"}</span>
               </h2>
               <p className="text-xs text-muted-foreground mt-0.5">
                 {locale === "ar"
-                  ? "معلمون معتمدون لجميع المناهج: عام، لغات، تجريبي، أزهري، ودولي."
-                  : "Verified tutors for National, Language, Al-Azhar, and International curricula."}
+                  ? "ابحث عن معلمين حسب المادة والمرحلة والمنطقة."
+                  : "Explore teachers by subject, stage, and area."}
               </p>
             </div>
             <Link
               href={`/${locale}/public/teachers`}
               className="text-xs font-bold text-primary hover:underline inline-flex items-center gap-1 self-start sm:self-auto"
             >
-              <span>{locale === "ar" ? "تصفح معلمي منطقتك" : "Browse local tutors"}</span>
+              <span>{locale === "ar" ? "تصفح المعلمين" : "Browse teachers"}</span>
               <Arrow className="h-3.5 w-3.5" />
             </Link>
           </div>
@@ -163,8 +163,8 @@ export default function LandingPage() {
             </h3>
             <p className="text-xs text-muted-foreground leading-relaxed">
               {locale === "ar"
-                ? "منصة زاد تربط أولياء الأمور والطلاب بالمعلمين مباشرة لتسهيل التواصل والاتفاق المباشر وفق احتياجات المتعلم."
-                : "Zads directly connects parents and students with educators for straightforward coordination according to student needs."}
+                ? "منصة زاد تربط المعلمين والمتعلمين لتسهيل التواصل وتنسيق فرص التعلم وفق احتياجات المتعلم."
+                : "Zads connects teachers and learners to discuss learning needs and coordinate learning directly."}
             </p>
           </div>
         </div>

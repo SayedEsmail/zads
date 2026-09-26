@@ -10,6 +10,12 @@ const api = axios.create({
   timeout: 15000,
 });
 
+// Public discovery must not depend on a session or inherit account-specific filters.
+export const publicApi = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || "/api",
+  timeout: 15000,
+});
+
 // Request interceptor: attach JWT from NextAuth session
 api.interceptors.request.use(async (config) => {
   const session = await getSession();

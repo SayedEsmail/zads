@@ -20,11 +20,11 @@ export async function generateMetadata({
 
   return {
     title: isAr
-      ? "زاد — منصة ربط المعلمين والطلاب في السادس من أكتوبر والجيزة"
-      : "Zads — Direct Tutor Platform in 6th of October & Giza",
+      ? "زاد — منصة ربط المعلمين والمتعلمين في السادس من أكتوبر والجيزة"
+      : "Zads — A Platform Connecting Teachers and Learners",
     description: isAr
-      ? "منصة تعليمية مباشرة لتسهيل التواصل مع أفضل المعلمين الخصوصيين للحصص المنزلية والأونلاين."
-      : "Direct platform connecting parents with verified private tutors for home and online sessions.",
+      ? "منصة تساعد المعلمين والمتعلمين على اكتشاف بعضهم والتواصل لتنسيق فرص التعلم."
+      : "A platform where teachers and learners can find each other and coordinate learning directly.",
     metadataBase: new URL(baseUrl),
     alternates: {
       canonical: `/${locale}/public`,
@@ -35,11 +35,11 @@ export async function generateMetadata({
     },
     openGraph: {
       title: isAr
-        ? "زاد — منصة ربط المعلمين والطلاب"
-        : "Zads — Direct Tutor Platform",
+        ? "زاد — منصة ربط المعلمين والمتعلمين"
+        : "Zads — Connecting Teachers and Learners",
       description: isAr
-        ? "تواصل مباشرة مع معلمين معتمدين لتنسيق الحصص المنزلية والأونلاين."
-        : "Connect directly with verified tutors for home and online sessions.",
+        ? "اكتشف المعلمين والمتعلمين وتواصل معهم لتنسيق فرص التعلم."
+        : "Find teachers and learners, then connect to coordinate learning.",
       locale: isAr ? "ar_EG" : "en_US",
       type: "website",
     },

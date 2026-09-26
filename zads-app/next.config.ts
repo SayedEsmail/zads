@@ -31,6 +31,16 @@ const nextConfig: NextConfig = {
         destination: "/:locale/client/:path*",
         permanent: true,
       },
+      {
+        source: "/:locale/about",
+        destination: "/:locale/public/about",
+        permanent: true,
+      },
+      {
+        source: "/:locale/how-it-works",
+        destination: "/:locale/public/how-it-works",
+        permanent: true,
+      },
     ];
   },
 

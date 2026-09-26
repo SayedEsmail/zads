@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useLocale, useTranslations } from "next-intl";
+import { useLocale } from "next-intl";
 import Link from "next/link";
 import { Search, SlidersHorizontal, MapPin, CheckCircle, GraduationCap, ArrowRight, ArrowLeft } from "lucide-react";
 import { useSearchStore } from "@/stores/search";
@@ -12,19 +12,17 @@ import type { StudyMode } from "@/types";
 
 export default function PublicTeachersPage() {
   const locale = useLocale();
-  const tCommon = useTranslations("common");
   const Arrow = locale === "ar" ? ArrowLeft : ArrowRight;
 
   const {
     teachers,
     totalTeachers,
+    totalPages,
     isLoadingTeachers,
     error,
     subjects,
     stages,
     governorates,
-    cities,
-    areas,
     fetchSubjects,
     fetchStages,
     fetchGovernorates,
@@ -45,13 +43,16 @@ export default function PublicTeachersPage() {
     maxPrice: "",
   });
 
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+  const loading = !initialLoadComplete || isLoadingTeachers;
+  const [page, setPage] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
     fetchSubjects();
     fetchStages();
     fetchGovernorates();
-    searchTeachers({});
+    searchTeachers({}, true).finally(() => setInitialLoadComplete(true));
   }, [fetchSubjects, fetchStages, fetchGovernorates, searchTeachers]);
 
   useEffect(() => {
@@ -66,8 +67,10 @@ export default function PublicTeachersPage() {
     }
   }, [filters.cityId, fetchAreas]);
 
-  const handleSearch = () => {
+  const handleSearch = (nextPage = 1) => {
+    setPage(nextPage);
     searchTeachers({
+      page: nextPage,
       subjectId: filters.subjectId || undefined,
       stageId: filters.stageId || undefined,
       governorateId: filters.governorateId || undefined,
@@ -76,7 +79,7 @@ export default function PublicTeachersPage() {
       studyMode: (filters.studyMode as StudyMode) || undefined,
       minPrice: filters.minPrice ? Number(filters.minPrice) : undefined,
       maxPrice: filters.maxPrice ? Number(filters.maxPrice) : undefined,
-    });
+    }, true);
   };
 
   const handleClearFilters = () => {
@@ -92,18 +95,22 @@ export default function PublicTeachersPage() {
       maxPrice: "",
     };
     setFilters(emptyFilters);
-    searchTeachers({});
+    setPage(1);
+    searchTeachers({}, true);
   };
 
   const filteredTeachers = teachers?.filter((t) => {
     if (!filters.query.trim()) return true;
-    const q = filters.query.toLowerCase();
+    const q = filters.query.trim().toLowerCase();
     const nameMatch = t.user?.name?.toLowerCase().includes(q);
     const bioMatch = t.bio?.toLowerCase().includes(q);
     const subjectMatch = t.subjects?.some((s) =>
       Boolean(s.subject?.nameAr?.toLowerCase().includes(q) || s.subject?.nameEn?.toLowerCase().includes(q))
     );
-    return nameMatch || bioMatch || subjectMatch;
+    const locationMatch = [t.area?.nameAr, t.area?.nameEn, t.area?.city?.nameAr,
+      t.area?.city?.nameEn, t.area?.city?.governorate?.nameAr, t.area?.city?.governorate?.nameEn]
+      .some((name) => name?.toLowerCase().includes(q));
+    return nameMatch || bioMatch || subjectMatch || locationMatch;
   });
 
   return (
@@ -114,35 +121,17 @@ export default function PublicTeachersPage() {
           <div className="max-w-2xl">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-xs font-semibold backdrop-blur-sm">
               <MapPin className="h-3.5 w-3.5" />
-              {locale === "ar" ? "معلمو السادس من أكتوبر والجيزة والقاهرة" : "6th of October, Giza & Cairo Tutors"}
+              {locale === "ar" ? "معلمو السادس من أكتوبر والجيزة والقاهرة" : "6th of October, Giza & Cairo Teachers"}
             </span>
             <h1 className="mt-3 text-2xl sm:text-3xl font-extrabold tracking-tight">
-              {locale === "ar" ? "دليل المعلمين الخصوصيين المعتمدين" : "Certified Private Tutors Directory"}
+              {locale === "ar" ? "اكتشف المعلّمين" : "Discover Teachers"}
             </h1>
             <p className="mt-2 text-sm sm:text-base text-white/90">
               {locale === "ar"
-                ? "تواصل مباشرة مع معلمين متميزين لتنسيق الحصص المنزلية والأونلاين."
-                : "Connect directly with trusted teachers for home and online sessions."}
+                ? "اعثر على معلّم يناسب احتياجاتك، وتواصل معه لتنسيق التعلّم حضوريًا أو أونلاين."
+                : "Find a teacher for your learning needs and connect to arrange in-person or online learning."}
             </p>
           </div>
-        </div>
-
-        {/* Quick Location Pills (6th of October Focus) */}
-        <div className="flex flex-wrap items-center gap-2 text-xs">
-          <span className="text-muted-foreground font-medium">
-            {locale === "ar" ? "أشهر المناطق:" : "Popular Areas:"}
-          </span>
-          {["الحي المتميز", "الحي الأول", "الحي الثاني", "غرب سوميد", "حدائق أكتوبر", "الشيخ زايد"].map((zone) => (
-            <button
-              key={zone}
-              onClick={() => {
-                setFilters((f) => ({ ...f, query: zone }));
-              }}
-              className="rounded-full border border-slate-200 bg-white px-3 py-1 font-medium text-slate-700 hover:border-primary hover:text-primary transition-colors cursor-pointer shadow-2xs"
-            >
-              {zone}
-            </button>
-          ))}
         </div>
 
         {/* Search Controls */}
@@ -151,13 +140,16 @@ export default function PublicTeachersPage() {
             <div className="relative flex-1">
               <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <input
+                aria-label={locale === "ar" ? "البحث في المعلّمين" : "Search teachers"}
                 value={filters.query}
                 onChange={(e) => setFilters((f) => ({ ...f, query: e.target.value }))}
-                placeholder={locale === "ar" ? "ابحث باسم المعلم، المادة، أو الحي..." : "Search by teacher, subject, or district..."}
+                placeholder={locale === "ar" ? "ابحث في الصفحة الحالية بالاسم، المادة، أو المنطقة..." : "Search this page by name, subject, or area..."}
                 className="w-full rounded-xl border border-border bg-slate-50 py-2.5 ps-9 pe-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white"
               />
             </div>
             <button
+              aria-label={locale === "ar" ? "فلاتر البحث" : "Search filters"}
+              aria-expanded={showFilters}
               onClick={() => setShowFilters(!showFilters)}
               className={`flex items-center gap-1.5 rounded-xl border px-3.5 py-2.5 text-sm font-semibold transition-colors cursor-pointer ${
                 showFilters ? "border-primary bg-primary/10 text-primary" : "border-border hover:bg-slate-100 text-slate-700"
@@ -167,7 +159,7 @@ export default function PublicTeachersPage() {
               <span className="hidden sm:inline">{locale === "ar" ? "تصفية متقدمة" : "Filters"}</span>
             </button>
             <button
-              onClick={handleSearch}
+              onClick={() => handleSearch()}
               className="rounded-xl bg-primary px-5 py-2.5 text-sm font-bold text-white hover:bg-primary-dark transition-colors cursor-pointer shadow-sm"
             >
               {locale === "ar" ? "بحث" : "Search"}
@@ -217,7 +209,7 @@ export default function PublicTeachersPage() {
                   className="w-full rounded-lg border border-border px-2.5 py-2 text-xs bg-white"
                 >
                   <option value="">{locale === "ar" ? "الكل (حضوري أو أونلاين)" : "All (Online & In-person)"}</option>
-                  <option value="offline">{locale === "ar" ? "حضوري / منزلي فقط" : "In-Person Only"}</option>
+                  <option value="offline">{locale === "ar" ? "حضوري فقط" : "In-Person Only"}</option>
                   <option value="online">{locale === "ar" ? "أونلاين فقط" : "Online Only"}</option>
                 </select>
               </div>
@@ -248,7 +240,7 @@ export default function PublicTeachersPage() {
                 </button>
                 <button
                   type="button"
-                  onClick={handleSearch}
+                  onClick={() => handleSearch()}
                   className="rounded-lg bg-primary text-white text-xs font-bold px-4 py-1.5 shadow-2xs hover:bg-primary-dark"
                 >
                   {locale === "ar" ? "تطبيق الفلترة" : "Apply Filters"}
@@ -261,11 +253,11 @@ export default function PublicTeachersPage() {
         {/* Results Count & Status */}
         <div className="flex items-center justify-between text-xs text-muted-foreground">
           <span>
-            {isLoadingTeachers
+            {loading
               ? (locale === "ar" ? "جاري البحث..." : "Searching...")
-              : (locale === "ar"
-                  ? `عرض ${filteredTeachers?.length ?? 0} معلم متاح`
-                  : `Showing ${filteredTeachers?.length ?? 0} available teachers`)}
+              : error ? (locale === "ar" ? "تعذّر تحميل المعلّمين" : "Could not load teachers") : (locale === "ar"
+                  ? `عرض ${filteredTeachers?.length ?? 0} معلّم من ${totalTeachers}`
+                  : `Showing ${filteredTeachers?.length ?? 0} teachers of ${totalTeachers}`)}
           </span>
           <span className="flex items-center gap-1 text-blue-700 font-medium">
             <CheckCircle className="h-3.5 w-3.5" />
@@ -274,11 +266,11 @@ export default function PublicTeachersPage() {
         </div>
 
         {/* Teachers List */}
-        <ErrorBanner error={error} onRetry={handleSearch} />
+        <ErrorBanner error={error} onRetry={() => handleSearch(page)} />
 
-        {isLoadingTeachers ? (
+        {loading ? (
           <PageSkeleton rows={4} />
-        ) : !filteredTeachers || filteredTeachers.length === 0 ? (
+        ) : error ? null : !filteredTeachers || filteredTeachers.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-12 text-center space-y-3">
             <GraduationCap className="mx-auto h-12 w-12 text-slate-300" />
             <h3 className="text-base font-bold text-slate-800">
@@ -309,16 +301,24 @@ export default function PublicTeachersPage() {
           </div>
         )}
 
+        {!error && !loading && totalPages > 1 && (
+          <nav aria-label={locale === "ar" ? "صفحات النتائج" : "Results pages"} className="flex justify-center items-center gap-4 text-sm">
+            <button disabled={page <= 1} onClick={() => handleSearch(page - 1)} className="disabled:opacity-40">{locale === "ar" ? "السابق" : "Previous"}</button>
+            <span>{page} / {totalPages}</span>
+            <button disabled={page >= totalPages} onClick={() => handleSearch(page + 1)} className="disabled:opacity-40">{locale === "ar" ? "التالي" : "Next"}</button>
+          </nav>
+        )}
+
         {/* Join as Teacher Promotion Box */}
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="space-y-1 text-center sm:text-start">
             <h3 className="text-base font-bold text-slate-900">
-              {locale === "ar" ? "هل أنت معلم وتبحث عن طلاب في منطقتك؟" : "Are you a teacher looking for students?"}
+              {locale === "ar" ? "هل أنت معلّم وتريد الوصول إلى متعلّمين؟" : "Are you a teacher looking to connect with learners?"}
             </h3>
             <p className="text-xs text-muted-foreground">
               {locale === "ar"
-                ? "انضم إلى منصة زاد التعليمية واستقبل طلبات أولياء الأمور مباشرة في منطقتك."
-                : "Join Zads platform and receive direct requests from parents in your area."}
+                ? "انضم إلى زاد واستقبل طلبات تواصل من المتعلّمين وأولياء الأمور."
+                : "Join Zads and receive contact requests from learners and guardians."}
             </p>
           </div>
           <Link

@@ -22,32 +22,32 @@ export default function JoinTeacherPage() {
       title: locale === "ar" ? "استقلالية تامة في الاتفاق" : "Independent Direct Agreements",
       desc:
         locale === "ar"
-          ? "تواصل مباشر مع أولياء الأمور والطلاب دون أي شروط مجحفة، واتفاق تام على تفاصيل الدروس."
-          : "Direct coordination with parents and students, agreeing freely on lesson schedules and details.",
+          ? "تواصل مع المتعلمين وأسرهم لمناقشة احتياجات التعلم والتفاصيل مباشرةً."
+          : "Connect with learners and their families to discuss learning needs and details directly.",
     },
     {
       icon: Users,
       title: locale === "ar" ? "تواصل مباشر مع أولياء الأمور" : "Direct Client Connection",
       desc:
         locale === "ar"
-          ? "استقبل طلبات الدروس مباشرة وتحدث مع ولي الأمر للاتفاق على المنهج والمواعيد المناسبة."
-          : "Receive lesson requests directly and communicate freely with parents to agree on schedules.",
+          ? "تعرّف على طلبات المتعلمين وتواصل معهم لمناقشة المواد والمواعيد المناسبة."
+          : "Explore learner requests and connect to discuss subjects and suitable schedules.",
     },
     {
       icon: ShieldCheck,
-      title: locale === "ar" ? "شارة التوثيق والاعتماد" : "Verified Teacher Badge",
+      title: locale === "ar" ? "حالة التوثيق في الملف" : "Profile Verification Status",
       desc:
         locale === "ar"
-          ? "ارفع مؤهلك الدراسي أو شهادتك لتحصل على شارة التحقق الرسمية لزيادة ثقة العائلات بملفك."
-          : "Upload your academic credentials to earn the official verification badge and build family trust.",
+          ? "أضف مؤهلاتك، وتظهر حالة التوثيق في ملفك بعد مراجعة المستندات."
+          : "Add your qualifications; verification status appears on your profile after document review.",
     },
     {
       icon: Clock,
       title: locale === "ar" ? "مرونة كاملة في المواعيد والأسعار" : "Total Schedule & Rate Flexibility",
       desc:
         locale === "ar"
-          ? "حدد أسعارك بنفسك للحصص الحضورية والأونلاين وضع جدول أوقات فراغك بدقة."
-          : "Set your own rates for in-person and online tutoring and manage your available weekly time slots.",
+          ? "أضف الأسعار وطرق التعلم التي تقدمها وحدد أوقاتك المتاحة."
+          : "Add your rates and learning formats, and set your available time slots.",
     },
   ];
 
@@ -57,8 +57,8 @@ export default function JoinTeacherPage() {
       title: locale === "ar" ? "أنشئ حسابك كمعلم" : "Create Teacher Account",
       desc:
         locale === "ar"
-          ? "سجل في دقيقة واحدة باستخدام رقم هاتفك وبياناتك الأساسية."
-          : "Sign up in one minute using your phone number and basic information.",
+          ? "أنشئ حساباً باستخدام رقم هاتفك وبياناتك الأساسية."
+          : "Create an account with your phone number and basic information.",
     },
     {
       num: "2",
@@ -73,8 +73,8 @@ export default function JoinTeacherPage() {
       title: locale === "ar" ? "استقبل طلبات الدروس وابدأ" : "Receive Inquiries & Teach",
       desc:
         locale === "ar"
-          ? "تصفح طلبات الطلاب القريبة منك واستقبل اتصالات أولياء الأمور مباشرة."
-          : "Browse local student requests and connect directly with interested parents.",
+          ? "استكشف طلبات المتعلمين وتواصل مباشرةً لمناقشة احتياجاتهم."
+          : "Explore learner requests and connect directly to discuss their needs.",
     },
   ];
 
@@ -89,20 +89,20 @@ export default function JoinTeacherPage() {
           </span>
           <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight">
             {locale === "ar"
-              ? "درّس بكرامة ومرونة... وتواصل مباشر مع العائلات"
-              : "Teach with flexibility through direct family connections"}
+              ? "شارك خبرتك وتواصل مع المتعلمين"
+              : "Share your expertise and connect with learners"}
           </h1>
           <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
             {locale === "ar"
-              ? "منصة زاد تمكّن المعلمين الأكفاء في السادس من أكتوبر وجميع المحافظات من الوصول المباشر للطلاب والعائلات مع الحفاظ على خصوصية كاملة وتحكم تام."
-              : "Zads empowers dedicated educators in 6th of October and across Egypt to connect directly with students and families."}
+              ? "تساعد منصة زاد المعلمين على عرض ملفاتهم والتواصل مع المتعلمين لمناقشة فرص التعلم."
+              : "Zads helps teachers share their profiles and connect with learners to discuss learning opportunities."}
           </p>
           <div className="pt-2">
             <Link
               href={`/${locale}/auth/register`}
               className="inline-flex items-center gap-2 rounded-xl bg-primary px-8 py-3.5 text-sm font-bold text-white shadow-md hover:bg-primary-dark transition-all"
             >
-              <span>{locale === "ar" ? "سجل كمعلم الآن مجاناً" : "Register as Teacher for Free"}</span>
+              <span>{locale === "ar" ? "أنشئ حساب معلم" : "Create a Teacher Account"}</span>
               <Arrow className="h-4 w-4" />
             </Link>
           </div>
@@ -157,12 +157,12 @@ export default function JoinTeacherPage() {
         {/* Final Registration Callout */}
         <div className="rounded-2xl bg-gradient-to-r from-slate-900 to-slate-800 p-8 text-center text-white space-y-4 shadow-lg">
           <h2 className="text-2xl font-bold">
-            {locale === "ar" ? "جاهز لبناء قاعدة طلابك المحلية؟" : "Ready to grow your student base?"}
+            {locale === "ar" ? "ابدأ بالتواصل مع المتعلمين" : "Start connecting with learners"}
           </h2>
           <p className="text-xs sm:text-sm text-slate-300 max-w-lg mx-auto">
             {locale === "ar"
-              ? "انضم اليوم إلى المعلمين الموثوقين في السادس من أكتوبر والجيزة وابدأ في استقبال طلبات التدريس."
-              : "Join trusted tutors in 6th of October and Giza today and start receiving lesson requests."}
+              ? "أنشئ ملفك واستكشف طلبات التعلم المتاحة على المنصة."
+              : "Create your profile and explore learning requests on the platform."}
           </p>
           <div>
             <Link
