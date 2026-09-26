@@ -58,6 +58,8 @@ export default function TeacherBrowsePage() {
         parentId: selectedRequest.parentId,
         subjectId: selectedRequest.subjectId,
         stageId: selectedRequest.stageId,
+        tutorRequestId: selectedRequest.id,
+        studyMode: selectedRequest.studyMode === "both" ? undefined : (selectedRequest.studyMode as "online" | "offline"),
         message: message.trim() || undefined,
       })
       .then(() => {

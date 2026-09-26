@@ -68,9 +68,9 @@ const searchTeachers = async (req, res, next) => {
             teacherWhere.area = { city: { governorateId: activeGovId } };
         }
 
-        // Lesson type filter
+        // Lesson type filter (PostgreSQL Json column)
         if (lessonType) {
-            teacherWhere.lessonTypes = { has: lessonType };
+            teacherWhere.lessonTypes = { array_contains: lessonType };
         }
 
         // Subject/Stage filter
@@ -104,37 +104,62 @@ const searchTeachers = async (req, res, next) => {
         const subjectWhere = { isActive: true };
         if (subjectId) subjectWhere.subjectId = subjectId;
         if (stageId) subjectWhere.stageId = stageId;
-        // studyMode filter: online → priceOnline not null, offline → priceOffline not null
-        if (studyMode === 'online') subjectWhere.priceOnline = { not: null };
-        else if (studyMode === 'offline') subjectWhere.priceOffline = { not: null };
-        if (minPrice) {
+
+        // studyMode filter: online or offline capability
+        if (studyMode === 'online') {
             subjectWhere.OR = [
-                { priceAtTeacher: { gte: parseInt(minPrice) } },
-                { priceAtStudent: { gte: parseInt(minPrice) } },
-                { priceGroup: { gte: parseInt(minPrice) } }
+                { priceOnline: { not: null, gt: 0 } },
+                { isOnline: true }
+            ];
+        } else if (studyMode === 'offline') {
+            subjectWhere.OR = [
+                { priceOffline: { not: null, gt: 0 } },
+                { isOffline: true }
             ];
         }
-        if (maxPrice) {
-            const priceFilter = { lte: parseInt(maxPrice) };
-            subjectWhere.OR = [
-                { priceAtTeacher: priceFilter },
-                { priceAtStudent: priceFilter },
-                { priceGroup: priceFilter }
-            ];
+
+        // minPrice and maxPrice handling across all pricing columns
+        if (minPrice || maxPrice) {
+            const min = minPrice ? parseInt(minPrice) : 0;
+            const max = maxPrice ? parseInt(maxPrice) : Infinity;
+
+            const priceFields = ['priceAtTeacher', 'priceAtStudent', 'priceGroup', 'priceOnline', 'priceOffline'];
+            const priceOrConditions = priceFields.map(f => {
+                const cond = {};
+                if (minPrice && maxPrice) {
+                    cond[f] = { gte: min, lte: max };
+                } else if (minPrice) {
+                    cond[f] = { gte: min };
+                } else {
+                    cond[f] = { lte: max, gt: 0 };
+                }
+                return cond;
+            });
+
+            if (subjectWhere.OR) {
+                subjectWhere.AND = [
+                    { OR: subjectWhere.OR },
+                    { OR: priceOrConditions }
+                ];
+                delete subjectWhere.OR;
+            } else {
+                subjectWhere.OR = priceOrConditions;
+            }
         }
+
+        const hasSubjectFilter = subjectId || stageId || studyMode || minPrice || maxPrice;
 
         // Get all teachers in the governorate
         let teachers = await prisma.teacher.findMany({
             where: {
                 ...teacherWhere,
-                ...(subjectId || stageId ? { subjects: { some: subjectWhere } } : {})
+                ...(hasSubjectFilter ? { subjects: { some: subjectWhere } } : {})
             },
             include: {
                 user: {
                     select: {
                         id: true,
                         name: true,
-                        phone: true,
                         avatarUrl: true
                     }
                 },
@@ -186,7 +211,10 @@ const searchTeachers = async (req, res, next) => {
         const total = teachers.length;
         teachers = teachers.slice(skip, skip + parseInt(limit));
 
-        return response.paginated(res, teachers, {
+        // Privacy: Strip certificateUrl from public search results
+        const sanitizedTeachers = teachers.map(({ certificateUrl, ...rest }) => rest);
+
+        return response.paginated(res, sanitizedTeachers, {
             page: parseInt(page),
             limit: parseInt(limit),
             total,
@@ -205,8 +233,11 @@ const getTeacherById = async (req, res, next) => {
     try {
         const { id } = req.params;
 
-        const teacher = await prisma.teacher.findUnique({
-            where: { id },
+        const teacher = await prisma.teacher.findFirst({
+            where: {
+                id,
+                user: { status: 'active' }
+            },
             include: {
                 user: {
                     select: {
@@ -250,7 +281,17 @@ const getTeacherById = async (req, res, next) => {
             data: { viewsCount: { increment: 1 } }
         });
 
-        return response.success(res, teacher);
+        // Privacy: Hide certificateUrl unless requester is admin or the teacher themselves
+        const isOwner = req.user?.userType === 'teacher' && req.user?.teacher?.id === teacher.id;
+        const isAdmin = req.user?.userType === 'admin';
+
+        let sanitizedTeacher = teacher;
+        if (!isOwner && !isAdmin) {
+            const { certificateUrl, ...rest } = teacher;
+            sanitizedTeacher = rest;
+        }
+
+        return response.success(res, sanitizedTeacher);
 
     } catch (error) {
         next(error);
@@ -577,14 +618,41 @@ const updateMyAvailability = async (req, res, next) => {
             return response.error(res, 'Slots must be an array', 400);
         }
 
-        // Validate slots
-        for (const slot of slots) {
-            if (slot.dayOfWeek < 0 || slot.dayOfWeek > 6) {
-                return response.error(res, 'Invalid day of week', 400);
+        // Validate slots (HH:mm format, startTime < endTime, dayOfWeek 0-6, non-overlapping)
+        const timeRegex = /^([01]\d|2[0-3]):[0-5]\d$/;
+        const slotsByDay = {};
+
+        for (let i = 0; i < slots.length; i++) {
+            const slot = slots[i];
+            const day = parseInt(slot.dayOfWeek);
+
+            if (isNaN(day) || day < 0 || day > 6) {
+                return response.error(res, `Invalid day of week for slot #${i + 1}. Must be between 0 (Sunday) and 6 (Saturday)`, 400);
             }
             if (!slot.startTime || !slot.endTime) {
-                return response.error(res, 'Start time and end time are required', 400);
+                return response.error(res, `Start time and end time are required for slot #${i + 1}`, 400);
             }
+            if (!timeRegex.test(slot.startTime) || !timeRegex.test(slot.endTime)) {
+                return response.error(res, `Times must be in valid 24-hour HH:mm format for slot #${i + 1}`, 400);
+            }
+            if (slot.startTime >= slot.endTime) {
+                return response.error(res, `Start time (${slot.startTime}) must be earlier than end time (${slot.endTime}) for slot #${i + 1}`, 400);
+            }
+
+            if (!slotsByDay[day]) {
+                slotsByDay[day] = [];
+            }
+            // Check for overlap with existing slots on the same day
+            for (const existing of slotsByDay[day]) {
+                if (slot.startTime < existing.endTime && existing.startTime < slot.endTime) {
+                    return response.error(
+                        res,
+                        `Overlapping time slots detected on day ${day}: (${slot.startTime}-${slot.endTime}) conflicts with (${existing.startTime}-${existing.endTime})`,
+                        400
+                    );
+                }
+            }
+            slotsByDay[day].push({ startTime: slot.startTime, endTime: slot.endTime });
         }
 
         // Execute in transaction: delete all existing slots, insert new ones

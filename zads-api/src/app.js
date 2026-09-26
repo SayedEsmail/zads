@@ -46,7 +46,14 @@ if (process.env.NODE_ENV === 'development') {
 // Parse JSON
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use('/uploads', express.static('public/uploads'));
+
+// Static files: avatars and public images only
+app.use('/uploads/images', express.static('public/uploads/images'));
+
+// Protected certificate document access
+const { auth: requireAuth } = require('./middlewares/auth');
+const uploadCtrl = require('./controllers/upload.controller');
+app.get('/uploads/certificates/:filename', requireAuth, uploadCtrl.getCertificate);
 
 // ==============================================
 // ROUTES
@@ -92,7 +99,7 @@ const HOST = process.env.HOST || '127.0.0.1';
 
 if (require.main === module) {
     app.listen(PORT, HOST, () => {
-        console.log(`🚀 Mo3alemy API running at http://${HOST}:${PORT}`);
+        console.log(`🚀 Zads API running at http://${HOST}:${PORT}`);
         console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
     });
 }

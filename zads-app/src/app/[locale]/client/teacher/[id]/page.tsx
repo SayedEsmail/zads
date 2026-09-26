@@ -93,6 +93,8 @@ export default function TeacherDetailPage() {
         subjectId: selectedSubjectRate?.subjectId || undefined,
         stageId: selectedSubjectRate?.stageId || undefined,
         message: finalMessage || undefined,
+        studyMode: studyMode as "online" | "offline",
+        preferredTime: selectedSlot || undefined,
       });
 
       toast.success("تم إرسال طلب التواصل المباشر بنجاح!");

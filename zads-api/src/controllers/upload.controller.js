@@ -111,5 +111,42 @@ exports.uploadCertificate = (req, res) => {
     });
 };
 
+// Authorized Certificate Retrieval (Teacher owner or Admin only)
+exports.getCertificate = async (req, res, next) => {
+    try {
+        const { filename } = req.params;
+        const safeFilename = path.basename(filename);
+        const filePath = path.resolve('public/uploads/certificates', safeFilename);
+
+        if (!fs.existsSync(filePath)) {
+            return res.status(404).json({
+                success: false,
+                message: 'Certificate file not found'
+            });
+        }
+
+        // Admins can view any certificate
+        if (req.user.userType === 'admin') {
+            return res.sendFile(filePath);
+        }
+
+        // Teachers can only view their own certificate
+        if (req.user.userType === 'teacher' && req.user.teacher) {
+            const certUrl = req.user.teacher.certificateUrl;
+            if (certUrl && certUrl.includes(safeFilename)) {
+                return res.sendFile(filePath);
+            }
+        }
+
+        return res.status(403).json({
+            success: false,
+            message: 'Access denied. You do not have permission to view this document.'
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
 exports.uploadMiddleware = upload.single('image');
 exports.certificateMiddleware = certificateUpload.single('certificate');
+

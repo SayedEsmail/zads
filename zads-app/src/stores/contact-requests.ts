@@ -13,7 +13,26 @@ interface ContactRequestsStore {
   error: string | null;
   fetch: () => Promise<void>;
   fetchIncoming: () => Promise<void>;
-  createRequest: (payload: { teacherId: string; subjectId?: string; stageId?: string; message?: string }) => Promise<void>;
+  createRequest: (payload: {
+    teacherId: string;
+    subjectId?: string;
+    stageId?: string;
+    message?: string;
+    studyMode?: "online" | "offline";
+    teachingPlace?: string;
+    preferredTime?: string;
+    tutorRequestId?: string;
+  }) => Promise<void>;
+  createRequestAsTeacher: (payload: {
+    parentId: string;
+    subjectId?: string;
+    stageId?: string;
+    message?: string;
+    studyMode?: "online" | "offline";
+    teachingPlace?: string;
+    preferredTime?: string;
+    tutorRequestId?: string;
+  }) => Promise<void>;
   updateStatus: (id: string, status: ContactRequestStatus, replyMessage?: string) => Promise<void>;
   updateParentStatus: (id: string, status: ContactRequestStatus, replyMessage?: string) => Promise<void>;
   updateParentMessage: (id: string, message: string) => Promise<void>;
@@ -53,6 +72,17 @@ export const useContactRequestsStore = create<ContactRequestsStore>()(
         try {
           await api.post("/contact-requests", payload);
           await get().fetch();
+        } catch (err) {
+          set({ error: extractError(err), isLoading: false });
+          throw err;
+        }
+      },
+
+      createRequestAsTeacher: async (payload) => {
+        set({ isLoading: true, error: null });
+        try {
+          await api.post("/contact-requests/teacher", payload);
+          await get().fetchIncoming();
         } catch (err) {
           set({ error: extractError(err), isLoading: false });
           throw err;
