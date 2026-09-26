@@ -34,6 +34,10 @@ const STRIP_FROM_UPSTREAM = new Set([
   "x-download-options",
   "x-permitted-cross-domain-policies",
   "referrer-policy",
+  // undici/fetch decompresses the body; forwarding these causes
+  // net::ERR_CONTENT_DECODING_FAILED in the browser (200 OK + broken decode).
+  "content-encoding",
+  "content-length",
 ]);
 
 type RouteContext = { params: Promise<{ backend: string[] }> };
@@ -73,8 +77,11 @@ async function proxy(req: NextRequest, context: RouteContext) {
     if (HOP_BY_HOP.has(lower)) return;
     // Keep API auth header-only; do not leak NextAuth session cookies upstream.
     if (lower === "cookie") return;
+    // Ask upstream for identity encoding so we never re-advertise compression.
+    if (lower === "accept-encoding") return;
     headers.set(key, value);
   });
+  headers.set("Accept-Encoding", "identity");
 
   const init: RequestInit = {
     method: req.method,
