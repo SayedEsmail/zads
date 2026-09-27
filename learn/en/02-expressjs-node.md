@@ -2,7 +2,8 @@
 
 
 > **Level:** From scratch to a complete understanding of the API's code
-> **Expected Time:** 3-4 weeks (2 hours/day)
+> **On the fullstack path:** days 6–12 only (14 hours). Do not add 3–4 weeks on top of the rest of the path. The calendar is [00-fullstack-path.md](./00-fullstack-path.md).
+> **Video for these days:** [event loop](https://www.youtube.com/watch?v=8aGhZQkoFbQ) on day 6, then the [Net Ninja Node crash course](https://www.youtube.com/playlist?list=PL4cUxeGkcC9jsz4LDYc6kv3ymONOKxwBU) without the view-engine and MongoDB lessons.
 > **Method:** Each topic contains an explanation + link to a real file in the project
 
 <blockquote dir="rtl">
@@ -470,7 +471,7 @@ app.use('/api/teachers', teacherRoutes);
 | `locations.routes.js` | `/api/locations` | Public | Egyptian locations (Govs/Cities/Areas) |
 | `upload.routes.js` | `/api/upload` | Auth | Image and certificate uploads |
 | `notifications.routes.js` | `/api/notifications` | Auth | FCM push notifications tokens |
-| `analytics.routes.js` | `/api/analytics` | Optional | WhatsApp clicks tracking |
+| `analytics.routes.js` | `/api/analytics` | Optional / mixed | Funnel events, attribution, contact clicks, WhatsApp clicks |
 
 📄 **Check route files — start with the simplest:**
 1. [locations.routes.js](file:///Users/sayed/Devs/Zads/zads-api/src/routes/locations.routes.js) — **Simplest** — All GET requests with no auth.
@@ -1105,4 +1106,4 @@ When deployed on Vercel:
 ## ⏭️ Next Step
 
 Once you complete this phase, head over to:
-📘 [03-postgresql-prisma.md](file:///Users/sayed/Devs/Zads/learn/en/03-postgresql-prisma.md) — PostgreSQL and Prisma Learning Roadmap.
+📘 [03-postgresql-prisma.md](./03-postgresql-prisma.md) — PostgreSQL and Prisma Learning Roadmap.

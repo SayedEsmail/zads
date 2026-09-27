@@ -286,13 +286,15 @@ In the project, we use `[locale]` as a dynamic parameter to set the language. Ne
 Next.js allows creating API endpoints inside the app:
 
 ```
-src/app/api/auth/[...nextauth]/route.ts  →  /api/auth/*
+src/app/api/auth/[...nextauth]/route.ts   →  /api/auth/*     (NextAuth only)
+src/app/api/[...backend]/route.ts         →  /api/*         (Express BFF proxy)
 ```
 
 📄 **Check in project:**
-- [NextAuth Route](file:///Users/sayed/Devs/Zads/zads-app/src/app/api/auth/[...nextauth]/route.ts) — The catch-all route that handles all NextAuth credentials and requests.
+- `zads-app/src/app/api/auth/[...nextauth]/route.ts` — NextAuth credentials and session.
+- `zads-app/src/app/api/[...backend]/route.ts` — Forwards every other `/api/*` call to Express. It drops the session cookie and strips upstream Helmet/compression headers.
 
-> **Note:** Other API calls are forwarded to the Express API via a proxy configured in `next.config.ts`.
+> **Note:** The API proxy is this route handler. `next.config.ts` no longer rewrites `/api/*`.
 
 <blockquote dir="rtl">
 
@@ -303,26 +305,15 @@ src/app/api/auth/[...nextauth]/route.ts  →  /api/auth/*
 ### 2.7 Next.js Config
 
 📄 **Check settings:**
-- [next.config.ts](file:///Users/sayed/Devs/Zads/zads-app/next.config.ts) — Notice:
-  - `rewrites()` — Redirects `/api/*` requests to the Express API (the proxy).
-  - `images.remotePatterns` — Allows loading images from external sources.
+- `zads-app/next.config.ts` — Notice:
+  - `redirects()` — Legacy paths (`/parent` → `/client`, old marketing URLs → `/public`).
+  - `images.remotePatterns` — Allows loading images from the API host.
   - `createNextIntlPlugin` — Enables translation support.
-
-```ts
-// مثال من next.config.ts — الـ proxy
-async rewrites() {
-    return [
-        {
-            source: '/api/:path*',          // أي طلب يبدأ بـ /api/
-            destination: `${API_BASE}/api/:path*`  // يتحول لـ Express
-        }
-    ];
-}
-```
+  - API proxy lives in `src/app/api/[...backend]/route.ts`, not here.
 
 <blockquote dir="rtl">
 
-*ملف الإعدادات ده هو اللي بيمشي الدنيا، وخصوصاً الـ rewrites عشان تمنع أي مشاكل CORS في التطوير.*
+*الـ proxy اتنقل لـ route handler عشان نقدر ننضّف هيدرز الـ API قبل ما توصل للمتصفح. ملف الإعدادات فاضل للصور والتحويلات القديمة.*
 
 </blockquote>
 
@@ -730,45 +721,27 @@ const { data: session } = useSession();
 
 </blockquote>
 
-### 5.3 Route Protection — Advanced Architecture Review 🛡️
+### 5.3 Route Protection — `src/proxy.ts`
 
-📄 **Check:**
-- [proxy.ts](file:///Users/sayed/Devs/Zads/zads-app/src/proxy.ts) — Route protection logic.
+Next.js 16 runs `src/proxy.ts` before the page renders. The file exports `proxy` and `config`. There is no separate `middleware.ts`.
 
-**Core idea:**
+📄 **Check:** `zads-app/src/proxy.ts`
+
 ```ts
 const PROTECTED = [
-    { pattern: /\/client\//, roles: ["parent"] },
-    { pattern: /\/teacher\//, roles: ["teacher"] },
-    { pattern: /\/admin\//, roles: ["admin"] },
+    { pattern: /^\/[^/]+\/client(\/.*)?$/, role: "parent" },
+    { pattern: /^\/[^/]+\/teacher(\/.*)?$/, role: "teacher" },
+    { pattern: /^\/[^/]+\/admin(?!\/login)(\/.*)?$/, role: "admin" },
 ];
-// لو مش مسجل دخول → redirect لـ /auth/login
-// لو مش الـ role المطلوب → redirect لصفحته الرئيسية
+// Not signed in → /{locale}/auth/login
+// Wrong role → that role's home (/client, /teacher, or /admin)
 ```
 
-> [!WARNING]
-> **Security Vulnerability and Poor UX (Page-Level Protection):**
-> Currently, the `proxy.ts` file is not integrated as a Next.js Middleware. This means route protection is executed at the page component level.
-> **Why is this bad practice?**
-> 1. **Flash of unauthenticated content:** An unauthorized user might briefly see sensitive page elements or data before being client-side redirected.
-> 2. **Executing Server Layouts:** Layouts rendered on the server (Server Components) may fully execute and fetch data before the browser-side code can block them.
-
-#### 💡 Correct Engineering Solution (Edge/Server-Level Protection):
-
-To secure the entire application before any page renders or any server component executes, you should hook the `proxy.ts` directly into a **Next.js Middleware**.
-
-Create [middleware.ts](file:///Users/sayed/Devs/Zads/zads-app/src/middleware.ts) inside `src/` and export the proxy:
-
-```typescript
-// src/middleware.ts
-export { proxy as middleware, config } from "./proxy";
-```
-
-This ensures absolute protection on the server edge before rendering.
+It also skips `/api` and static files, collapses doubled paths like `/client/client`, redirects old `/parent` URLs, and then hands the request to next-intl.
 
 <blockquote dir="rtl">
 
-*الـ Middleware هو البواب اللي واقف على باب العمارة، بيمنع أي حد مش مصرح له يدخل من الأساس قبل ما يشوف الشقة حتى.*
+*في Next.js 16 الملف اسمه `proxy.ts` وهو البوابة. مش محتاج `middleware.ts` زيادة.*
 
 </blockquote>
 
@@ -983,4 +956,4 @@ const { theme, setTheme } = useTheme();
 ## ⏭️ Next Step
 
 Once you complete this phase, head over to:
-📙 [02-expressjs-node.md](file:///Users/sayed/Devs/Zads/learn/en/02-expressjs-node.md) — Express.js and Node.js Learning Roadmap.
+📙 [02-expressjs-node.md](./02-expressjs-node.md) — Express.js and Node.js Learning Roadmap.

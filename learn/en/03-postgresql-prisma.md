@@ -2,7 +2,8 @@
 
 
 > **Level:** From scratch to a complete understanding of the database structure
-> **Expected Time:** 2-3 weeks (2 hours/day)
+> **On the fullstack path:** days 13–19 only (14 hours). The calendar is [00-fullstack-path.md](./00-fullstack-path.md).
+> **Video for these days:** [SQL in 60 minutes](https://www.youtube.com/watch?v=p3qvj9hO_Bo), then the keys, joins, and constraints parts of [PostgreSQL — freeCodeCamp](https://www.youtube.com/watch?v=SpfIwlAYaKk). Drills: [pgexercises.com](https://pgexercises.com/).
 > **Method:** Each topic contains an explanation + link to a real file in the project
 
 <blockquote dir="rtl">
@@ -227,7 +228,7 @@ model User {
 
 </blockquote>
 
-### 2.3 The 18 Tables in Zads
+### 2.3 The 19 Models in Zads
 
 📄 **All located in:** [schema.prisma](file:///Users/sayed/Devs/Zads/zads-api/prisma/schema.prisma)
 
@@ -296,10 +297,13 @@ model User {
 | `ComparisonItem` | Tutors added inside a comparison list |
 | `TeacherAvailability` | Weekly schedule slot preferences for tutors |
 | `WhatsAppClick` | Analytics click tracker for WhatsApp redirect links |
+| `PlatformEvent` | First-party funnel and attribution events (`eventType`, `sessionId`, `dedupKey`) |
+
+`ContactRequest` also stores `studyMode`, `teachingPlace`, `preferredTime`, `replyMessage`, `initiatedBy`, `tutorRequestId`, and `idempotencyKey`. Phone numbers stay hidden until the request is `accepted`. See [04-platform-now.md](./04-platform-now.md).
 
 <blockquote dir="rtl">
 
-*زاد بيدير 18 جدول مترابطين ببعض، كل واحد قايم بدور محدد عشان نضمن سرعة وكفاءة التطبيق.*
+*زاد بيدير 19 موديل مترابطين. آخرهم `PlatformEvent` لأحداث التحليلات جوا الداتابيز.*
 
 </blockquote>
 
@@ -1205,4 +1209,4 @@ If you reached this point, you have mastered:
 - ✅ **Express.js & Node.js** — Backend Server.
 - ✅ **PostgreSQL & Prisma** — Relational Database.
 
-Head back to [00-project-overview.md](file:///Users/sayed/Devs/Zads/learn/en/00-project-overview.md) and start building! 🚀
+Next: 🚀 [04-platform-now.md](./04-platform-now.md) — public discovery, privacy, analytics, and how the app talks to the API today.

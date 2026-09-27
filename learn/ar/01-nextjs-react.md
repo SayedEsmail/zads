@@ -225,33 +225,24 @@ export default function ClientLayout({ children }) {
 Next.js بيسمحلك تعمل API endpoints جوا التطبيق نفسه:
 
 ```
-src/app/api/auth/[...nextauth]/route.ts  →  /api/auth/*
+src/app/api/auth/[...nextauth]/route.ts   →  /api/auth/*     (NextAuth بس)
+src/app/api/[...backend]/route.ts         →  /api/*         (بروكسي Express)
 ```
 
 📄 **شوف في المشروع:**
-- [NextAuth Route](file:///Users/sayed/Devs/Zads/zads-app/src/app/api/auth/[...nextauth]/route.ts) — ده الـ catch-all route اللى بيتعامل مع كل طلبات NextAuth
+- `zads-app/src/app/api/auth/[...nextauth]/route.ts` — بيانات الدخول وجلسة NextAuth.
+- `zads-app/src/app/api/[...backend]/route.ts` — بيمرر باقي نداءات `/api/*` لـ Express. بيشيل كوكي الجلسة وهيدرز Helmet والضغط من الرد.
 
-> **ملاحظة:** باقي الـ API calls بتروح لـ Express API عبر proxy (rewrites) في `next.config.ts`
+> **ملاحظة:** بروكسي الـ API هو الـ route handler ده. `next.config.ts` مبقاش بيعمل rewrite لـ `/api/*`.
 
 ### 2.7 Next.js Config — إعدادات المشروع
 
 📄 **شوف الإعدادات:**
-- [next.config.ts](file:///Users/sayed/Devs/Zads/zads-app/next.config.ts) — لاحظ:
-  - `rewrites()` — بيحول `/api/*` لـ Express API (الـ proxy)
-  - `images.remotePatterns` — السماح بتحميل صور من مصادر خارجية
-  - `createNextIntlPlugin` — تفعيل الترجمة
-
-```ts
-// مثال من next.config.ts — الـ proxy
-async rewrites() {
-    return [
-        {
-            source: '/api/:path*',          // أي طلب يبدأ بـ /api/
-            destination: `${API_BASE}/api/:path*`  // يتحول لـ Express
-        }
-    ];
-}
-```
+- `zads-app/next.config.ts` — لاحظ:
+  - `redirects()` — المسارات القديمة (`/parent` → `/client`، وصفحات التسويق → `/public`).
+  - `images.remotePatterns` — السماح بتحميل صور من سيرفر الـ API.
+  - `createNextIntlPlugin` — تفعيل الترجمة.
+  - بروكسي الـ API في `src/app/api/[...backend]/route.ts`، مش هنا.
 
 ---
 
@@ -583,40 +574,23 @@ const { data: session } = useSession();
 | `parent` | إدارة الأولاد، الطلبات، المفضلة، قراءة المدرسين |
 | `teacher` | إدارة المواد، طلبات التواصل، قراءة الطلبات |
 
-### 5.3 حماية المسارات (Route Protection) - مراجعة هندسية متقدمة 🛡️
+### 5.3 حماية المسارات — `src/proxy.ts`
 
-📄 **شوف:**
-- [proxy.ts](file:///Users/sayed/Devs/Zads/zads-app/src/proxy.ts) — منطق حماية المسارات
+Next.js 16 بيشغّل `src/proxy.ts` قبل ما الصفحة تترندر. الملف بيصدّر `proxy` و `config`. مفيش `middleware.ts` منفصل.
 
-**الفكرة:**
+📄 **شوف:** `zads-app/src/proxy.ts`
+
 ```ts
 const PROTECTED = [
-    { pattern: /\/client\//, roles: ["parent"] },
-    { pattern: /\/teacher\//, roles: ["teacher"] },
-    { pattern: /\/admin\//, roles: ["admin"] },
+    { pattern: /^\/[^/]+\/client(\/.*)?$/, role: "parent" },
+    { pattern: /^\/[^/]+\/teacher(\/.*)?$/, role: "teacher" },
+    { pattern: /^\/[^/]+\/admin(?!\/login)(\/.*)?$/, role: "admin" },
 ];
-// لو مش مسجل دخول → redirect لـ /auth/login
-// لو مش الـ role المطلوب → redirect لصفحته الرئيسية
+// مش مسجّل → /{locale}/auth/login
+// الرول غلط → الصفحة الرئيسية للرول (/client أو /teacher أو /admin)
 ```
 
-> [!WARNING]
-> **ثغرة أمنية وتجربة مستخدم سيئة (Page-Level Protection):**
-> حالياً، ملف `proxy.ts` غير مربوط كـ Next.js Middleware. هذا يعني أن حماية المسارات تتم على مستوى الصفحات (Page-level).
-> **لماذا يعد هذا خطيراً هندسياً؟**
-> 1. **ومضة محتوى غير مصرح به (Flash of unauthenticated content):** قد يرى المستخدم غير المصرح له جزءاً من الصفحة أو البيانات الحساسة للحظة بسيطة قبل أن يتم تحويله (Client-side Redirect).
-> 2. **تشغيل الـ Server Layouts:** الـ Layouts المشتركة التي ترندر على السيرفر (Server Components) قد تتنفذ بالكامل وتجلب بيانات من السيرفر قبل أن يقوم المتصفح بالتحقق من الصلاحيات.
-
-#### 💡 الحل الهندسي الصحيح (Edge/Server-Level Protection):
-لتأمين التطبيق بالكامل قبل رندرة أي صفحة أو استدعاء أي مكون سيرفر، يجب ربط منطق `proxy.ts` مباشرة كـ **Next.js Middleware**.
-
-قم بإنشاء ملف [middleware.ts](file:///Users/sayed/Devs/Zads/zads-app/src/middleware.ts) في جذر مجلد `src` وتوصيل الـ proxy كالتالي:
-
-```typescript
-// src/middleware.ts
-export { proxy as middleware, config } from "./proxy";
-```
-
-عند تفعيل هذا الملف، سيقوم Next.js بتشغيل هذا الفلتر على مستوى الـ Edge/Server قبل رندرة أي مسار، مما يضمن أماناً مطلقاً بنسبة 100% ويمنع أي ومضات للمحتوى!
+كمان بيتخطى `/api` والملفات الثابتة، وبيظبط المسارات المكررة زي `/client/client`، وبيحوّل روابط `/parent` القديمة، وبعدين يسلّم الطلب لـ next-intl.
 
 
 ---
@@ -784,7 +758,7 @@ const { theme, setTheme } = useTheme();
 ## ⏭️ الخطوة التالية
 
 لما تخلص المرحلة دي، روح لـ:
-📙 [02-expressjs-node.md](file:///Users/sayed/Devs/Zads/learn/02-expressjs-node.md) — خريطة تعلم Express.js و Node.js
+📙 [02-expressjs-node.md](./02-expressjs-node.md) — خريطة تعلم Express.js و Node.js
 
 </div>
 

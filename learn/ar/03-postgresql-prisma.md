@@ -14,7 +14,8 @@
 
 
 > **المستوى:** من الصفر حتى فهم كامل لهيكل الداتابيز
-> **الوقت المتوقع:** 2-3 أسابيع (ساعتين يومياً)
+> **على مسار الـ fullstack:** أيام 13–19 فقط (14 ساعة). الخريطة في [00-fullstack-path.md](./00-fullstack-path.md).
+> **فيديو الأيام دي:** [SQL في 60 دقيقة](https://www.youtube.com/watch?v=p3qvj9hO_Bo) ثم أجزاء العلاقات والقيود من [PostgreSQL — freeCodeCamp](https://www.youtube.com/watch?v=SpfIwlAYaKk). تمارين: [pgexercises.com](https://pgexercises.com/).
 > **الطريقة:** كل موضوع فيه شرح + رابط لملف حقيقي من المشروع
 
 ---
@@ -207,7 +208,7 @@ model User {
 | `@default(active)` | قيمة افتراضية من enum | `status @default(active)` |
 | `@@unique([a, b])` | مفتاح مركب فريد | `@@unique([parentId, teacherId])` |
 
-### 2.3 الجداول الـ 18 في المشروع — كل واحد ووظيفته
+### 2.3 الموديلات الـ 19 في المشروع — كل واحد ووظيفته
 
 📄 **كلهم في:** [schema.prisma](file:///Users/sayed/Devs/Zads/zads-api/prisma/schema.prisma)
 
@@ -276,6 +277,9 @@ model User {
 | `ComparisonItem` | مدرس في قائمة مقارنة |
 | `TeacherAvailability` | مواعيد المدرس الأسبوعية |
 | `WhatsAppClick` | تتبع نقرات رابط WhatsApp |
+| `PlatformEvent` | أحداث القمع والإسناد جوا الداتابيز (`eventType`, `sessionId`, `dedupKey`) |
+
+`ContactRequest` كمان فيه `studyMode` و `teachingPlace` و `preferredTime` و `replyMessage` و `initiatedBy` و `tutorRequestId` و `idempotencyKey`. أرقام التليفون متخفية لحد ما الطلب يبقى `accepted`. التفاصيل في [04-platform-now.md](./04-platform-now.md).
 
 ---
 
@@ -1154,7 +1158,7 @@ npx prisma studio
 - ✅ **Express.js & Node.js** — السيرفر
 - ✅ **PostgreSQL & Prisma** — قاعدة البيانات
 
-ارجع لـ [00-project-overview.md](file:///Users/sayed/Devs/Zads/learn/00-project-overview.md) وابدأ اشتغل على المشروع! 🚀
+الخطوة الجاية: 🚀 [04-platform-now.md](./04-platform-now.md) — الاكتشاف العام، والخصوصية، والتحليلات، وإزاي التطبيق بيكلم الـ API دلوقتي.
 
 </div>
 

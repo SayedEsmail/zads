@@ -1,5 +1,7 @@
 # 🏗️ Zads Project Overview — Project Layout & Design Decisions
 
+> If you are moving from senior frontend to fullstack (TypeScript, Node.js, SQL), start at [00-fullstack-path.md](./00-fullstack-path.md). This file is the project map, not day 1.
+
 
 > **Goal of this file:** Understand the project as a whole — why we chose these technologies, how we organized the files, and the philosophy behind every decision.
 <blockquote dir="rtl">
@@ -144,8 +146,8 @@ Zads/
 │       │                           │              │           │
 │       └───────────────────────────┼──────────────┘           │
 │                                   │                          │
-│                    next.config.ts rewrites                    │
-│                    /api/* → Express API                      │
+│         src/app/api/[...backend]/route.ts (BFF proxy)        │
+│         /api/* → Express, except /api/auth (NextAuth)        │
 └─────────────────────┬───────────────────────────────────────┘
                       │ HTTP (axios)
                       ▼
@@ -166,8 +168,8 @@ Zads/
 │              PostgreSQL (Neon Serverless)                     │
 │                                                              │
 │  ┌──────────────────────────────────────────────────────┐    │
-│  │  18 Tables: users, teachers, parents, subjects,      │    │
-│  │  stages, favorites, contact_requests, tutor_requests, │    │
+│  │  19 models: users, teachers, parents, subjects,      │    │
+│  │  contact_requests, tutor_requests, platform_events,   │    │
 │  │  governorates, cities, areas, ...                     │    │
 │  └──────────────────────────────────────────────────────┘    │
 └─────────────────────────────────────────────────────────────┘
@@ -178,7 +180,7 @@ Zads/
 ```mermaid
 graph LR
     Browser((Browser)) -->|Request to /api/teachers/search| FE[Next.js App<br/>Port 3001]
-    FE -->|next.config.ts rewrites| Proxy{Proxy Engine}
+    FE -->|app/api/[...backend]/route.ts| Proxy{BFF proxy}
     Proxy -->|Forward request behind the scenes| BE[Express API<br/>Port 3000]
     BE -->|Prisma Client| DB[(Neon Database)]
 ```
@@ -194,7 +196,7 @@ graph LR
 1. **User** opens a page in the browser → Next.js renders the page.
 2. **Page** uses a Zustand store to fetch data.
 3. **Store** sends an HTTP request via axios → `/api/teachers/search`.
-4. **Next.js** proxies (rewrites) the request → Express API on port 3000.
+4. **Next.js** proxies the request in `src/app/api/[...backend]/route.ts` → Express API on port 3000. `/api/auth/*` stays on NextAuth.
 5. **Express** routes it through middleware (auth → validation) → Controller.
 6. **Controller** uses Prisma to read/write in PostgreSQL.
 7. **Response** goes back through the same path ← Controller ← Express ← Next.js ← Browser.
@@ -218,7 +220,7 @@ src/
 │       ├── admin/     ← Admin pages
 │       ├── auth/      ← Login/Register
 │       ├── client/    ← Client/Learner dashboard
-│       ├── public/    ← Public pages
+│       ├── public/    ← Landing, teachers, areas, terms, privacy, contact
 │       └── teacher/   ← Teacher dashboard
 │
 ├── components/    ← Shared components
@@ -343,7 +345,7 @@ src/
 3. 📄 [DEPLOY.md](file:///Users/sayed/Devs/Zads/DEPLOY.md) — How to deploy
 
 ### Frontend (Important files first):
-1. 📄 [next.config.ts](file:///Users/sayed/Devs/Zads/zads-app/next.config.ts) — Next.js config + proxy setup
+1. 📄 [next.config.ts](../../zads-app/next.config.ts) — images, i18n plugin, legacy redirects. API proxy is `src/app/api/[...backend]/route.ts`
 2. 📄 [layout.tsx](file:///Users/sayed/Devs/Zads/zads-app/src/app/[locale]/layout.tsx) — Root layout
 3. 📄 [auth.ts](file:///Users/sayed/Devs/Zads/zads-app/src/lib/auth.ts) — Authentication setup
 4. 📄 [api.ts](file:///Users/sayed/Devs/Zads/zads-app/src/lib/api.ts) — Axios instance
@@ -360,8 +362,11 @@ src/
 
 ## ⏭️ Next Step
 
-Start with the following learning files in order:
+If you are going from frontend to fullstack, start at [00-fullstack-path.md](./00-fullstack-path.md). Do not start with the React file.
 
-1. 📗 [01-nextjs-react.md](file:///Users/sayed/Devs/Zads/learn/en/01-nextjs-react.md) — Learn Next.js & React from the project
-2. 📙 [02-expressjs-node.md](file:///Users/sayed/Devs/Zads/learn/en/02-expressjs-node.md) — Learn Express.js & Node.js from the project
-3. 📘 [03-postgresql-prisma.md](file:///Users/sayed/Devs/Zads/learn/en/03-postgresql-prisma.md) — Learn PostgreSQL & Prisma from the project
+Code reference, in order, if you want to read the whole project:
+
+1. 📗 [01-nextjs-react.md](./01-nextjs-react.md) — Next.js and React in this repo (not your first step)
+2. 📙 [02-expressjs-node.md](./02-expressjs-node.md) — Express.js and Node.js
+3. 📘 [03-postgresql-prisma.md](./03-postgresql-prisma.md) — PostgreSQL and Prisma
+4. 🚀 [04-platform-now.md](./04-platform-now.md) — The platform as it ships now

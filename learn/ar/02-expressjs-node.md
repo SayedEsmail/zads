@@ -14,7 +14,8 @@
 
 
 > **المستوى:** من الصفر حتى فهم كامل لكود الـ API
-> **الوقت المتوقع:** 3-4 أسابيع (ساعتين يومياً)
+> **على مسار الـ fullstack:** أيام 6–12 فقط (14 ساعة). متضيفش 3–4 أسابيع فوق باقي المسار. الخريطة في [00-fullstack-path.md](./00-fullstack-path.md).
+> **فيديو الأيام دي:** [event loop](https://www.youtube.com/watch?v=8aGhZQkoFbQ) في اليوم 6، وبعدين [Net Ninja Node crash course](https://www.youtube.com/playlist?list=PL4cUxeGkcC9jsz4LDYc6kv3ymONOKxwBU) من غير حلقات الـ views و MongoDB.
 > **الطريقة:** كل موضوع فيه شرح + رابط لملف حقيقي من المشروع
 
 ---
@@ -402,7 +403,7 @@ app.use('/api/teachers', teacherRoutes);
 | `locations.routes.js` | `/api/locations` | عام | محافظات/مدن/مناطق |
 | `upload.routes.js` | `/api/upload` | مسجل | رفع صور وشهادات |
 | `notifications.routes.js` | `/api/notifications` | مسجل | FCM tokens + إرسال |
-| `analytics.routes.js` | `/api/analytics` | اختياري | تتبع نقرات WhatsApp |
+| `analytics.routes.js` | `/api/analytics` | اختياري / مختلط | أحداث القمع، الإسناد، نقرات التواصل، ونقرات WhatsApp |
 
 📄 **شوف كل ملف routes — ابدأ بالأبسط:**
 1. [locations.routes.js](file:///Users/sayed/Devs/Zads/zads-api/src/routes/locations.routes.js) — **الأبسط** — كلها GET بدون auth
@@ -978,7 +979,7 @@ if (process.env.NODE_ENV !== 'production') {
 ## ⏭️ الخطوة التالية
 
 لما تخلص المرحلة دي، روح لـ:
-📘 [03-postgresql-prisma.md](file:///Users/sayed/Devs/Zads/learn/03-postgresql-prisma.md) — خريطة تعلم PostgreSQL و Prisma
+📘 [03-postgresql-prisma.md](./03-postgresql-prisma.md) — خريطة تعلم PostgreSQL و Prisma
 
 </div>
 
