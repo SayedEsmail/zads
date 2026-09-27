@@ -7,6 +7,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/public",
     "/public/teachers",
     "/public/join-teacher",
+    "/public/areas/6th-of-october",
+    "/public/areas/sheikh-zayed",
     "/public/about",
     "/public/how-it-works",
     "/public/terms",
@@ -22,7 +24,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
         url: `${baseUrl}/${locale}${route}`,
         lastModified: new Date(),
         changeFrequency: route.includes("teachers") ? "daily" : "monthly",
-        priority: route === "/public" ? 1.0 : route.includes("teachers") ? 0.9 : 0.6,
+        priority:
+          route === "/public"
+            ? 1.0
+            : route.includes("teachers") || route.includes("areas/")
+              ? 0.9
+              : route.includes("join-teacher")
+                ? 0.85
+                : 0.6,
       });
     }
   }

@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import api from "@/lib/api";
 import { extractError } from "./_convention";
+import { trackEvent } from "@/lib/analytics";
 import type { ContactRequest, ContactRequestStatus } from "@/types";
 
 interface ContactRequestsStore {
@@ -94,6 +95,10 @@ export const useContactRequestsStore = create<ContactRequestsStore>()(
           // cross-origin preflight just for the Idempotency-Key header.
           await api.post("/contact-requests", body);
           pendingIntentKeys.delete(intent);
+          trackEvent("contact_request", {
+            teacher_id: payload.teacherId,
+            study_mode: payload.studyMode,
+          });
         } catch (err) {
           set({ error: extractError(err), isLoading: false });
           throw err;

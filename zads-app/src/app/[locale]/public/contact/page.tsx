@@ -5,6 +5,7 @@ import { useLocale } from "next-intl";
 import Link from "next/link";
 import { Mail, Phone, MapPin, MessageSquare, Send, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
+import { trackEvent } from "@/lib/analytics";
 
 export default function ContactPage() {
   const locale = useLocale();
@@ -21,6 +22,7 @@ export default function ContactPage() {
     }
 
     setIsSubmitted(true);
+    trackEvent("contact_support", { locale });
     toast.success(
       locale === "ar"
         ? "تم استلام رسالتك بنجاح! سيتواصل معك فريق الدعم قريباً."

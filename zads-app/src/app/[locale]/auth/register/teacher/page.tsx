@@ -11,6 +11,7 @@ import { z } from "zod";
 import { useAuthStore } from "@/stores/auth";
 import { ErrorBanner } from "@/components/shared/ErrorBanner";
 import { sanitizeInternalCallbackUrl } from "@/lib/utils";
+import { trackEvent } from "@/lib/analytics";
 import { Eye, EyeOff } from "lucide-react";
 
 const schema = z.object({
@@ -43,6 +44,7 @@ export default function RegisterTeacherPage() {
       password: data.password,
     });
     if (!signedIn) return;
+    trackEvent("sign_up_teacher", { method: "phone" });
     router.replace(`/${locale}/teacher`);
     router.refresh();
   };

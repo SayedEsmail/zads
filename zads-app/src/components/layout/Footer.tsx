@@ -28,6 +28,8 @@ export default function Footer() {
                 <Link href={`/${locale}/public`} className="hover:text-primary transition-colors">{t("home")}</Link>
                 <Link href={`/${locale}/public/teachers`} className="hover:text-primary transition-colors">{locale === "ar" ? "دليل المعلمين" : "Teachers Directory"}</Link>
                 <Link href={`/${locale}/public/join-teacher`} className="hover:text-primary transition-colors">{locale === "ar" ? "انضم كمعلم" : "Join as Teacher"}</Link>
+                <Link href={`/${locale}/public/areas/6th-of-october`} className="hover:text-primary transition-colors">{locale === "ar" ? "معلمون في 6 أكتوبر" : "Teachers in October"}</Link>
+                <Link href={`/${locale}/public/areas/sheikh-zayed`} className="hover:text-primary transition-colors">{locale === "ar" ? "معلمون في الشيخ زايد" : "Teachers in Sheikh Zayed"}</Link>
                 <Link href={`/${locale}/public/how-it-works`} className="hover:text-primary transition-colors">{t("howItWorks")}</Link>
               </nav>
             </div>

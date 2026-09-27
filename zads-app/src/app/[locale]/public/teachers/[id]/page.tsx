@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import api from "@/lib/api";
 import { formatPrice, getInitials } from "@/lib/utils";
+import { trackEvent } from "@/lib/analytics";
 import { ErrorBanner } from "@/components/shared/ErrorBanner";
 import { PageSkeleton } from "@/components/shared/PageSkeleton";
 import type { Teacher } from "@/types";
@@ -46,7 +47,10 @@ export default function PublicTeacherDetailPage({
     api
       .get<{ data: Teacher }>(`/teachers/${id}`)
       .then((res) => {
-        if (!cancelled) setTeacher(res.data.data);
+        if (!cancelled) {
+          setTeacher(res.data.data);
+          trackEvent("view_teacher_profile", { teacher_id: id, source: "public" });
+        }
       })
       .catch((err) => {
         if (!cancelled) {

@@ -1,6 +1,28 @@
+import type { Metadata } from "next";
 import { useTranslations, useLocale } from "next-intl";
 import Link from "next/link";
-import { MapPin, Wifi, Clock, Star, CheckCircle, GraduationCap, ArrowRight, ArrowLeft, ShieldCheck } from "lucide-react";
+import { MapPin, Wifi, Clock, Star, CheckCircle, ArrowRight, ArrowLeft, ShieldCheck } from "lucide-react";
+
+type Props = { params: Promise<{ locale: string }> };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const isAr = locale === "ar";
+  const path = `/${locale}/public`;
+
+  return {
+    title: isAr
+      ? "زاد — منصة ربط المعلمين والمتعلمين في السادس من أكتوبر والجيزة"
+      : "Zads — Connecting Teachers and Learners",
+    description: isAr
+      ? "اكتشف معلّمين ومتعلّمين في 6 أكتوبر والشيخ زايد والجيزة، وتواصل لتنسيق فرص التعلّم."
+      : "Discover teachers and learners in 6th of October, Sheikh Zayed, and Giza — then connect to coordinate learning.",
+    alternates: {
+      canonical: path,
+      languages: { ar: "/ar/public", en: "/en/public" },
+    },
+  };
+}
 
 export default function LandingPage() {
   const t = useTranslations("landing");
@@ -37,12 +59,12 @@ export default function LandingPage() {
   ];
 
   const octoberZones = [
-    { nameAr: "الحي المتميز", nameEn: "Al Motamayez" },
-    { nameAr: "غرب سوميد", nameEn: "West Somid" },
-    { nameAr: "الأحياء السكنية (1 - 12)", nameEn: "Districts 1 to 12" },
-    { nameAr: "الشيخ زايد", nameEn: "Sheikh Zayed" },
-    { nameAr: "حدائق أكتوبر", nameEn: "October Gardens" },
-    { nameAr: "جنوب الأحياء والتوسعات", nameEn: "South & Expansions" },
+    { nameAr: "الحي المتميز", nameEn: "Al Motamayez", href: "teachers" as const },
+    { nameAr: "غرب سوميد", nameEn: "West Somid", href: "teachers" as const },
+    { nameAr: "الأحياء السكنية (1 - 12)", nameEn: "Districts 1 to 12", href: "teachers" as const },
+    { nameAr: "الشيخ زايد", nameEn: "Sheikh Zayed", href: "areas/sheikh-zayed" as const },
+    { nameAr: "حدائق أكتوبر", nameEn: "October Gardens", href: "teachers" as const },
+    { nameAr: "جنوب الأحياء والتوسعات", nameEn: "South & Expansions", href: "teachers" as const },
   ];
 
   return (
@@ -92,20 +114,29 @@ export default function LandingPage() {
                   : "Explore teachers by subject, stage, and area."}
               </p>
             </div>
-            <Link
-              href={`/${locale}/public/teachers`}
-              className="text-xs font-bold text-primary hover:underline inline-flex items-center gap-1 self-start sm:self-auto"
-            >
-              <span>{locale === "ar" ? "تصفح المعلمين" : "Browse teachers"}</span>
-              <Arrow className="h-3.5 w-3.5" />
-            </Link>
+            <div className="flex flex-wrap gap-3 self-start sm:self-auto text-xs font-bold">
+              <Link
+                href={`/${locale}/public/areas/6th-of-october`}
+                className="text-primary hover:underline inline-flex items-center gap-1"
+              >
+                <span>{locale === "ar" ? "صفحة 6 أكتوبر" : "6th of October"}</span>
+                <Arrow className="h-3.5 w-3.5" />
+              </Link>
+              <Link
+                href={`/${locale}/public/teachers`}
+                className="text-primary hover:underline inline-flex items-center gap-1"
+              >
+                <span>{locale === "ar" ? "تصفح المعلمين" : "Browse teachers"}</span>
+                <Arrow className="h-3.5 w-3.5" />
+              </Link>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
             {octoberZones.map((z) => (
               <Link
                 key={z.nameEn}
-                href={`/${locale}/public/teachers`}
+                href={`/${locale}/public/${z.href}`}
                 className="rounded-xl border border-slate-200/80 bg-white p-3 text-center text-xs font-semibold text-slate-700 hover:border-primary hover:text-primary transition-all shadow-2xs"
               >
                 {locale === "ar" ? z.nameAr : z.nameEn}

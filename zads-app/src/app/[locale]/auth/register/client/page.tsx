@@ -10,6 +10,7 @@ import { z } from "zod";
 import { useAuthStore } from "@/stores/auth";
 import { ErrorBanner } from "@/components/shared/ErrorBanner";
 import { sanitizeInternalCallbackUrl } from "@/lib/utils";
+import { trackEvent } from "@/lib/analytics";
 import type { ClientAccountKind } from "@/types";
 import { Eye, EyeOff } from "lucide-react";
 
@@ -54,6 +55,7 @@ export default function RegisterClientPage() {
       clientAccountKind: data.clientAccountKind,
     });
     if (!signedIn) return;
+    trackEvent("sign_up_parent", { method: "phone", account_kind: data.clientAccountKind });
     if (callbackUrl) {
       router.replace(callbackUrl);
     } else {

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { notFound } from "next/navigation";
@@ -6,6 +7,7 @@ import { routing } from "@/i18n/routing";
 import { SessionProvider } from "next-auth/react";
 import { Toaster } from "@/components/ui/sonner";
 import { AttributionTracker } from "@/components/shared/AttributionTracker";
+import { GoogleAnalytics } from "@/components/shared/GoogleAnalytics";
 import { PushNotificationRegistrar } from "@/components/shared/PushNotificationRegistrar";
 import "../globals.css";
 
@@ -27,7 +29,6 @@ export async function generateMetadata({
       : "A platform where teachers and learners can find each other and coordinate learning directly.",
     metadataBase: new URL(baseUrl),
     alternates: {
-      canonical: `/${locale}/public`,
       languages: {
         ar: "/ar/public",
         en: "/en/public",
@@ -85,6 +86,9 @@ export default async function LocaleLayout({
         <SessionProvider>
           <NextIntlClientProvider messages={messages}>
             {children}
+            <Suspense fallback={null}>
+              <GoogleAnalytics />
+            </Suspense>
             <AttributionTracker />
             <PushNotificationRegistrar />
             <Toaster />
