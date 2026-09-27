@@ -65,7 +65,7 @@ function load(relative, overrides = {}) {
 
   const React = require('react');
   const { renderToString } = require('react-dom/server');
-  const { default: Page } = load('src/app/[locale]/public/teachers/page.tsx', {
+  const { default: Page } = load('src/app/[locale]/public/teachers/TeachersPageClient.tsx', {
     'next-intl': { useLocale: () => 'ar' },
     'next/link': ({ children, href }) => React.createElement('a', { href }, children),
     '@/stores/search': { useSearchStore },
