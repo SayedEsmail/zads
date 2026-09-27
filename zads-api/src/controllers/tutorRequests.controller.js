@@ -25,6 +25,33 @@ const createRequest = async (req, res, next) => {
             areaId
         } = req.body;
 
+        if (!subjectId || !stageId) {
+            return response.error(res, 'Subject and stage are required', 400);
+        }
+
+        const resolvedTarget = requestTarget ?? (parentChildId ? 'dependent' : 'self');
+        if (!['self', 'dependent'].includes(resolvedTarget)) {
+            return response.error(res, 'Invalid request target', 400);
+        }
+
+        if (resolvedTarget === 'dependent') {
+            if (!parentChildId) {
+                return response.error(res, 'A child profile is required for a dependent request', 400);
+            }
+            const child = await prisma.parentChild.findFirst({
+                where: { id: parentChildId, parentId },
+                select: { id: true, stageId: true }
+            });
+            if (!child) {
+                return response.error(res, 'Child profile not found for this parent', 404);
+            }
+            if (child.stageId !== stageId) {
+                return response.error(res, 'Stage does not match the selected child', 400);
+            }
+        } else if (parentChildId) {
+            return response.error(res, 'A self request cannot include a child profile', 400);
+        }
+
         // Set expiry to 30 days from now
         const expiresAt = new Date();
         expiresAt.setDate(expiresAt.getDate() + 30);
@@ -36,12 +63,12 @@ const createRequest = async (req, res, next) => {
                 stageId,
                 description,
                 preferredLessonType,
-                requestTarget: requestTarget ?? (parentChildId ? 'dependent' : 'self'),
+                requestTarget: resolvedTarget,
                 studyMode: studyMode ?? 'both',
                 parentChildId: parentChildId ?? null,
                 budgetMin,
                 budgetMax,
-                areaId,
+                areaId: areaId ?? req.user.parent.areaId ?? null,
                 expiresAt
             },
             include: {
@@ -74,7 +101,12 @@ const getTutorRequests = async (req, res, next) => {
 
         if (subjectId) where.subjectId = subjectId;
         if (stageId) where.stageId = stageId;
-        if (req.query.studyMode) where.studyMode = req.query.studyMode;
+        const studyMode = req.query.studyMode;
+        if (studyMode && !['online', 'offline', 'both'].includes(studyMode)) {
+            return response.error(res, 'Invalid study mode', 400);
+        }
+        if (studyMode === 'online') where.studyMode = { in: ['online', 'both'] };
+        if (studyMode === 'offline') where.studyMode = { in: ['offline', 'both'] };
         if (req.query.requestTarget) where.requestTarget = req.query.requestTarget;
 
         // Determine active location filters (defaulting to logged-in teacher's location if no search filters provided)
@@ -83,7 +115,8 @@ const getTutorRequests = async (req, res, next) => {
         let activeGovId = governorateId;
 
         const teacher = req.user?.teacher;
-        if (teacher?.areaId && !areaId && !cityId && !governorateId) {
+        const isOnlineSearch = studyMode === 'online';
+        if (teacher?.areaId && !areaId && !cityId && !governorateId && !isOnlineSearch) {
             const teacherArea = await prisma.area.findUnique({
                 where: { id: teacher.areaId },
                 include: { city: true }
@@ -95,27 +128,27 @@ const getTutorRequests = async (req, res, next) => {
             }
         }
 
-        // Apply governorate restriction (always scope requests to the target governorate)
-        if (activeAreaId) {
-            where.areaId = activeAreaId;
+        // Apply location filtering:
+        // If specific area is requested, filter by areaId.
+        // Otherwise, allow city-wide browsing prioritized by proximity.
+        if (areaId) {
+            where.areaId = areaId;
         } else if (activeCityId) {
             where.area = { cityId: activeCityId };
         } else if (activeGovId) {
             where.area = { city: { governorateId: activeGovId } };
         }
 
+        // Subject filter: if explicitly provided, filter by it.
+        // Otherwise, load teacher's subjects to prioritize matches in sorting.
+        let teacherSubjectIds = [];
         const teacherId = req.user?.teacher?.id;
-        if (teacherId && !subjectId) {
-            // Find all subjects this teacher teaches
+        if (teacherId) {
             const teacherSubjects = await prisma.teacherSubject.findMany({
-                where: { teacherId },
+                where: { teacherId, isActive: true },
                 select: { subjectId: true }
             });
-            
-            if (teacherSubjects.length > 0) {
-                const subjectIds = teacherSubjects.map(ts => ts.subjectId);
-                where.subjectId = { in: subjectIds };
-            }
+            teacherSubjectIds = teacherSubjects.map(ts => ts.subjectId);
         }
 
         const requests = await prisma.tutorRequest.findMany({
@@ -123,12 +156,11 @@ const getTutorRequests = async (req, res, next) => {
             include: {
                 parent: {
                     include: {
-                        user: { select: { name: true } }
+                        user: { select: { id: true, name: true, avatarUrl: true } }
                     }
                 },
                 subject: true,
                 stage: true,
-                parentChild: true,
                 area: {
                     include: {
                         city: {
@@ -142,7 +174,7 @@ const getTutorRequests = async (req, res, next) => {
             orderBy: { createdAt: 'desc' }
         });
 
-        // Proximity Sorting based on active location (defaulting to teacher's home location)
+        // Proximity & Relevance Sorting based on active location (defaulting to teacher's home location)
         let sortAreaId = teacher?.areaId;
         let sortCityId = null;
         let sortGovId = null;
@@ -158,7 +190,7 @@ const getTutorRequests = async (req, res, next) => {
             }
         }
 
-        // If specific search filters were explicitly provided, let's use them to prioritize sorting
+        // If specific search filters were explicitly provided, use them to prioritize sorting
         if (areaId) {
             sortAreaId = areaId;
         }
@@ -169,27 +201,30 @@ const getTutorRequests = async (req, res, next) => {
             sortGovId = governorateId;
         }
 
-        if (sortAreaId || sortCityId) {
-            requests.sort((a, b) => {
-                // Priority 1: Same neighborhood/area
-                const aSameArea = sortAreaId && a.areaId === sortAreaId ? 1 : 0;
-                const bSameArea = sortAreaId && b.areaId === sortAreaId ? 1 : 0;
-                if (aSameArea !== bSameArea) return bSameArea - aSameArea;
+        requests.sort((a, b) => {
+            // Priority 1: Same neighborhood/area
+            const aSameArea = sortAreaId && a.areaId === sortAreaId ? 1 : 0;
+            const bSameArea = sortAreaId && b.areaId === sortAreaId ? 1 : 0;
+            if (aSameArea !== bSameArea) return bSameArea - aSameArea;
 
-                // Priority 2: Same city
-                const aSameCity = sortCityId && a.area?.cityId === sortCityId ? 1 : 0;
-                const bSameCity = sortCityId && b.area?.cityId === sortCityId ? 1 : 0;
-                if (aSameCity !== bSameCity) return bSameCity - aSameCity;
+            // Priority 2: Same city
+            const aSameCity = sortCityId && a.area?.cityId === sortCityId ? 1 : 0;
+            const bSameCity = sortCityId && b.area?.cityId === sortCityId ? 1 : 0;
+            if (aSameCity !== bSameCity) return bSameCity - aSameCity;
 
-                // Priority 3: Same governorate
-                const aSameGov = sortGovId && a.area?.city?.governorateId === sortGovId ? 1 : 0;
-                const bSameGov = sortGovId && b.area?.city?.governorateId === sortGovId ? 1 : 0;
-                if (aSameGov !== bSameGov) return bSameGov - aSameGov;
+            // Priority 3: Same governorate
+            const aSameGov = sortGovId && a.area?.city?.governorateId === sortGovId ? 1 : 0;
+            const bSameGov = sortGovId && b.area?.city?.governorateId === sortGovId ? 1 : 0;
+            if (aSameGov !== bSameGov) return bSameGov - aSameGov;
 
-                // Default to creation date descending
-                return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-            });
-        }
+            // Priority 4: Matches teacher's taught subjects
+            const aMatchesSubject = teacherSubjectIds.includes(a.subjectId) ? 1 : 0;
+            const bMatchesSubject = teacherSubjectIds.includes(b.subjectId) ? 1 : 0;
+            if (aMatchesSubject !== bMatchesSubject) return bMatchesSubject - aMatchesSubject;
+
+            // Priority 5: Creation date (newest first)
+            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        });
 
         return response.success(res, requests);
 

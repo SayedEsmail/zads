@@ -33,8 +33,10 @@ export default function Navbar() {
 
   const navLinks = [
     { href: `/${locale}/public`, label: t("home") },
-    { href: `/${locale}/public/about`, label: t("about") },
+    { href: `/${locale}/public/teachers`, label: locale === "ar" ? "دليل المعلمين" : "Teachers" },
+    { href: `/${locale}/public/join-teacher`, label: locale === "ar" ? "انضم كمعلم" : "Join as Teacher" },
     { href: `/${locale}/public/how-it-works`, label: t("howItWorks") },
+    { href: `/${locale}/public/about`, label: t("about") },
   ];
 
   return (

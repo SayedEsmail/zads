@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
@@ -9,6 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAuthStore } from "@/stores/auth";
 import { ErrorBanner } from "@/components/shared/ErrorBanner";
+import { sanitizeInternalCallbackUrl } from "@/lib/utils";
 
 const schema = z.object({
   phone: z.string().min(8, "Invalid phone number"),
@@ -27,6 +28,9 @@ export default function LoginPage() {
   const t = useTranslations("auth");
   const locale = useLocale();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const rawCallback = searchParams.get("callbackUrl");
+  const callbackUrl = sanitizeInternalCallbackUrl(rawCallback);
   const { login, isLoading, error } = useAuthStore();
 
   const {
@@ -38,7 +42,12 @@ export default function LoginPage() {
   const onSubmit = async (data: FormValues) => {
     const userType = await login(data.phone, data.password);
     if (userType) {
-      router.replace(getRoleHome(locale, userType));
+      const returnsToTeacher = callbackUrl?.startsWith(`/${locale}/client/teacher/`);
+      if (callbackUrl && userType === "parent" && returnsToTeacher) {
+        router.replace(callbackUrl);
+      } else {
+        router.replace(getRoleHome(locale, userType));
+      }
       router.refresh();
     }
   };
@@ -106,7 +115,14 @@ export default function LoginPage() {
 
       <div className="mt-10 text-center text-sm font-medium text-muted-foreground">
         {t("noAccount")}{" "}
-        <Link href={`/${locale}/auth/register`} className="text-primary hover:text-primary-dark hover:underline">
+        <Link
+          href={
+            callbackUrl
+              ? `/${locale}/auth/register?callbackUrl=${encodeURIComponent(callbackUrl)}`
+              : `/${locale}/auth/register`
+          }
+          className="text-primary hover:text-primary-dark hover:underline"
+        >
           {t("registerNow")}
         </Link>
       </div>

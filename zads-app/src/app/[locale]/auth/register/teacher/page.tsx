@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
@@ -9,6 +10,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAuthStore } from "@/stores/auth";
 import { ErrorBanner } from "@/components/shared/ErrorBanner";
+import { sanitizeInternalCallbackUrl } from "@/lib/utils";
+import { trackEvent } from "@/lib/analytics";
 import { Eye, EyeOff } from "lucide-react";
 
 const schema = z.object({
@@ -23,7 +26,9 @@ export default function RegisterTeacherPage() {
   const t = useTranslations("auth");
   const locale = useLocale();
   const router = useRouter();
-  const { registerTeacher, isLoading, error } = useAuthStore();
+  const searchParams = useSearchParams();
+  const callbackUrl = sanitizeInternalCallbackUrl(searchParams.get("callbackUrl"));
+  const { registerTeacher, isLoading, error, registrationComplete } = useAuthStore();
   const [showPassword, setShowPassword] = useState(false);
 
   const {
@@ -33,11 +38,13 @@ export default function RegisterTeacherPage() {
   } = useForm<FormValues>({ resolver: zodResolver(schema) });
 
   const onSubmit = async (data: FormValues) => {
-    await registerTeacher({
+    const signedIn = await registerTeacher({
       name: data.name,
       phone: data.phone,
       password: data.password,
     });
+    if (!signedIn) return;
+    trackEvent("sign_up_teacher", { method: "phone" });
     router.replace(`/${locale}/teacher`);
     router.refresh();
   };
@@ -51,6 +58,20 @@ export default function RegisterTeacherPage() {
       <h2 className="mb-6 text-xl font-semibold">{t("registerTeacher")}</h2>
 
       <ErrorBanner error={error} className="mb-4" />
+
+      {registrationComplete && (
+        <p className="mb-4 rounded-xl bg-blue-50 p-3 text-sm text-blue-800">
+          {locale === "ar"
+            ? "تم إنشاء الحساب. يرجى تسجيل الدخول للمتابعة."
+            : "Your account has been created. Please sign in to continue."}{" "}
+          <Link
+            href={callbackUrl ? `/${locale}/auth/login?callbackUrl=${encodeURIComponent(callbackUrl)}` : `/${locale}/auth/login`}
+            className="font-bold underline"
+          >
+            {t("signInNow")}
+          </Link>
+        </p>
+      )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
         {/* Name */}
@@ -100,7 +121,7 @@ export default function RegisterTeacherPage() {
 
         <button
           type="submit"
-          disabled={isLoading}
+          disabled={isLoading || registrationComplete}
           className="mt-4 w-full rounded-[1.25rem] bg-primary py-4 text-sm font-bold text-white shadow-lg shadow-primary/20 transition-all hover:bg-primary-dark hover:shadow-primary/30 hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
         >
           {isLoading ? "..." : t("registerTeacher")}
@@ -109,7 +130,10 @@ export default function RegisterTeacherPage() {
 
       <p className="mt-6 text-center text-sm text-muted-foreground">
         {t("haveAccount")}{" "}
-        <Link href={`/${locale}/auth/login`} className="font-medium text-primary hover:underline">
+        <Link
+          href={callbackUrl ? `/${locale}/auth/login?callbackUrl=${encodeURIComponent(callbackUrl)}` : `/${locale}/auth/login`}
+          className="font-medium text-primary hover:underline"
+        >
           {t("signInNow")}
         </Link>
       </p>

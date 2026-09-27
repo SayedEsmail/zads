@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const prisma = require('../config/database');
 const { jwtSecret, jwtExpiresIn } = require('../config/env');
 const response = require('../utils/response');
+const { normalizeEgyptianPhone } = require('../utils/validators');
 
 /**
  * Register a new teacher
@@ -21,9 +22,11 @@ const registerTeacher = async (req, res, next) => {
             lessonTypes
         } = req.body;
 
+        const cleanPhone = normalizeEgyptianPhone(phone);
+
         // Check if phone already exists
         const existingUser = await prisma.user.findUnique({
-            where: { phone }
+            where: { phone: cleanPhone }
         });
 
         if (existingUser) {
@@ -37,7 +40,7 @@ const registerTeacher = async (req, res, next) => {
         const result = await prisma.$transaction(async (tx) => {
             const user = await tx.user.create({
                 data: {
-                    phone,
+                    phone: cleanPhone,
                     passwordHash,
                     name,
                     email,
@@ -66,6 +69,22 @@ const registerTeacher = async (req, res, next) => {
             { expiresIn: jwtExpiresIn }
         );
 
+        // Authoritative server-side analytics logging (NO sensitive PII)
+        try {
+            await prisma.platformEvent.create({
+                data: {
+                    eventType: 'registration_complete',
+                    userId: result.user.id,
+                    metadata: {
+                        userType: 'teacher',
+                        areaId: result.teacher.areaId || null
+                    }
+                }
+            });
+        } catch (analyticsErr) {
+            // Analytics logging should never fail user requests
+        }
+
         return response.created(res, {
             user: {
                 id: result.user.id,
@@ -92,10 +111,11 @@ const registerTeacher = async (req, res, next) => {
 const registerParent = async (req, res, next) => {
     try {
         const { phone, password, name, email, areaId, clientAccountKind } = req.body;
+        const cleanPhone = normalizeEgyptianPhone(phone);
 
         // Check if phone already exists
         const existingUser = await prisma.user.findUnique({
-            where: { phone }
+            where: { phone: cleanPhone }
         });
 
         if (existingUser) {
@@ -109,7 +129,7 @@ const registerParent = async (req, res, next) => {
         const result = await prisma.$transaction(async (tx) => {
             const user = await tx.user.create({
                 data: {
-                    phone,
+                    phone: cleanPhone,
                     passwordHash,
                     name,
                     email,
@@ -134,6 +154,23 @@ const registerParent = async (req, res, next) => {
             jwtSecret,
             { expiresIn: jwtExpiresIn }
         );
+
+        // Authoritative server-side analytics logging (NO sensitive PII)
+        try {
+            await prisma.platformEvent.create({
+                data: {
+                    eventType: 'registration_complete',
+                    userId: result.user.id,
+                    metadata: {
+                        userType: 'parent',
+                        areaId: result.parent.areaId || null,
+                        clientAccountKind: clientAccountKind || 'parent'
+                    }
+                }
+            });
+        } catch (analyticsErr) {
+            // Analytics logging should never fail user requests
+        }
 
         return response.created(res, {
             user: {
@@ -165,7 +202,7 @@ const login = async (req, res, next) => {
 
         // Find user
         let user;
-        const searchPhone = (phone && phone !== 'undefined') ? phone : null;
+        const searchPhone = (phone && phone !== 'undefined') ? normalizeEgyptianPhone(phone) : null;
         const searchEmail = (email && email !== 'undefined') ? email : null;
 
         if (searchPhone) {
@@ -276,13 +313,14 @@ const updateFcmToken = async (req, res, next) => {
  */
 const updateProfile = async (req, res, next) => {
     try {
-        const { name, email, avatarUrl, phone, password } = req.body;
+        const { name, email, avatarUrl, phone, password, newPassword, currentPassword } = req.body;
         const userId = req.user.id;
+        const cleanPhone = phone ? normalizeEgyptianPhone(phone) : undefined;
 
         // Check if phone is being updated and if it belongs to someone else
-        if (phone && phone !== req.user.phone) {
+        if (cleanPhone && cleanPhone !== req.user.phone) {
             const existingUser = await prisma.user.findUnique({
-                where: { phone }
+                where: { phone: cleanPhone }
             });
             if (existingUser) {
                 return response.error(res, 'Phone number already registered', 409);
@@ -293,11 +331,19 @@ const updateProfile = async (req, res, next) => {
             ...(name && { name }),
             ...(email !== undefined && { email }),
             ...(avatarUrl !== undefined && { avatarUrl }),
-            ...(phone && { phone }),
+            ...(cleanPhone && { phone: cleanPhone }),
         };
 
-        if (password) {
-            dataToUpdate.passwordHash = await bcrypt.hash(password, 10);
+        const targetNewPassword = password || newPassword;
+        if (targetNewPassword) {
+            if (!currentPassword) {
+                return response.error(res, 'Current password is required to change password', 400);
+            }
+            const isMatch = await bcrypt.compare(currentPassword, req.user.passwordHash);
+            if (!isMatch) {
+                return response.error(res, 'Current password is incorrect', 400);
+            }
+            dataToUpdate.passwordHash = await bcrypt.hash(targetNewPassword, 10);
         }
 
         const updatedUser = await prisma.user.update({

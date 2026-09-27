@@ -1,5 +1,6 @@
 const prisma = require('../config/database');
 const response = require('../utils/response');
+const path = require('path');
 
 /**
  * Search teachers with filters (location by area, subject, stage)
@@ -27,50 +28,46 @@ const searchTeachers = async (req, res, next) => {
             user: { status: 'active' }
         };
 
-        // Determine active location filters (defaulting to logged-in parent's location if no search filters provided)
-        let activeAreaId = areaId;
-        let activeCityId = cityId;
-        let activeGovId = governorateId;
+        // Location filtering:
+        // For online discovery without explicit location query, do NOT restrict geographically.
+        const isOnlineSearch = studyMode === 'online';
+        const hasExplicitLocation = !!(areaId || cityId || governorateId);
 
-        const parent = req.user?.parent;
-        if (parent?.areaId && !areaId && !cityId && !governorateId) {
-            const parentArea = await prisma.area.findUnique({
-                where: { id: parent.areaId },
-                include: { city: true }
-            });
-            if (parentArea) {
-                activeAreaId = parentArea.id;
-                activeCityId = parentArea.cityId;
-                activeGovId = parentArea.city?.governorateId;
+        let activeAreaId = areaId || null;
+        let activeCityId = cityId || null;
+        let activeGovId = governorateId || null;
+
+        if (!isOnlineSearch || hasExplicitLocation) {
+            if (areaId) {
+                // Strict explicit area filter - DO NOT expand to governorate!
+                teacherWhere.areaId = areaId;
+                activeAreaId = areaId;
+            } else if (cityId) {
+                // Explicit city filter
+                teacherWhere.area = { cityId };
+                activeCityId = cityId;
+            } else if (governorateId) {
+                teacherWhere.area = { city: { governorateId } };
+                activeGovId = governorateId;
+            } else if (!isOnlineSearch) {
+                // For offline discovery without explicit location query, default to parent's city if available
+                const parent = req.user?.parent;
+                if (parent?.areaId) {
+                    const parentArea = await prisma.area.findUnique({
+                        where: { id: parent.areaId },
+                        include: { city: true }
+                    });
+                    if (parentArea?.cityId) {
+                        teacherWhere.area = { cityId: parentArea.cityId };
+                        activeCityId = parentArea.cityId;
+                    }
+                }
             }
         }
 
-        // Apply governorate restriction (always show teachers within the target governorate)
-        if (activeAreaId) {
-            const area = await prisma.area.findUnique({
-                where: { id: activeAreaId },
-                include: { city: true }
-            });
-            if (area?.city?.governorateId) {
-                teacherWhere.area = { city: { governorateId: area.city.governorateId } };
-                activeGovId = area.city.governorateId;
-                activeCityId = area.cityId;
-            }
-        } else if (activeCityId) {
-            const city = await prisma.city.findUnique({
-                where: { id: activeCityId }
-            });
-            if (city?.governorateId) {
-                teacherWhere.area = { city: { governorateId: city.governorateId } };
-                activeGovId = city.governorateId;
-            }
-        } else if (activeGovId) {
-            teacherWhere.area = { city: { governorateId: activeGovId } };
-        }
-
-        // Lesson type filter
+        // Lesson type filter (PostgreSQL Json column)
         if (lessonType) {
-            teacherWhere.lessonTypes = { has: lessonType };
+            teacherWhere.lessonTypes = { array_contains: lessonType };
         }
 
         // Subject/Stage filter
@@ -104,37 +101,69 @@ const searchTeachers = async (req, res, next) => {
         const subjectWhere = { isActive: true };
         if (subjectId) subjectWhere.subjectId = subjectId;
         if (stageId) subjectWhere.stageId = stageId;
-        // studyMode filter: online → priceOnline not null, offline → priceOffline not null
-        if (studyMode === 'online') subjectWhere.priceOnline = { not: null };
-        else if (studyMode === 'offline') subjectWhere.priceOffline = { not: null };
-        if (minPrice) {
-            subjectWhere.OR = [
-                { priceAtTeacher: { gte: parseInt(minPrice) } },
-                { priceAtStudent: { gte: parseInt(minPrice) } },
-                { priceGroup: { gte: parseInt(minPrice) } }
-            ];
+
+        // Pricing and Mode consistency (prevents cross-column price matching)
+        const hasMin = minPrice !== undefined && minPrice !== null && minPrice !== '';
+        const hasMax = maxPrice !== undefined && maxPrice !== null && maxPrice !== '';
+        const minVal = hasMin ? Number(minPrice) : 0;
+        const maxVal = hasMax ? Number(maxPrice) : Infinity;
+        const hasPriceFilter = hasMin || hasMax;
+
+        if ((hasMin && (!Number.isSafeInteger(minVal) || minVal < 0)) ||
+            (hasMax && (!Number.isSafeInteger(maxVal) || maxVal < 0)) ||
+            (hasMin && hasMax && minVal > maxVal)) {
+            return response.error(res, 'Invalid price range', 400);
         }
-        if (maxPrice) {
-            const priceFilter = { lte: parseInt(maxPrice) };
-            subjectWhere.OR = [
-                { priceAtTeacher: priceFilter },
-                { priceAtStudent: priceFilter },
-                { priceGroup: priceFilter }
-            ];
+
+        const makePriceRange = () => {
+            // Prices at or below zero are not displayed as offers. A null price means
+            // negotiated and is intentionally excluded from numeric range filters.
+            const r = { gte: hasMin ? Math.max(1, minVal) : 1 };
+            if (hasMax) r.lte = maxVal;
+            return r;
+        };
+
+        if (studyMode === 'online') {
+            subjectWhere.isOnline = true;
+            if (hasPriceFilter) {
+                subjectWhere.priceOnline = makePriceRange();
+            }
+        } else if (studyMode === 'offline') {
+            subjectWhere.isOffline = true;
+            if (hasPriceFilter) {
+                const range = makePriceRange();
+                subjectWhere.OR = [
+                    { priceOffline: range },
+                    { priceAtStudent: range },
+                    { priceAtTeacher: range }
+                ];
+            }
+        } else {
+            // No studyMode specified: if price filter is provided, ensure matched mode satisfies the price
+            if (hasPriceFilter) {
+                const range = makePriceRange();
+                subjectWhere.OR = [
+                    { isOnline: true, priceOnline: range },
+                    { isOffline: true, priceOffline: range },
+                    { isOffline: true, priceAtStudent: range },
+                    { isOffline: true, priceAtTeacher: range }
+                ];
+            }
         }
+
+        const hasSubjectFilter = subjectId || stageId || studyMode || hasPriceFilter;
 
         // Get all teachers in the governorate
         let teachers = await prisma.teacher.findMany({
             where: {
                 ...teacherWhere,
-                ...(subjectId || stageId ? { subjects: { some: subjectWhere } } : {})
+                ...(hasSubjectFilter ? { subjects: { some: subjectWhere } } : {})
             },
             include: {
                 user: {
                     select: {
                         id: true,
                         name: true,
-                        phone: true,
                         avatarUrl: true
                     }
                 },
@@ -186,7 +215,31 @@ const searchTeachers = async (req, res, next) => {
         const total = teachers.length;
         teachers = teachers.slice(skip, skip + parseInt(limit));
 
-        return response.paginated(res, teachers, {
+        // Privacy: Strip certificateUrl from public search results
+        const sanitizedTeachers = teachers.map(({ certificateUrl, ...rest }) => rest);
+
+        // Server-side authoritative event logging for search outcomes (no PII)
+        try {
+            await prisma.platformEvent.create({
+                data: {
+                    eventType: 'search_outcome',
+                    userId: req.user?.id || null,
+                    metadata: {
+                        stageId: stageId || null,
+                        subjectId: subjectId || null,
+                        studyMode: studyMode || null,
+                        cityId: cityId || null,
+                        areaId: areaId || null,
+                        resultsCount: total,
+                        isZeroResult: total === 0
+                    }
+                }
+            });
+        } catch (analyticsErr) {
+            // Analytics logging should never fail user requests
+        }
+
+        return response.paginated(res, sanitizedTeachers, {
             page: parseInt(page),
             limit: parseInt(limit),
             total,
@@ -205,8 +258,11 @@ const getTeacherById = async (req, res, next) => {
     try {
         const { id } = req.params;
 
-        const teacher = await prisma.teacher.findUnique({
-            where: { id },
+        const teacher = await prisma.teacher.findFirst({
+            where: {
+                id,
+                user: { status: 'active' }
+            },
             include: {
                 user: {
                     select: {
@@ -250,7 +306,34 @@ const getTeacherById = async (req, res, next) => {
             data: { viewsCount: { increment: 1 } }
         });
 
-        return response.success(res, teacher);
+        // Server-side authoritative event logging for profile view (no PII)
+        try {
+            await prisma.platformEvent.create({
+                data: {
+                    eventType: 'profile_view',
+                    userId: req.user?.id || null,
+                    entityId: id,
+                    metadata: {
+                        isVerified: teacher.isVerified,
+                        subjectsCount: teacher.subjects?.length || 0
+                    }
+                }
+            });
+        } catch (analyticsErr) {
+            // Analytics logging should never fail user requests
+        }
+
+        // Privacy: Hide certificateUrl unless requester is admin or the teacher themselves
+        const isOwner = req.user?.userType === 'teacher' && req.user?.teacher?.id === teacher.id;
+        const isAdmin = req.user?.userType === 'admin';
+
+        let sanitizedTeacher = teacher;
+        if (!isOwner && !isAdmin) {
+            const { certificateUrl, ...rest } = teacher;
+            sanitizedTeacher = rest;
+        }
+
+        return response.success(res, sanitizedTeacher);
 
     } catch (error) {
         next(error);
@@ -277,16 +360,46 @@ const updateTeacher = async (req, res, next) => {
             certificateUrl
         } = req.body;
 
+        const currentTeacher = await prisma.teacher.findUnique({
+            where: { id: teacherId },
+            select: { certificateUrl: true, isVerified: true }
+        });
+
+        const updateData = {
+            ...(bio !== undefined && { bio }),
+            ...(experienceYears !== undefined && { experienceYears }),
+            ...(qualification !== undefined && { qualification }),
+            ...(areaId !== undefined && { areaId }),
+            ...(lessonTypes !== undefined && { lessonTypes }),
+        };
+
+        // Handle certificateUrl security (R1):
+        // Reject arbitrary external certificate URLs.
+        // Certificate files must be uploaded via the dedicated upload endpoint.
+        if (certificateUrl !== undefined) {
+            if (certificateUrl === null || certificateUrl === '') {
+                // Removing certificate invalidates verification
+                updateData.certificateUrl = null;
+                updateData.isVerified = false;
+                updateData.verifiedAt = null;
+                updateData.verifiedBy = null;
+                updateData.verificationNotes = null;
+            } else {
+                if (typeof certificateUrl !== 'string' || certificateUrl.includes('://') || certificateUrl.startsWith('//')) {
+                    return response.error(res, 'External certificate URLs are not allowed', 400);
+                }
+                // Only server-uploaded certificate paths can be retained. Legacy absolute
+                // URLs are never trusted or echoed back into the profile.
+                const isServerCertificatePath = /^\/uploads\/certificates\/[^/]+$/.test(certificateUrl);
+                if (!isServerCertificatePath || currentTeacher?.certificateUrl !== certificateUrl) {
+                    return response.error(res, 'Certificates must be uploaded through the upload endpoint', 400);
+                }
+            }
+        }
+
         const updated = await prisma.teacher.update({
             where: { id: teacherId },
-            data: {
-                ...(bio !== undefined && { bio }),
-                ...(experienceYears !== undefined && { experienceYears }),
-                ...(qualification !== undefined && { qualification }),
-                ...(areaId !== undefined && { areaId }),
-                ...(lessonTypes !== undefined && { lessonTypes }),
-                ...(certificateUrl !== undefined && { certificateUrl })
-            },
+            data: updateData,
             include: {
                 user: {
                     select: {
@@ -333,6 +446,8 @@ const addSubject = async (req, res, next) => {
             priceGroup,
             priceOnline,
             priceOffline,
+            isOnline,
+            isOffline,
             priceNegotiable,
             durationMinutes
         } = req.body;
@@ -347,6 +462,8 @@ const addSubject = async (req, res, next) => {
                 priceGroup,
                 priceOnline,
                 priceOffline,
+                ...(isOnline !== undefined && { isOnline }),
+                ...(isOffline !== undefined && { isOffline }),
                 priceNegotiable,
                 durationMinutes
             },
@@ -381,6 +498,8 @@ const updateSubject = async (req, res, next) => {
             priceGroup,
             priceOnline,
             priceOffline,
+            isOnline,
+            isOffline,
             priceNegotiable,
             durationMinutes,
             isActive
@@ -397,6 +516,8 @@ const updateSubject = async (req, res, next) => {
                 ...(priceGroup !== undefined && { priceGroup }),
                 ...(priceOnline !== undefined && { priceOnline }),
                 ...(priceOffline !== undefined && { priceOffline }),
+                ...(isOnline !== undefined && { isOnline }),
+                ...(isOffline !== undefined && { isOffline }),
                 ...(priceNegotiable !== undefined && { priceNegotiable }),
                 ...(durationMinutes !== undefined && { durationMinutes }),
                 ...(isActive !== undefined && { isActive })
@@ -577,14 +698,41 @@ const updateMyAvailability = async (req, res, next) => {
             return response.error(res, 'Slots must be an array', 400);
         }
 
-        // Validate slots
-        for (const slot of slots) {
-            if (slot.dayOfWeek < 0 || slot.dayOfWeek > 6) {
-                return response.error(res, 'Invalid day of week', 400);
+        // Validate slots (HH:mm format, startTime < endTime, dayOfWeek 0-6, non-overlapping)
+        const timeRegex = /^([01]\d|2[0-3]):[0-5]\d$/;
+        const slotsByDay = {};
+
+        for (let i = 0; i < slots.length; i++) {
+            const slot = slots[i];
+            const day = parseInt(slot.dayOfWeek);
+
+            if (isNaN(day) || day < 0 || day > 6) {
+                return response.error(res, `Invalid day of week for slot #${i + 1}. Must be between 0 (Sunday) and 6 (Saturday)`, 400);
             }
             if (!slot.startTime || !slot.endTime) {
-                return response.error(res, 'Start time and end time are required', 400);
+                return response.error(res, `Start time and end time are required for slot #${i + 1}`, 400);
             }
+            if (!timeRegex.test(slot.startTime) || !timeRegex.test(slot.endTime)) {
+                return response.error(res, `Times must be in valid 24-hour HH:mm format for slot #${i + 1}`, 400);
+            }
+            if (slot.startTime >= slot.endTime) {
+                return response.error(res, `Start time (${slot.startTime}) must be earlier than end time (${slot.endTime}) for slot #${i + 1}`, 400);
+            }
+
+            if (!slotsByDay[day]) {
+                slotsByDay[day] = [];
+            }
+            // Check for overlap with existing slots on the same day
+            for (const existing of slotsByDay[day]) {
+                if (slot.startTime < existing.endTime && existing.startTime < slot.endTime) {
+                    return response.error(
+                        res,
+                        `Overlapping time slots detected on day ${day}: (${slot.startTime}-${slot.endTime}) conflicts with (${existing.startTime}-${existing.endTime})`,
+                        400
+                    );
+                }
+            }
+            slotsByDay[day].push({ startTime: slot.startTime, endTime: slot.endTime });
         }
 
         // Execute in transaction: delete all existing slots, insert new ones

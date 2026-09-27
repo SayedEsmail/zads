@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import api from "@/lib/api";
+import api, { publicApi } from "@/lib/api";
 import { type StoreSlice, extractError, initialSlice } from "./_convention";
 import type { Subject, Stage, Governorate, City, Area, Teacher, PaginatedResponse } from "@/types";
 
@@ -41,7 +41,7 @@ interface SearchStore {
   fetchGovernorates: () => Promise<void>;
   fetchCities: (governorateId: string) => Promise<void>;
   fetchAreas: (cityId: string) => Promise<void>;
-  searchTeachers: (filters: SearchFilters) => Promise<void>;
+  searchTeachers: (filters: SearchFilters, publicDiscovery?: boolean) => Promise<void>;
   reset: () => void;
 }
 
@@ -62,43 +62,43 @@ export const useSearchStore = create<SearchStore>()(
 
       fetchSubjects: async () => {
         try {
-          const res = await api.get<{ data: Subject[] }>("/subjects");
+          const res = await publicApi.get<{ data: Subject[] }>("/subjects");
           set({ subjects: res.data.data });
         } catch { /* silent */ }
       },
 
       fetchStages: async () => {
         try {
-          const res = await api.get<{ data: Stage[] }>("/stages");
+          const res = await publicApi.get<{ data: Stage[] }>("/stages");
           set({ stages: res.data.data });
         } catch { /* silent */ }
       },
 
       fetchGovernorates: async () => {
         try {
-          const res = await api.get<{ data: Governorate[] }>("/locations/governorates");
+          const res = await publicApi.get<{ data: Governorate[] }>("/locations/governorates");
           set({ governorates: res.data.data });
         } catch { /* silent */ }
       },
 
       fetchCities: async (governorateId) => {
         try {
-          const res = await api.get<{ data: City[] }>(`/locations/cities?governorateId=${governorateId}`);
+          const res = await publicApi.get<{ data: City[] }>(`/locations/cities?governorateId=${governorateId}`);
           set({ cities: res.data.data });
         } catch { /* silent */ }
       },
 
       fetchAreas: async (cityId) => {
         try {
-          const res = await api.get<{ data: Area[] }>(`/locations/areas?cityId=${cityId}`);
+          const res = await publicApi.get<{ data: Area[] }>(`/locations/areas?cityId=${cityId}`);
           set({ areas: res.data.data });
         } catch { /* silent */ }
       },
 
-      searchTeachers: async (filters) => {
+      searchTeachers: async (filters, publicDiscovery = false) => {
         set({ isLoadingTeachers: true, error: null });
         try {
-          const res = await api.get<PaginatedResponse<Teacher>>("/teachers", { params: filters });
+          const res = await (publicDiscovery ? publicApi : api).get<PaginatedResponse<Teacher>>("/teachers", { params: filters });
           set({
             teachers: res.data.data,
             totalTeachers: res.data.pagination.total,

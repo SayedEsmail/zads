@@ -33,8 +33,11 @@ export default function TeacherSearchPage() {
     cityId: "",
     areaId: "",
     studyMode: "" as StudyMode | "",
+    minPrice: "",
+    maxPrice: "",
   });
   const [showFilters, setShowFilters] = useState(false);
+  const [priceError, setPriceError] = useState("");
 
   useEffect(() => {
     fetchSubjects();
@@ -56,6 +59,20 @@ export default function TeacherSearchPage() {
   }, [filters.cityId, fetchAreas]);
 
   const handleSearch = () => {
+    const minPrice = filters.minPrice === "" ? undefined : Number(filters.minPrice);
+    const maxPrice = filters.maxPrice === "" ? undefined : Number(filters.maxPrice);
+    if (
+      (minPrice !== undefined && (!Number.isSafeInteger(minPrice) || minPrice < 0)) ||
+      (maxPrice !== undefined && (!Number.isSafeInteger(maxPrice) || maxPrice < 0))
+    ) {
+      setPriceError(locale === "ar" ? "أدخل سعراً صحيحاً موجباً أو صفراً." : "Enter a whole-number price of zero or more.");
+      return;
+    }
+    if (minPrice !== undefined && maxPrice !== undefined && minPrice > maxPrice) {
+      setPriceError(locale === "ar" ? "يجب ألا يتجاوز الحد الأدنى الحد الأقصى." : "Minimum price must not exceed maximum price.");
+      return;
+    }
+    setPriceError("");
     searchTeachers({
       subjectId: filters.subjectId || undefined,
       stageId: filters.stageId || undefined,
@@ -63,6 +80,8 @@ export default function TeacherSearchPage() {
       cityId: filters.cityId || undefined,
       areaId: filters.areaId || undefined,
       studyMode: (filters.studyMode as StudyMode) || undefined,
+      minPrice,
+      maxPrice,
     });
   };
 
@@ -158,6 +177,15 @@ export default function TeacherSearchPage() {
             <option value="offline">{t("offline")}</option>
             <option value="both">{t("both")}</option>
           </select>
+          <label className="text-xs font-semibold text-muted-foreground">
+            {locale === "ar" ? "السعر الأدنى" : "Minimum price"}
+            <input type="number" min="0" step="1" inputMode="numeric" value={filters.minPrice} onChange={(e) => { setFilters((f) => ({ ...f, minPrice: e.target.value })); setPriceError(""); }} placeholder={locale === "ar" ? "أي سعر" : "Any price"} className="mt-1 w-full rounded-lg border border-border px-2.5 py-2 text-sm font-normal text-foreground" />
+          </label>
+          <label className="text-xs font-semibold text-muted-foreground">
+            {locale === "ar" ? "السعر الأقصى" : "Maximum price"}
+            <input type="number" min="0" step="1" inputMode="numeric" value={filters.maxPrice} onChange={(e) => { setFilters((f) => ({ ...f, maxPrice: e.target.value })); setPriceError(""); }} placeholder={locale === "ar" ? "أي سعر" : "Any price"} className="mt-1 w-full rounded-lg border border-border px-2.5 py-2 text-sm font-normal text-foreground" />
+          </label>
+          {priceError && <p role="alert" className="col-span-full text-xs font-medium text-red-600">{priceError}</p>}
         </div>
       )}
 

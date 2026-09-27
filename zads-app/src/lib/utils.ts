@@ -29,3 +29,34 @@ export function extractError(err: unknown): string {
   return "An unexpected error occurred";
 }
 
+/**
+ * Safely validate and sanitize internal redirect callback URLs.
+ * Rejects external URLs, protocol tricks, protocol-relative '//', backslashes, etc.
+ * Returns relative path or null if invalid/external.
+ */
+export function sanitizeInternalCallbackUrl(url: string | null | undefined): string | null {
+  if (!url || typeof url !== "string") return null;
+  const trimmed = url.trim();
+
+  // Must begin with a single slash, not '//' or '/\'
+  if (!trimmed.startsWith("/") || trimmed.startsWith("//") || trimmed.startsWith("/\\")) {
+    return null;
+  }
+
+  // Reject explicit protocol schemes (javascript:, data:, https:, etc.)
+  if (trimmed.includes("://") || /^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(trimmed)) {
+    return null;
+  }
+
+  try {
+    const dummyOrigin = "https://zads.app";
+    const parsed = new URL(trimmed, dummyOrigin);
+    if (parsed.origin !== dummyOrigin) {
+      return null;
+    }
+    return parsed.pathname + parsed.search + parsed.hash;
+  } catch {
+    return null;
+  }
+}
+

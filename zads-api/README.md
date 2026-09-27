@@ -98,3 +98,23 @@ npm start        # Start production server
 npm run db:push  # Push schema changes
 npm run db:seed  # Seed database
 ```
+
+## Isolated integration checks
+
+Run `pnpm test:local` from `zads-api`. The runner starts disposable local PostgreSQL,
+sets explicit test-only connection variables, applies migrations, and runs the
+HTTP integration suites. It stops the database and removes its temporary data
+when finished. It does not use the database configured in `.env`.
+
+Direct integration-suite execution requires `NODE_ENV=test` and an explicit
+local `DATABASE_URL`; use a disposable database because the suites mutate fixtures.
+These checks do not replace a manual browser review.
+
+### Production schema maintenance
+
+Production credentials stay in Vercel. `scripts/production-schema-task.js` performs
+no database work unless explicitly enabled with `ZADS_DB_TASK=audit` (read-only)
+or `ZADS_DB_TASK=reconcile` (the two September 2026 migrations only).
+The reconciliation handles the pre-existing production columns, applies additions
+in a transaction, checks that row counts are preserved, and records completed
+migrations through Prisma. It is not part of the normal install/build commands.

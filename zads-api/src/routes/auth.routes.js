@@ -42,6 +42,14 @@ router.put(
     authController.updateProfile
 );
 
+// Change password endpoint alias (protected)
+router.put(
+    '/change-password',
+    auth,
+    validate(updateProfileSchema),
+    authController.updateProfile
+);
+
 // Update FCM token (protected)
 router.post('/fcm-token', auth, authController.updateFcmToken);
 

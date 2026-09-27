@@ -54,6 +54,8 @@ jobs:
         run: pnpm --filter zads-app run build
         env:
           NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
+          NEXT_PUBLIC_GA_MEASUREMENT_ID: G-00DPVWBBDZ
+          NEXT_PUBLIC_APP_URL: https://zads.app
 
   deploy:
     name: Deploy to Production

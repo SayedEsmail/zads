@@ -1,6 +1,7 @@
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const prisma = require('../config/database');
 
 // Configure storage for general images (avatars, etc.)
 const storage = multer.diskStorage({
@@ -89,26 +90,101 @@ exports.uploadImage = (req, res) => {
     });
 };
 
-// Upload Certificate Controller
-exports.uploadCertificate = (req, res) => {
-    if (!req.file) {
-        return res.status(400).json({
-            success: false,
-            message: 'No certificate file uploaded'
-        });
-    }
-
-    const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT || 3000}`;
-    const fileUrl = `${baseUrl}/uploads/certificates/${req.file.filename}`;
-
-    res.status(200).json({
-        success: true,
-        message: 'Certificate uploaded successfully',
-        data: {
-            url: fileUrl,
-            filename: req.file.filename
+// Upload Certificate Controller - Assigns ownership server-side to authenticated teacher
+exports.uploadCertificate = async (req, res, next) => {
+    let filePath;
+    try {
+        if (!req.file) {
+            return res.status(400).json({
+                success: false,
+                message: 'No certificate file uploaded'
+            });
         }
-    });
+
+        const teacherId = req.user.teacher?.id;
+        if (!teacherId) {
+            return res.status(403).json({
+                success: false,
+                message: 'Only teachers can upload certificates'
+            });
+        }
+
+        const safeFilename = path.basename(req.file.filename);
+        filePath = req.file.path;
+        const relativeUrl = `/uploads/certificates/${safeFilename}`;
+
+        // Directly link to the teacher and invalidate previous verification
+        await prisma.teacher.update({
+            where: { id: teacherId },
+            data: {
+                certificateUrl: relativeUrl,
+                isVerified: false,
+                verifiedAt: null,
+                verifiedBy: null,
+                verificationNotes: null
+            }
+        });
+
+        res.status(200).json({
+            success: true,
+            message: 'Certificate uploaded and assigned successfully',
+            data: {
+                url: relativeUrl,
+                filename: safeFilename
+            }
+        });
+    } catch (error) {
+        if (filePath) {
+            fs.unlink(filePath, unlinkError => {
+                if (unlinkError && unlinkError.code !== 'ENOENT') {
+                    console.error('[UPLOAD] Failed to remove unassigned certificate:', unlinkError.message);
+                }
+            });
+        }
+        next(error);
+    }
+};
+
+// Authorized Certificate Retrieval (Teacher owner or Admin only)
+exports.getCertificate = async (req, res, next) => {
+    try {
+        const { filename } = req.params;
+        const safeFilename = path.basename(filename);
+        const filePath = path.resolve('public/uploads/certificates', safeFilename);
+
+        if (!fs.existsSync(filePath)) {
+            return res.status(404).json({
+                success: false,
+                message: 'Certificate file not found'
+            });
+        }
+
+        // Admins can view any certificate
+        if (req.user.userType === 'admin') {
+            return res.sendFile(filePath);
+        }
+
+        // Teachers can only view their own certificate based on DB record
+        if (req.user.userType === 'teacher' && req.user.teacher) {
+            const currentTeacher = await prisma.teacher.findUnique({
+                where: { id: req.user.teacher.id },
+                select: { certificateUrl: true }
+            });
+            if (currentTeacher?.certificateUrl) {
+                const currentFilename = path.basename(currentTeacher.certificateUrl.split('?')[0]);
+                if (currentFilename === safeFilename) {
+                    return res.sendFile(filePath);
+                }
+            }
+        }
+
+        return res.status(403).json({
+            success: false,
+            message: 'Access denied. You do not have permission to view this document.'
+        });
+    } catch (error) {
+        next(error);
+    }
 };
 
 exports.uploadMiddleware = upload.single('image');

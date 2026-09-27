@@ -66,13 +66,21 @@ const getDashboardStats = async (req, res, next) => {
  */
 const getAllTeachers = async (req, res, next) => {
     try {
-        const { page = 1, limit = 20, status, search } = req.query;
+        const { page = 1, limit = 20, status, search, isVerified, areaId } = req.query;
         const skip = (parseInt(page) - 1) * parseInt(limit);
 
         const where = {};
 
         if (status) {
             where.user = { status };
+        }
+
+        if (isVerified !== undefined && isVerified !== '') {
+            where.isVerified = isVerified === 'true' || isVerified === true;
+        }
+
+        if (areaId) {
+            where.areaId = areaId;
         }
 
         if (search) {
@@ -327,15 +335,21 @@ const deleteTutorRequest = async (req, res, next) => {
 const toggleTeacherVerification = async (req, res, next) => {
     try {
         const { teacherId } = req.params;
-        const { isVerified } = req.body;
+        const { isVerified, verificationNotes } = req.body;
 
         if (typeof isVerified !== 'boolean') {
             return response.error(res, 'isVerified must be a boolean', 400);
         }
 
+        const adminId = req.user?.id || 'admin';
         const teacher = await prisma.teacher.update({
             where: { id: teacherId },
-            data: { isVerified },
+            data: {
+                isVerified,
+                verifiedAt: isVerified ? new Date() : null,
+                verifiedBy: isVerified ? adminId : null,
+                ...(verificationNotes !== undefined ? { verificationNotes } : {})
+            },
             include: {
                 user: {
                     select: {
@@ -354,12 +368,109 @@ const toggleTeacherVerification = async (req, res, next) => {
     }
 };
 
+/**
+ * Get all contact requests (paginated with filters for admin)
+ */
+const getAllContactRequests = async (req, res, next) => {
+    try {
+        const {
+            page = 1,
+            limit = 20,
+            status,
+            search,
+            initiatedBy,
+            startDate,
+            endDate
+        } = req.query;
+        const skip = (parseInt(page) - 1) * parseInt(limit);
+
+        const where = {};
+
+        if (status) {
+            where.status = status;
+        }
+
+        if (initiatedBy) {
+            where.initiatedBy = initiatedBy;
+        }
+
+        if (startDate || endDate) {
+            where.createdAt = {};
+            if (startDate) where.createdAt.gte = new Date(startDate);
+            if (endDate) where.createdAt.lte = new Date(endDate);
+        }
+
+        if (search) {
+            where.OR = [
+                { teacher: { user: { name: { contains: search, mode: 'insensitive' } } } },
+                { teacher: { user: { phone: { contains: search } } } },
+                { parent: { user: { name: { contains: search, mode: 'insensitive' } } } },
+                { parent: { user: { phone: { contains: search } } } }
+            ];
+        }
+
+        const [contactRequests, total] = await Promise.all([
+            prisma.contactRequest.findMany({
+                where,
+                include: {
+                    teacher: {
+                        include: {
+                            user: {
+                                select: {
+                                    id: true,
+                                    name: true,
+                                    phone: true,
+                                    email: true,
+                                    avatarUrl: true,
+                                    status: true
+                                }
+                            }
+                        }
+                    },
+                    parent: {
+                        include: {
+                            user: {
+                                select: {
+                                    id: true,
+                                    name: true,
+                                    phone: true,
+                                    email: true,
+                                    avatarUrl: true,
+                                    status: true
+                                }
+                            }
+                        }
+                    },
+                    subject: true,
+                    stage: true,
+                    tutorRequest: true
+                },
+                skip,
+                take: parseInt(limit),
+                orderBy: { createdAt: 'desc' }
+            }),
+            prisma.contactRequest.count({ where })
+        ]);
+
+        return response.paginated(res, contactRequests, {
+            page: parseInt(page),
+            limit: parseInt(limit),
+            total,
+            totalPages: Math.ceil(total / parseInt(limit))
+        });
+
+    } catch (error) {
+        next(error);
+    }
+};
+
 module.exports = {
     getDashboardStats,
     getAllTeachers,
     getAllParents,
     updateUserStatus,
     getContactStats,
+    getAllContactRequests,
     getAllTutorRequests,
     deleteTutorRequest,
     toggleTeacherVerification

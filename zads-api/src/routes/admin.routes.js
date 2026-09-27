@@ -19,8 +19,9 @@ router.get('/parents', adminController.getAllParents);
 // User status management
 router.patch('/users/:userId/status', adminController.updateUserStatus);
 
-// Stats
+// Stats & Contact Requests
 router.get('/stats/contacts', adminController.getContactStats);
+router.get('/contact-requests', adminController.getAllContactRequests);
 
 // Tutor Requests management
 router.get('/tutor-requests', adminController.getAllTutorRequests);

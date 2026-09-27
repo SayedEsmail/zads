@@ -1,5 +1,21 @@
 const prisma = require('../config/database');
 const response = require('../utils/response');
+const notificationService = require('../services/notification.service');
+
+const normalizeOptionalText = value => {
+    if (value === undefined || value === null) return null;
+    const normalized = String(value).trim();
+    return normalized || null;
+};
+
+const sameRequestPayload = (request, payload) =>
+    (request.subjectId || null) === (payload.subjectId || null) &&
+    (request.stageId || null) === (payload.stageId || null) &&
+    normalizeOptionalText(request.message) === normalizeOptionalText(payload.message) &&
+    (request.studyMode || null) === (payload.studyMode || null) &&
+    normalizeOptionalText(request.teachingPlace) === normalizeOptionalText(payload.teachingPlace) &&
+    normalizeOptionalText(request.preferredTime) === normalizeOptionalText(payload.preferredTime) &&
+    (request.tutorRequestId || null) === (payload.tutorRequestId || null);
 
 /**
  * Create contact request (parent to teacher)
@@ -7,32 +23,183 @@ const response = require('../utils/response');
 const createRequest = async (req, res, next) => {
     try {
         const parentId = req.user.parent?.id;
-        const { teacherId, subjectId, stageId, message } = req.body;
+        const {
+            teacherId,
+            subjectId,
+            stageId,
+            message,
+            studyMode,
+            teachingPlace,
+            preferredTime,
+            tutorRequestId
+        } = req.body;
+
+        const idempotencyKey = req.headers['idempotency-key'] || req.body.idempotencyKey || null;
 
         if (!parentId) {
             return response.error(res, 'Parent profile not found', 404);
         }
 
-        const contactRequest = await prisma.contactRequest.create({
-            data: {
-                parentId,
-                teacherId,
-                subjectId,
-                stageId,
-                message
-            },
-            include: {
-                teacher: {
-                    include: {
-                        user: { select: { name: true } }
-                    }
-                }
+        if (!teacherId) {
+            return response.error(res, 'Teacher ID is required', 400);
+        }
+
+        // Validate teacher exists and is active
+        const teacher = await prisma.teacher.findFirst({
+            where: {
+                id: teacherId,
+                user: { status: 'active' }
             }
         });
 
-        // TODO: Send push notification to teacher
+        if (!teacher) {
+            return response.error(res, 'Teacher not found or inactive', 404);
+        }
 
-        return response.created(res, contactRequest, 'Contact request sent');
+        // Validate learner-selected teaching offer server-side (R5)
+        if (subjectId) {
+            const teachesOffer = await prisma.teacherSubject.findFirst({
+                where: {
+                    teacherId,
+                    subjectId,
+                    ...(stageId ? { stageId } : {}),
+                    isActive: true
+                }
+            });
+            if (!teachesOffer) {
+                return response.error(res, 'The selected teacher does not offer this subject or stage', 400);
+            }
+        }
+
+        // 1. Idempotency Key check with normalized material payload comparison (R5)
+        if (idempotencyKey) {
+            const existingByKey = await prisma.contactRequest.findFirst({
+                where: { idempotencyKey },
+                include: {
+                    teacher: {
+                        include: { user: { select: { id: true, name: true, avatarUrl: true } } }
+                    },
+                    subject: true,
+                    stage: true
+                }
+            });
+            if (existingByKey) {
+                // Must be initiated by parent, belonging to this parent, for this teacher
+                if (existingByKey.initiatedBy !== 'parent' || existingByKey.parentId !== parentId || existingByKey.teacherId !== teacherId) {
+                    return response.error(res, 'Idempotency key collision or unauthorized request retry', 409);
+                }
+
+                // Normalized material payload comparison
+                if (!sameRequestPayload(existingByKey, {
+                    subjectId, stageId, message, studyMode, teachingPlace, preferredTime, tutorRequestId
+                })) {
+                    return response.error(res, 'Idempotency key reused with different request payload', 409);
+                }
+
+                return response.success(res, existingByKey, 'Contact request returned (idempotent retry)', 200);
+            }
+        }
+
+        // 2. Pending duplicate check (do not silently return different intent)
+        const existingPending = await prisma.contactRequest.findFirst({
+            where: {
+                parentId,
+                teacherId,
+                subjectId: subjectId || null,
+                status: 'pending'
+            }
+        });
+
+        if (existingPending) {
+            return response.error(res, 'A pending contact request already exists for this teacher and subject', 409);
+        }
+
+        let contactRequest;
+        try {
+            contactRequest = await prisma.contactRequest.create({
+                data: {
+                    parentId,
+                    teacherId,
+                    subjectId: subjectId || null,
+                    stageId: stageId || null,
+                    message: message || null,
+                    studyMode: studyMode || null,
+                    teachingPlace: teachingPlace || null,
+                    preferredTime: preferredTime || null,
+                    tutorRequestId: tutorRequestId || null,
+                    initiatedBy: 'parent',
+                    status: 'pending',
+                    idempotencyKey
+                },
+                include: {
+                    teacher: {
+                        include: {
+                            user: { select: { id: true, name: true, avatarUrl: true } }
+                        }
+                    },
+                    subject: true,
+                    stage: true
+                }
+            });
+        } catch (createErr) {
+            if (createErr.code === 'P2002' && !idempotencyKey) {
+                return response.error(res, 'A conflicting contact request was created concurrently', 409);
+            }
+            // Handle concurrent duplicate insertion race condition (Prisma P2002)
+            if (createErr.code === 'P2002' && idempotencyKey) {
+                const winning = await prisma.contactRequest.findFirst({
+                    where: { idempotencyKey },
+                    include: {
+                        teacher: {
+                            include: { user: { select: { id: true, name: true, avatarUrl: true } } }
+                        },
+                        subject: true,
+                        stage: true
+                    }
+                });
+                if (winning && winning.initiatedBy === 'parent' && winning.parentId === parentId && winning.teacherId === teacherId) {
+                    if (sameRequestPayload(winning, {
+                        subjectId, stageId, message, studyMode, teachingPlace, preferredTime, tutorRequestId
+                    })) {
+                        return response.success(res, winning, 'Contact request returned (idempotent retry)', 200);
+                    }
+                }
+                return response.error(res, 'Idempotency key collision or conflicting write', 409);
+            }
+            throw createErr;
+        }
+
+        // Trigger notification to recipient teacher (non-blocking)
+        if (teacher.userId) {
+            notificationService.sendToUser(
+                teacher.userId,
+                'طلب تواصل جديد',
+                'تلقيت طلب تواصل جديد على منصة زاد',
+                { type: 'contact_request', requestId: contactRequest.id, initiatedBy: 'parent' }
+            ).catch(notifErr => console.warn('[NOTIFICATION] failed to notify teacher:', notifErr.message));
+        }
+
+        // Authoritative server-side analytics logging (NO sensitive PII)
+        try {
+            await prisma.platformEvent.create({
+                data: {
+                    eventType: 'contact_request_create',
+                    userId: req.user.id,
+                    entityId: contactRequest.id,
+                    metadata: {
+                        teacherId,
+                        initiatedBy: 'parent',
+                        studyMode: studyMode || null,
+                        hasSubject: !!subjectId,
+                        hasStage: !!stageId
+                    }
+                }
+            });
+        } catch (analyticsErr) {
+            console.warn('[ANALYTICS] event log error:', analyticsErr.message);
+        }
+
+        return response.created(res, contactRequest, 'Contact request sent successfully');
 
     } catch (error) {
         next(error);
@@ -40,36 +207,223 @@ const createRequest = async (req, res, next) => {
 };
 
 /**
- * Create contact request (teacher to parent/client)
+ * Create contact request (teacher to parent/client in response to tutor request)
  */
 const createRequestAsTeacher = async (req, res, next) => {
     try {
         const teacherId = req.user.teacher?.id;
-        const { parentId, subjectId, stageId, message } = req.body;
+        const {
+            parentId,
+            subjectId,
+            stageId,
+            message,
+            studyMode,
+            teachingPlace,
+            preferredTime,
+            tutorRequestId
+        } = req.body;
+
+        const idempotencyKey = req.headers['idempotency-key'] || req.body.idempotencyKey || null;
 
         if (!teacherId) {
             return response.error(res, 'Teacher profile not found', 404);
         }
 
-        const contactRequest = await prisma.contactRequest.create({
-            data: {
-                parentId,
+        if (!parentId) {
+            return response.error(res, 'Parent ID is required', 400);
+        }
+
+        // Validate tutor request eligibility (R5: teacher contact requires an active, matching tutor request)
+        if (!tutorRequestId) {
+            return response.error(res, 'Teacher-initiated contact requires a valid tutor request ID', 400);
+        }
+
+        const tutorRequest = await prisma.tutorRequest.findUnique({
+            where: { id: tutorRequestId }
+        });
+
+        if (!tutorRequest) {
+            return response.error(res, 'Tutor request not found', 404);
+        }
+
+        if (tutorRequest.status !== 'active') {
+            return response.error(res, 'Tutor request is closed or no longer active', 400);
+        }
+
+        if (tutorRequest.expiresAt && tutorRequest.expiresAt <= new Date()) {
+            return response.error(res, 'Tutor request has expired', 400);
+        }
+
+        if (tutorRequest.parentId !== parentId) {
+            return response.error(res, 'Tutor request does not belong to the specified parent', 400);
+        }
+
+        if (subjectId && tutorRequest.subjectId && tutorRequest.subjectId !== subjectId) {
+            return response.error(res, 'Subject does not match the tutor request', 400);
+        }
+
+        if (stageId && tutorRequest.stageId && tutorRequest.stageId !== stageId) {
+            return response.error(res, 'Stage does not match the tutor request', 400);
+        }
+
+        const resolvedSubjectId = subjectId || tutorRequest.subjectId;
+        const resolvedStageId = stageId || tutorRequest.stageId;
+
+        // Validate teacher actually offers the requested subject
+        const teacherTeaches = await prisma.teacherSubject.findFirst({
+            where: {
                 teacherId,
-                subjectId,
-                stageId,
-                message,
-                initiatedBy: 'teacher'
-            },
-            include: {
-                parent: {
-                    include: {
-                        user: { select: { name: true } }
-                    }
-                }
+                subjectId: resolvedSubjectId,
+                ...(resolvedStageId ? { stageId: resolvedStageId } : {}),
+                isActive: true
             }
         });
 
-        return response.created(res, contactRequest, 'Contact request sent to parent');
+        if (!teacherTeaches) {
+            return response.error(res, 'Teacher does not offer the requested subject and stage', 400);
+        }
+
+        // Validate parent exists and is active
+        const parent = await prisma.parent.findFirst({
+            where: {
+                id: parentId,
+                user: { status: 'active' }
+            }
+        });
+
+        if (!parent) {
+            return response.error(res, 'Parent not found or inactive', 404);
+        }
+
+        // 1. Idempotency Key check with normalized material payload comparison (R5)
+        if (idempotencyKey) {
+            const existingByKey = await prisma.contactRequest.findFirst({
+                where: { idempotencyKey },
+                include: {
+                    parent: {
+                        include: { user: { select: { id: true, name: true, avatarUrl: true } } }
+                    },
+                    subject: true,
+                    stage: true
+                }
+            });
+            if (existingByKey) {
+                // Must be initiated by teacher, belonging to this teacher, for this parent
+                if (existingByKey.initiatedBy !== 'teacher' || existingByKey.teacherId !== teacherId || existingByKey.parentId !== parentId) {
+                    return response.error(res, 'Idempotency key collision or unauthorized request retry', 409);
+                }
+
+                // Normalized material payload comparison
+                if (!sameRequestPayload(existingByKey, {
+                    subjectId: resolvedSubjectId, stageId: resolvedStageId, message, studyMode,
+                    teachingPlace, preferredTime, tutorRequestId
+                })) {
+                    return response.error(res, 'Idempotency key reused with different request payload', 409);
+                }
+
+                return response.success(res, existingByKey, 'Contact request returned (idempotent retry)', 200);
+            }
+        }
+
+        // 2. Pending duplicate check
+        const existingPending = await prisma.contactRequest.findFirst({
+            where: {
+                teacherId,
+                tutorRequestId,
+                status: 'pending'
+            }
+        });
+
+        if (existingPending) {
+            return response.error(res, 'A pending contact request already exists for this tutor request', 409);
+        }
+
+        let contactRequest;
+        try {
+            contactRequest = await prisma.contactRequest.create({
+                data: {
+                    parentId,
+                    teacherId,
+                    subjectId: resolvedSubjectId || null,
+                    stageId: resolvedStageId || null,
+                    message: message || null,
+                    studyMode: studyMode || null,
+                    teachingPlace: teachingPlace || null,
+                    preferredTime: preferredTime || null,
+                    tutorRequestId,
+                    initiatedBy: 'teacher',
+                    status: 'pending',
+                    idempotencyKey
+                },
+                include: {
+                    parent: {
+                        include: {
+                            user: { select: { id: true, name: true, avatarUrl: true } }
+                        }
+                    },
+                    subject: true,
+                    stage: true
+                }
+            });
+        } catch (createErr) {
+            if (createErr.code === 'P2002' && !idempotencyKey) {
+                return response.error(res, 'A conflicting contact request was created concurrently', 409);
+            }
+            if (createErr.code === 'P2002' && idempotencyKey) {
+                const winning = await prisma.contactRequest.findFirst({
+                    where: { idempotencyKey },
+                    include: {
+                        parent: {
+                            include: { user: { select: { id: true, name: true, avatarUrl: true } } }
+                        },
+                        subject: true,
+                        stage: true
+                    }
+                });
+                if (winning && winning.initiatedBy === 'teacher' && winning.teacherId === teacherId && winning.parentId === parentId) {
+                    if (sameRequestPayload(winning, {
+                        subjectId: resolvedSubjectId, stageId: resolvedStageId, message, studyMode,
+                        teachingPlace, preferredTime, tutorRequestId
+                    })) {
+                        return response.success(res, winning, 'Contact request returned (idempotent retry)', 200);
+                    }
+                }
+                return response.error(res, 'Idempotency key collision or conflicting write', 409);
+            }
+            throw createErr;
+        }
+
+        // Trigger notification to recipient parent (non-blocking)
+        if (parent.userId) {
+            notificationService.sendToUser(
+                parent.userId,
+                'عرض تواصل جديد من معلّم',
+                'تلقيت عرض تواصل من معلّم بخصوص طلبك على منصة زاد',
+                { type: 'contact_request', requestId: contactRequest.id, initiatedBy: 'teacher' }
+            ).catch(notifErr => console.warn('[NOTIFICATION] failed to notify parent:', notifErr.message));
+        }
+
+        // Authoritative server-side analytics logging (NO sensitive PII)
+        try {
+            await prisma.platformEvent.create({
+                data: {
+                    eventType: 'contact_request_create',
+                    userId: req.user.id,
+                    entityId: contactRequest.id,
+                    metadata: {
+                        parentId,
+                        initiatedBy: 'teacher',
+                        studyMode: studyMode || null,
+                        hasSubject: !!subjectId,
+                        hasStage: !!stageId
+                    }
+                }
+            });
+        } catch (analyticsErr) {
+            console.warn('[ANALYTICS] event log error:', analyticsErr.message);
+        }
+
+        return response.created(res, contactRequest, 'Contact request sent to client successfully');
 
     } catch (error) {
         next(error);
@@ -77,7 +431,8 @@ const createRequestAsTeacher = async (req, res, next) => {
 };
 
 /**
- * Get my contact requests (for parent)
+ * Get my contact requests (for parent/client)
+ * Phone privacy: phone is ONLY revealed if status === 'accepted'
  */
 const getMyRequestsAsParent = async (req, res, next) => {
     try {
@@ -92,7 +447,7 @@ const getMyRequestsAsParent = async (req, res, next) => {
             include: {
                 teacher: {
                     include: {
-                        user: { select: { name: true, phone: true, avatarUrl: true } }
+                        user: { select: { id: true, name: true, phone: true, avatarUrl: true } }
                     }
                 },
                 subject: true,
@@ -101,7 +456,22 @@ const getMyRequestsAsParent = async (req, res, next) => {
             orderBy: { createdAt: 'desc' }
         });
 
-        return response.success(res, requests);
+        // Privacy: phone is only revealed when status is accepted
+        const sanitized = requests.map(reqItem => {
+            const data = { ...reqItem };
+            if (data.status !== 'accepted' && data.teacher?.user) {
+                data.teacher = {
+                    ...data.teacher,
+                    user: {
+                        ...data.teacher.user,
+                        phone: null
+                    }
+                };
+            }
+            return data;
+        });
+
+        return response.success(res, sanitized);
 
     } catch (error) {
         next(error);
@@ -110,6 +480,7 @@ const getMyRequestsAsParent = async (req, res, next) => {
 
 /**
  * Get incoming requests (for teacher)
+ * Phone privacy: phone is ONLY revealed if status === 'accepted'
  */
 const getIncomingRequests = async (req, res, next) => {
     try {
@@ -129,7 +500,7 @@ const getIncomingRequests = async (req, res, next) => {
             include: {
                 parent: {
                     include: {
-                        user: { select: { name: true, phone: true, avatarUrl: true } }
+                        user: { select: { id: true, name: true, phone: true, avatarUrl: true } }
                     }
                 },
                 subject: true,
@@ -138,7 +509,22 @@ const getIncomingRequests = async (req, res, next) => {
             orderBy: { createdAt: 'desc' }
         });
 
-        return response.success(res, requests);
+        // Privacy: phone is only revealed when status is accepted
+        const sanitized = requests.map(reqItem => {
+            const data = { ...reqItem };
+            if (data.status !== 'accepted' && data.parent?.user) {
+                data.parent = {
+                    ...data.parent,
+                    user: {
+                        ...data.parent.user,
+                        phone: null
+                    }
+                };
+            }
+            return data;
+        });
+
+        return response.success(res, sanitized);
 
     } catch (error) {
         next(error);
@@ -146,7 +532,7 @@ const getIncomingRequests = async (req, res, next) => {
 };
 
 /**
- * Update request status (teacher accepts/rejects)
+ * Update request status (teacher accepts/rejects parent-initiated request)
  */
 const updateRequestStatus = async (req, res, next) => {
     try {
@@ -158,24 +544,93 @@ const updateRequestStatus = async (req, res, next) => {
             return response.error(res, 'Teacher profile not found', 404);
         }
 
-        if (status && !['accepted', 'rejected'].includes(status)) {
-            return response.error(res, 'Invalid status', 400);
+        if (!status || !['accepted', 'rejected'].includes(status)) {
+            return response.error(res, 'Invalid status. Must be accepted or rejected', 400);
         }
 
-        const request = await prisma.contactRequest.update({
+        // Recipient-only atomic transition: only update if currently pending and recipient is teacher
+        const updateResult = await prisma.contactRequest.updateMany({
             where: {
                 id: requestId,
-                teacherId // Ensure ownership
+                teacherId,
+                status: 'pending',
+                initiatedBy: 'parent'
             },
-            data: { 
-                ...(status && { status }),
+            data: {
+                status,
                 ...(replyMessage !== undefined && { replyMessage })
             }
         });
 
-        // TODO: Send push notification to parent
+        if (updateResult.count === 0) {
+            const existing = await prisma.contactRequest.findUnique({
+                where: { id: requestId }
+            });
 
-        return response.success(res, request, `Request status updated`);
+            if (!existing) {
+                return response.error(res, 'Contact request not found', 404);
+            }
+            if (existing.teacherId !== teacherId) {
+                return response.error(res, 'You do not have permission to update this request', 403);
+            }
+            if (existing.initiatedBy === 'teacher') {
+                return response.error(res, 'You cannot accept or reject a request that you initiated', 403);
+            }
+            if (existing.status !== 'pending') {
+                return response.error(res, `Cannot change status of a request that is already ${existing.status}`, 409);
+            }
+            return response.error(res, 'Could not transition request', 400);
+        }
+
+        const updated = await prisma.contactRequest.findUnique({
+            where: { id: requestId },
+            include: {
+                parent: {
+                    include: {
+                        user: { select: { id: true, name: true, phone: true, avatarUrl: true } }
+                    }
+                },
+                subject: true,
+                stage: true
+            }
+        });
+
+        // Authoritative server-side analytics logging
+        try {
+            await prisma.platformEvent.create({
+                data: {
+                    eventType: 'contact_request_transition',
+                    userId: req.user.id,
+                    entityId: requestId,
+                    metadata: {
+                        newStatus: status,
+                        previousStatus: 'pending',
+                        transitionedBy: 'teacher'
+                    }
+                }
+            });
+        } catch (analyticsErr) {
+            console.warn('[ANALYTICS] event log error:', analyticsErr.message);
+        }
+
+        // Trigger notification to sender parent (non-blocking)
+        if (updated.parent?.user?.id) {
+            notificationService.sendToUser(
+                updated.parent.user.id,
+                status === 'accepted' ? 'تم قبول طلب التواصل' : 'اعتذار عن طلب التواصل',
+                status === 'accepted'
+                    ? 'وافق المعلّم على طلب التواصل، يمكنك الآن التنسيق مباشرة'
+                    : 'اعتذر المعلّم عن قبول طلب التواصل في الوقت الحالي',
+                { type: 'contact_request_status', requestId, status }
+            ).catch(notifErr => console.warn('[NOTIFICATION] failed to notify parent of status update:', notifErr.message));
+        }
+
+        // If rejected, keep phone hidden
+        if (status !== 'accepted' && updated.parent?.user) {
+            updated.parent.user.phone = null;
+        }
+
+        return response.success(res, updated, `Request ${status} successfully`);
 
     } catch (error) {
         next(error);
@@ -195,17 +650,29 @@ const updateRequestMessage = async (req, res, next) => {
             return response.error(res, 'Parent profile not found', 404);
         }
 
-        const request = await prisma.contactRequest.update({
+        const existing = await prisma.contactRequest.findFirst({
             where: {
                 id: requestId,
-                parentId // Ensure ownership
-            },
-            data: { 
+                parentId
+            }
+        });
+
+        if (!existing) {
+            return response.error(res, 'Contact request not found', 404);
+        }
+
+        if (existing.status !== 'pending') {
+            return response.error(res, 'Cannot edit message for a request that has already been resolved', 400);
+        }
+
+        const updated = await prisma.contactRequest.update({
+            where: { id: requestId },
+            data: {
                 ...(message !== undefined && { message })
             }
         });
 
-        return response.success(res, request, `Request message updated`);
+        return response.success(res, updated, 'Request message updated');
 
     } catch (error) {
         next(error);
@@ -213,7 +680,7 @@ const updateRequestMessage = async (req, res, next) => {
 };
 
 /**
- * Update request status by parent (accept/reject teacher initiated request)
+ * Update request status by parent (accept/reject teacher-initiated request)
  */
 const updateRequestStatusAsParent = async (req, res, next) => {
     try {
@@ -225,22 +692,93 @@ const updateRequestStatusAsParent = async (req, res, next) => {
             return response.error(res, 'Parent profile not found', 404);
         }
 
-        if (status && !['accepted', 'rejected'].includes(status)) {
-            return response.error(res, 'Invalid status', 400);
+        if (!status || !['accepted', 'rejected'].includes(status)) {
+            return response.error(res, 'Invalid status. Must be accepted or rejected', 400);
         }
 
-        const request = await prisma.contactRequest.update({
+        // Recipient-only atomic transition: only update if currently pending and recipient is parent
+        const updateResult = await prisma.contactRequest.updateMany({
             where: {
                 id: requestId,
-                parentId // Ensure ownership
+                parentId,
+                status: 'pending',
+                initiatedBy: 'teacher'
             },
-            data: { 
-                ...(status && { status }),
+            data: {
+                status,
                 ...(replyMessage !== undefined && { replyMessage })
             }
         });
 
-        return response.success(res, request, `Request status updated by parent`);
+        if (updateResult.count === 0) {
+            const existing = await prisma.contactRequest.findUnique({
+                where: { id: requestId }
+            });
+
+            if (!existing) {
+                return response.error(res, 'Contact request not found', 404);
+            }
+            if (existing.parentId !== parentId) {
+                return response.error(res, 'You do not have permission to update this request', 403);
+            }
+            if (existing.initiatedBy === 'parent') {
+                return response.error(res, 'You cannot accept or reject a request that you initiated', 403);
+            }
+            if (existing.status !== 'pending') {
+                return response.error(res, `Cannot change status of a request that is already ${existing.status}`, 409);
+            }
+            return response.error(res, 'Could not transition request', 400);
+        }
+
+        const updated = await prisma.contactRequest.findUnique({
+            where: { id: requestId },
+            include: {
+                teacher: {
+                    include: {
+                        user: { select: { id: true, name: true, phone: true, avatarUrl: true } }
+                    }
+                },
+                subject: true,
+                stage: true
+            }
+        });
+
+        // Authoritative server-side analytics logging
+        try {
+            await prisma.platformEvent.create({
+                data: {
+                    eventType: 'contact_request_transition',
+                    userId: req.user.id,
+                    entityId: requestId,
+                    metadata: {
+                        newStatus: status,
+                        previousStatus: 'pending',
+                        transitionedBy: 'parent'
+                    }
+                }
+            });
+        } catch (analyticsErr) {
+            console.warn('[ANALYTICS] event log error:', analyticsErr.message);
+        }
+
+        // Trigger notification to sender teacher (non-blocking)
+        if (updated.teacher?.user?.id) {
+            notificationService.sendToUser(
+                updated.teacher.user.id,
+                status === 'accepted' ? 'تم قبول عرض التواصل' : 'اعتذار عن عرض التواصل',
+                status === 'accepted'
+                    ? 'وافق العميل على عرض التواصل، يمكنك الآن التنسيق مباشرة'
+                    : 'اعتذر العميل عن قبول عرض التواصل في الوقت الحالي',
+                { type: 'contact_request_status', requestId, status }
+            ).catch(notifErr => console.warn('[NOTIFICATION] failed to notify teacher of status update:', notifErr.message));
+        }
+
+        // If rejected, keep phone hidden
+        if (status !== 'accepted' && updated.teacher?.user) {
+            updated.teacher.user.phone = null;
+        }
+
+        return response.success(res, updated, `Request ${status} by parent`);
 
     } catch (error) {
         next(error);

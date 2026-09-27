@@ -15,11 +15,12 @@ interface AuthState {
   profile: (User & { parent?: ClientProfile }) | null;
   isLoading: boolean;
   error: string | null;
+  registrationComplete: boolean;
 
   // Actions
   login: (phone: string, password: string, email?: string) => Promise<string | null>;
-  registerClient: (payload: RegisterClientPayload) => Promise<void>;
-  registerTeacher: (payload: RegisterTeacherPayload) => Promise<void>;
+  registerClient: (payload: RegisterClientPayload) => Promise<boolean>;
+  registerTeacher: (payload: RegisterTeacherPayload) => Promise<boolean>;
   logout: () => Promise<void>;
   updateAccount: (payload: Partial<User>) => Promise<void>;
   uploadAvatar: (file: File) => Promise<void>;
@@ -33,6 +34,7 @@ export const useAuthStore = create<AuthState>()(
     (set, get) => ({
       ...initialSlice<null>(),
       profile: null,
+      registrationComplete: false,
 
       login: async (phone, password, email) => {
         set({ isLoading: true, error: null });
@@ -59,16 +61,25 @@ export const useAuthStore = create<AuthState>()(
       },
 
       registerClient: async (payload) => {
-        set({ isLoading: true, error: null });
+        set({ isLoading: true, error: null, registrationComplete: false });
         try {
           await api.post("/auth/register/parent", payload);
-          // After successful registration, sign in
-          await signIn("credentials", {
+          const result = await signIn("credentials", {
             phone: payload.phone,
             password: payload.password,
             redirect: false,
           });
-          set({ isLoading: false });
+          const session = result?.error ? null : await getSession();
+          if (session?.userType !== "parent") {
+            set({
+              isLoading: false,
+              registrationComplete: true,
+              error: "Your account was created, but automatic sign-in failed. Please sign in.",
+            });
+            return false;
+          }
+          set({ isLoading: false, registrationComplete: true });
+          return true;
         } catch (err) {
           set({ error: extractError(err), isLoading: false });
           throw err;
@@ -76,15 +87,25 @@ export const useAuthStore = create<AuthState>()(
       },
 
       registerTeacher: async (payload) => {
-        set({ isLoading: true, error: null });
+        set({ isLoading: true, error: null, registrationComplete: false });
         try {
           await api.post("/auth/register/teacher", payload);
-          await signIn("credentials", {
+          const result = await signIn("credentials", {
             phone: payload.phone,
             password: payload.password,
             redirect: false,
           });
-          set({ isLoading: false });
+          const session = result?.error ? null : await getSession();
+          if (session?.userType !== "teacher") {
+            set({
+              isLoading: false,
+              registrationComplete: true,
+              error: "Your account was created, but automatic sign-in failed. Please sign in.",
+            });
+            return false;
+          }
+          set({ isLoading: false, registrationComplete: true });
+          return true;
         } catch (err) {
           set({ error: extractError(err), isLoading: false });
           throw err;
@@ -143,7 +164,7 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      reset: () => set({ profile: null, isLoading: false, error: null }),
+      reset: () => set({ profile: null, isLoading: false, error: null, registrationComplete: false }),
     }),
     { name: "auth-store" }
   )

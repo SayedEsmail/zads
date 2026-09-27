@@ -44,19 +44,39 @@ exports.sendNotification = async (req, res, next) => {
             });
         }
 
-        const success = await notificationService.sendToUser(userId, title, body, data);
+        const result = await notificationService.sendToUser(userId, title, body, data);
 
-        if (success) {
-            res.status(200).json({
+        if (result.delivered) {
+            return res.status(200).json({
                 success: true,
-                message: 'Notification sent successfully'
-            });
-        } else {
-            res.status(500).json({
-                success: false,
-                message: 'Failed to send notification'
+                delivered: true,
+                message: 'Notification delivered successfully via Firebase',
+                messageId: result.messageId
             });
         }
+
+        if (result.reason === 'NO_FCM_TOKEN') {
+            return res.status(400).json({
+                success: false,
+                delivered: false,
+                message: 'User does not have an active registered FCM device token'
+            });
+        }
+
+        if (result.reason === 'FIREBASE_NOT_INITIALIZED') {
+            return res.status(503).json({
+                success: false,
+                delivered: false,
+                message: 'Push notification delivery service is unavailable (Firebase credentials not configured).'
+            });
+        }
+
+        return res.status(500).json({
+            success: false,
+            delivered: false,
+            message: 'Failed to deliver notification',
+            error: result.error
+        });
     } catch (error) {
         next(error);
     }

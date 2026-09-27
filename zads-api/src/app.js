@@ -26,14 +26,50 @@ const app = express();
 // MIDDLEWARES
 // ==============================================
 
-// Security
-app.use(helmet());
+// API serves JSON, not documents. Disable HTML-oriented Helmet defaults that
+// browsers surface as ERR_FAILED / CORS noise when responses are read cross-origin
+// or forwarded through the frontend BFF.
+app.use(helmet({
+    contentSecurityPolicy: false,
+    crossOriginEmbedderPolicy: false,
+    crossOriginOpenerPolicy: false,
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+}));
+
+const corsOrigins = (process.env.CORS_ORIGIN || 'https://zads.app,https://www.zads.app')
+    .split(',')
+    .map((value) => value.trim())
+    .filter(Boolean);
+
+const isAllowedOrigin = (origin) => {
+    if (!origin) return true;
+    if (corsOrigins.includes('*') || corsOrigins.includes(origin)) return true;
+    try {
+        const { hostname, protocol } = new URL(origin);
+        if (protocol !== 'https:' && protocol !== 'http:') return false;
+        return hostname === 'zads.app' || hostname.endsWith('.zads.app');
+    } catch {
+        return false;
+    }
+};
 
 // CORS
 app.use(cors({
-    origin: process.env.CORS_ORIGIN || '*',
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    origin(origin, callback) {
+        callback(null, isAllowedOrigin(origin));
+    },
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: [
+        'Content-Type',
+        'Authorization',
+        'Idempotency-Key',
+        'idempotency-key',
+        'Accept',
+        'X-Requested-With',
+    ],
+    credentials: true,
+    maxAge: 0,
+    optionsSuccessStatus: 204,
 }));
 
 // Logging
@@ -46,7 +82,16 @@ if (process.env.NODE_ENV === 'development') {
 // Parse JSON
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use('/uploads', express.static('public/uploads'));
+
+// Static files: avatars and public images only
+app.use('/uploads/images', express.static('public/uploads/images'));
+
+// Protected certificate document access requires an Authorization bearer header.
+const { certificateAuth } = require('./middlewares/auth');
+const uploadCtrl = require('./controllers/upload.controller');
+app.get('/uploads/certificates/:filename', certificateAuth, uploadCtrl.getCertificate);
+app.get('/api/uploads/certificates/:filename', certificateAuth, uploadCtrl.getCertificate);
+app.get('/api/upload/certificates/:filename', certificateAuth, uploadCtrl.getCertificate);
 
 // ==============================================
 // ROUTES
@@ -92,11 +137,10 @@ const HOST = process.env.HOST || '127.0.0.1';
 
 if (require.main === module) {
     app.listen(PORT, HOST, () => {
-        console.log(`🚀 Mo3alemy API running at http://${HOST}:${PORT}`);
+        console.log(`🚀 Zads API running at http://${HOST}:${PORT}`);
         console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
     });
 }
 
 module.exports = app;
 // Force nodemon reload after prisma client generation
-

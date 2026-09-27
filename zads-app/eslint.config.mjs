@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Node/CommonJS smoke tests are run with node, not eslint
+    "tests/**",
   ]),
 ]);
 

@@ -1,21 +1,43 @@
 import axios from "axios";
 import { getSession, signOut } from "next-auth/react";
 
+function forceSameOriginBase(config: { baseURL?: string; url?: string }) {
+  // Always same-origin BFF. Neutralize stale absolute bases from old bundles/env.
+  config.baseURL = "/api";
+  if (typeof config.url === "string") {
+    config.url = config.url
+      .replace(/^https?:\/\/(www\.)?api\.zads\.app\/api(?=\/|$)/i, "")
+      .replace(/^https?:\/\/(www\.)?api\.zads\.app(?=\/|$)/i, "")
+      .replace(/^https?:\/\/(www\.)?zads\.app\/api(?=\/|$)/i, "");
+  }
+  return config;
+}
+
 const api = axios.create({
-  // Use relative /api so it correctly uses the browser's current host/port (e.g. localhost:3001) for the proxy
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || "/api",
+  baseURL: "/api",
   headers: {
     "Content-Type": "application/json",
   },
   timeout: 15000,
 });
 
-// Request interceptor: attach JWT from NextAuth session
+// Public discovery must not depend on a session or inherit account-specific filters.
+export const publicApi = axios.create({
+  baseURL: "/api",
+  timeout: 15000,
+});
+
 api.interceptors.request.use(async (config) => {
+  forceSameOriginBase(config);
   const session = await getSession();
   if (session?.apiToken) {
     config.headers.Authorization = `Bearer ${session.apiToken}`;
   }
+  return config;
+});
+
+publicApi.interceptors.request.use((config) => {
+  forceSameOriginBase(config);
   return config;
 });
 

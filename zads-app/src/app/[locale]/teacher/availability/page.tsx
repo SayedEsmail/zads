@@ -146,8 +146,8 @@ export default function TeacherAvailabilityPage() {
             </h1>
             <p className="text-sm text-orange-100/90 mt-1">
               {locale === "ar"
-                ? "حدد فترات العمل المتاحة لديك في الأسبوع ليتمكن أولياء الأمور من حجز حصص معك خلالها."
-                : "Set your weekly working hours so parents can book matching tutoring slots with you."}
+                ? "حدد فترات العمل المتاحة لديك في الأسبوع ليتمكن المتعلمون من الاطلاع عليها والتواصل معك للتنسيق."
+                : "Set your weekly availability so learners can view it and contact you to coordinate."}
             </p>
           </div>
         </div>

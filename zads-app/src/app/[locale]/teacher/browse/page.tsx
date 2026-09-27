@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import api from "@/lib/api";
+import { useContactRequestsStore } from "@/stores/contact-requests";
 import { ErrorBanner } from "@/components/shared/ErrorBanner";
 import { PageSkeleton } from "@/components/shared/PageSkeleton";
 import { TutorRequestCard } from "@/components/shared/TutorRequestCard";
@@ -13,6 +14,7 @@ export default function TeacherBrowsePage() {
   const t = useTranslations("teacher");
   const tCommon = useTranslations("common");
   const locale = useLocale();
+  const createRequestAsTeacher = useContactRequestsStore((state) => state.createRequestAsTeacher);
   const [requests, setRequests] = useState<TutorRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -53,11 +55,12 @@ export default function TeacherBrowsePage() {
   const handleSendContact = () => {
     if (!selectedRequest) return;
     setIsSending(true);
-    api
-      .post("/contact-requests/teacher", {
+    createRequestAsTeacher({
         parentId: selectedRequest.parentId,
         subjectId: selectedRequest.subjectId,
         stageId: selectedRequest.stageId,
+        tutorRequestId: selectedRequest.id,
+        studyMode: selectedRequest.studyMode === "both" ? undefined : (selectedRequest.studyMode as "online" | "offline"),
         message: message.trim() || undefined,
       })
       .then(() => {
@@ -69,8 +72,9 @@ export default function TeacherBrowsePage() {
         setSelectedRequest(null);
         setMessage("");
       })
-      .catch((err) => {
-        toast.error(err.response?.data?.message ?? err.message);
+      .catch((err: unknown) => {
+        const error = err as { response?: { data?: { message?: string } }; message?: string };
+        toast.error(error.response?.data?.message ?? error.message ?? (locale === "ar" ? "تعذر إرسال الطلب" : "Unable to send request"));
       })
       .finally(() => setIsSending(false));
   };

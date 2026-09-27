@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { MapPin, Star, Heart, MessageCircle } from "lucide-react";
+import { MapPin, Star, Heart, MessageCircle, CheckCircle } from "lucide-react";
 import { cn, getInitials, formatPrice } from "@/lib/utils";
 import type { Teacher, TeacherSubject } from "@/types";
 
@@ -15,6 +15,7 @@ export interface TeacherCardProps {
   onToggleFavorite?: (id: string) => void;
   onContact?: (id: string) => void;
   variant?: "compact" | "full";
+  targetHref?: string;
 }
 
 export function TeacherCard({
@@ -24,6 +25,7 @@ export function TeacherCard({
   onToggleFavorite,
   onContact,
   variant = "full",
+  targetHref,
 }: TeacherCardProps) {
   const locale = useLocale();
   const router = useRouter();
@@ -32,8 +34,10 @@ export function TeacherCard({
   const user = teacher.user;
   const area = teacher.area;
 
+  const destination = targetHref ?? `/${locale}/client/teacher/${teacher.id}`;
+
   const handleCardClick = () => {
-    router.push(`/${locale}/client/teacher/${teacher.id}`);
+    router.push(destination);
   };
 
   return (
@@ -64,13 +68,21 @@ export function TeacherCard({
       {/* Info */}
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-2">
-          <Link
-            href={`/${locale}/client/teacher/${teacher.id}`}
-            onClick={(e) => e.stopPropagation()}
-            className="font-semibold hover:text-primary line-clamp-1"
-          >
-            {user?.name}
-          </Link>
+          <div className="flex items-center gap-2 flex-wrap">
+            <Link
+              href={destination}
+              onClick={(e) => e.stopPropagation()}
+              className="font-semibold hover:text-primary line-clamp-1"
+            >
+              {user?.name}
+            </Link>
+            {teacher.isVerified && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-blue-700 border border-blue-200/80">
+                <CheckCircle className="h-3 w-3 text-blue-600 shrink-0" />
+                {locale === "ar" ? "موثق" : "Verified"}
+              </span>
+            )}
+          </div>
           {onToggleFavorite && (
             <button
               onClick={(e) => {
@@ -127,10 +139,10 @@ export function TeacherCard({
         {/* Online/Offline pricing */}
         {subjects && subjects.length > 0 && variant === "full" && (
           <div className="mt-1.5 flex gap-3 text-xs text-muted-foreground">
-            {subjects[0].priceOnline != null && (
+            {subjects[0].isOnline && subjects[0].priceOnline != null && (
               <span>{tCommon("online")}: <strong className="text-foreground">{formatPrice(subjects[0].priceOnline)}</strong></span>
             )}
-            {subjects[0].priceOffline != null && (
+            {subjects[0].isOffline && subjects[0].priceOffline != null && (
               <span>{tCommon("offline")}: <strong className="text-foreground">{formatPrice(subjects[0].priceOffline)}</strong></span>
             )}
           </div>
