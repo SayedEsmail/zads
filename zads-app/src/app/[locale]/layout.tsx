@@ -9,6 +9,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { AttributionTracker } from "@/components/shared/AttributionTracker";
 import { GoogleAnalytics } from "@/components/shared/GoogleAnalytics";
 import { PushNotificationRegistrar } from "@/components/shared/PushNotificationRegistrar";
+import { GA_MEASUREMENT_ID } from "@/lib/analytics";
 import "../globals.css";
 
 export async function generateMetadata({
@@ -81,6 +82,22 @@ export default async function LocaleLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         {/* eslint-disable-next-line @next/next/no-page-custom-font */}
         <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+        {GA_MEASUREMENT_ID ? (
+          <>
+            <script async src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`} />
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `
+                  window.dataLayer = window.dataLayer || [];
+                  function gtag(){dataLayer.push(arguments);}
+                  window.gtag = gtag;
+                  gtag('js', new Date());
+                  gtag('config', '${GA_MEASUREMENT_ID}');
+                `,
+              }}
+            />
+          </>
+        ) : null}
       </head>
       <body className="min-h-screen flex flex-col bg-background text-foreground antialiased" suppressHydrationWarning>
         <SessionProvider>
