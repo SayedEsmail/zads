@@ -97,8 +97,8 @@ export function TeacherCard({
           )}
         </div>
 
-        {/* Rating */}
-        {variant === "full" && (
+        {/* Rating — hide until the teacher has at least one review */}
+        {variant === "full" && Number(teacher.ratingCount) > 0 && (
           <div className="mt-0.5 flex items-center gap-1">
             <Star className="h-3.5 w-3.5 fill-warning text-warning" />
             <span className="text-xs font-medium">{Number(teacher.avgRating).toFixed(1)}</span>

@@ -149,16 +149,18 @@ export default function PublicTeacherDetailPage({
                   </p>
                 )}
 
-                {/* Rating */}
-                <div className="mt-1.5 flex items-center gap-1.5">
-                  <Star className="h-4 w-4 fill-warning text-warning" />
-                  <span className="text-xs font-bold text-slate-800">
-                    {Number(teacher.avgRating).toFixed(1)}
-                  </span>
-                  <span className="text-xs text-slate-400">
-                    ({teacher.ratingCount} {locale === "ar" ? "تقييم" : "reviews"})
-                  </span>
-                </div>
+                {/* Rating — hide until there are reviews */}
+                {Number(teacher.ratingCount) > 0 && (
+                  <div className="mt-1.5 flex items-center gap-1.5">
+                    <Star className="h-4 w-4 fill-warning text-warning" />
+                    <span className="text-xs font-bold text-slate-800">
+                      {Number(teacher.avgRating).toFixed(1)}
+                    </span>
+                    <span className="text-xs text-slate-400">
+                      ({teacher.ratingCount} {locale === "ar" ? "تقييم" : "reviews"})
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
 
