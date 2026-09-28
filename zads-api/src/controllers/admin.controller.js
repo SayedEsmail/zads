@@ -1,5 +1,7 @@
+const bcrypt = require('bcryptjs');
 const prisma = require('../config/database');
 const response = require('../utils/response');
+const { normalizeEgyptianPhone, phoneRegex } = require('../utils/validators');
 
 /**
  * Get dashboard statistics
@@ -211,6 +213,119 @@ const updateUserStatus = async (req, res, next) => {
 
         return response.success(res, user, `User ${status}`);
 
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * Update user profile fields (admin)
+ */
+const updateUser = async (req, res, next) => {
+    try {
+        const { userId } = req.params;
+        const { name, phone, email, password } = req.body;
+
+        const existing = await prisma.user.findUnique({ where: { id: userId } });
+        if (!existing) {
+            return response.error(res, 'User not found', 404);
+        }
+
+        if (existing.userType === 'admin') {
+            return response.error(res, 'Admin accounts cannot be edited here', 403);
+        }
+
+        const data = {};
+
+        if (name !== undefined) {
+            const trimmed = String(name).trim();
+            if (trimmed.length < 2) {
+                return response.error(res, 'Name must be at least 2 characters', 400);
+            }
+            data.name = trimmed;
+        }
+
+        if (phone !== undefined) {
+            const cleanPhone = normalizeEgyptianPhone(phone);
+            if (!phoneRegex.test(cleanPhone)) {
+                return response.error(res, 'Invalid Egyptian phone number', 400);
+            }
+            const phoneOwner = await prisma.user.findUnique({ where: { phone: cleanPhone } });
+            if (phoneOwner && phoneOwner.id !== userId) {
+                return response.error(res, 'Phone number already registered', 409);
+            }
+            data.phone = cleanPhone;
+        }
+
+        if (email !== undefined) {
+            const normalizedEmail = email === null || email === '' ? null : String(email).trim().toLowerCase();
+            if (normalizedEmail) {
+                const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail);
+                if (!emailOk) {
+                    return response.error(res, 'Invalid email address', 400);
+                }
+                const emailOwner = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+                if (emailOwner && emailOwner.id !== userId) {
+                    return response.error(res, 'Email already registered', 409);
+                }
+            }
+            data.email = normalizedEmail;
+        }
+
+        if (password !== undefined && password !== null && password !== '') {
+            if (String(password).length < 6) {
+                return response.error(res, 'Password must be at least 6 characters', 400);
+            }
+            data.passwordHash = await bcrypt.hash(String(password), 10);
+        }
+
+        if (Object.keys(data).length === 0) {
+            return response.error(res, 'No fields to update', 400);
+        }
+
+        const user = await prisma.user.update({
+            where: { id: userId },
+            data,
+            select: {
+                id: true,
+                name: true,
+                phone: true,
+                email: true,
+                status: true,
+                userType: true,
+                avatarUrl: true
+            }
+        });
+
+        return response.success(res, user, 'User updated successfully');
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * Permanently delete a teacher or client account (admin)
+ */
+const deleteUser = async (req, res, next) => {
+    try {
+        const { userId } = req.params;
+
+        const existing = await prisma.user.findUnique({ where: { id: userId } });
+        if (!existing) {
+            return response.error(res, 'User not found', 404);
+        }
+
+        if (existing.userType === 'admin') {
+            return response.error(res, 'Admin accounts cannot be deleted', 403);
+        }
+
+        if (req.user?.id && req.user.id === userId) {
+            return response.error(res, 'You cannot delete your own account', 403);
+        }
+
+        await prisma.user.delete({ where: { id: userId } });
+
+        return response.success(res, { id: userId }, 'User deleted successfully');
     } catch (error) {
         next(error);
     }
@@ -469,6 +584,8 @@ module.exports = {
     getAllTeachers,
     getAllParents,
     updateUserStatus,
+    updateUser,
+    deleteUser,
     getContactStats,
     getAllContactRequests,
     getAllTutorRequests,
