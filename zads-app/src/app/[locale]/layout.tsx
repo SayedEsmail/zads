@@ -100,7 +100,7 @@ export default async function LocaleLayout({
         ) : null}
       </head>
       <body className="min-h-screen flex flex-col bg-background text-foreground antialiased" suppressHydrationWarning>
-        <SessionProvider>
+        <SessionProvider basePath="/api/nextauth">
           <NextIntlClientProvider messages={messages}>
             {children}
             <Suspense fallback={null}>

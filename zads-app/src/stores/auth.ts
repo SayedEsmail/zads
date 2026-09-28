@@ -82,7 +82,7 @@ export const useAuthStore = create<AuthState>()(
           return true;
         } catch (err) {
           set({ error: extractError(err), isLoading: false });
-          throw err;
+          return false;
         }
       },
 
@@ -108,7 +108,7 @@ export const useAuthStore = create<AuthState>()(
           return true;
         } catch (err) {
           set({ error: extractError(err), isLoading: false });
-          throw err;
+          return false;
         }
       },
 

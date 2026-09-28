@@ -50,7 +50,7 @@ Open http://localhost:3001 → redirects to /en
 ## API
 
 Browser requests always use the same-origin `/api` proxy. Configure the backend origin with server-side `API_BASE_URL` (local development: `http://localhost:3000`; production: `https://api.zads.app`).
-Auth flow: NextAuth credentials provider calls `/api/auth/login`, wraps JWT in session cookie.
+Auth flow: NextAuth (at `/api/nextauth`) credentials provider calls Express `/api/auth/login` via `API_BASE_URL`, wraps JWT in session cookie. Browser API calls to `/api/auth/*` are proxied by the BFF to Express.
 
 ## P0-13 RTL Test
 
