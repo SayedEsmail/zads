@@ -16,8 +16,10 @@ router.patch('/teachers/:teacherId/verify', adminController.toggleTeacherVerific
 // Parents management
 router.get('/parents', adminController.getAllParents);
 
-// User status management
+// User status / profile management
 router.patch('/users/:userId/status', adminController.updateUserStatus);
+router.put('/users/:userId', adminController.updateUser);
+router.delete('/users/:userId', adminController.deleteUser);
 
 // Stats & Contact Requests
 router.get('/stats/contacts', adminController.getContactStats);

@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import api from "@/lib/api";
 import { extractError, initialSlice } from "./_convention";
-import type { AdminTeacher, AdminParent, AdminContactRequest, Subject, Stage, PaginatedResponse } from "@/types";
+import type { AdminTeacher, AdminParent, AdminContactRequest, Subject, Stage, PaginatedResponse, UserStatus } from "@/types";
 
 interface AdminDashboardStats {
   teachers: {
@@ -51,6 +51,8 @@ interface AdminStore {
   fetchContactRequests: (params?: { page?: number; limit?: number; status?: string; search?: string; startDate?: string; endDate?: string; initiatedBy?: string }) => Promise<void>;
   toggleTeacherVerification: (teacherId: string, isVerified: boolean, notes?: string) => Promise<void>;
   updateUserStatus: (userId: string, status: "active" | "suspended") => Promise<void>;
+  updateUser: (userId: string, payload: { name?: string; phone?: string; email?: string | null; password?: string }) => Promise<void>;
+  deleteUser: (userId: string) => Promise<void>;
   fetchStages: () => Promise<void>;
   createStage: (payload: { nameAr: string; nameEn?: string; sortOrder: number }) => Promise<void>;
   updateStage: (id: string, payload: { nameAr?: string; nameEn?: string; sortOrder?: number; isActive?: boolean }) => Promise<void>;
@@ -243,6 +245,72 @@ export const useAdminStore = create<AdminStore>()(
           });
         } catch (err) {
           set({ error: extractError(err), isLoading: false });
+          throw err;
+        }
+      },
+
+      updateUser: async (userId, payload) => {
+        set({ error: null });
+        try {
+          const res = await api.put<{ data: { id: string; name: string; phone: string; email: string | null; status: string; userType: string; avatarUrl: string | null } }>(
+            `/admin/users/${userId}`,
+            payload
+          );
+          const updated = res.data.data;
+          set({
+            teachers: get().teachers.map((t) =>
+              t.user?.id === userId
+                ? {
+                    ...t,
+                    user: {
+                      ...t.user,
+                      name: updated.name,
+                      phone: updated.phone,
+                      email: updated.email,
+                      status: updated.status as UserStatus,
+                      avatarUrl: updated.avatarUrl,
+                    },
+                  }
+                : t
+            ),
+            parents: get().parents.map((p) =>
+              p.user?.id === userId
+                ? {
+                    ...p,
+                    user: {
+                      ...p.user,
+                      name: updated.name,
+                      phone: updated.phone,
+                      email: updated.email,
+                      status: updated.status as UserStatus,
+                      avatarUrl: updated.avatarUrl,
+                    },
+                  }
+                : p
+            ),
+            error: null,
+          });
+        } catch (err) {
+          set({ error: extractError(err) });
+          throw err;
+        }
+      },
+
+      deleteUser: async (userId) => {
+        set({ error: null });
+        try {
+          const wasTeacher = get().teachers.some((t) => t.user?.id === userId);
+          const wasParent = get().parents.some((p) => p.user?.id === userId);
+          await api.delete(`/admin/users/${userId}`);
+          set({
+            teachers: get().teachers.filter((t) => t.user?.id !== userId),
+            totalTeachers: wasTeacher ? Math.max(0, get().totalTeachers - 1) : get().totalTeachers,
+            parents: get().parents.filter((p) => p.user?.id !== userId),
+            totalParents: wasParent ? Math.max(0, get().totalParents - 1) : get().totalParents,
+            error: null,
+          });
+        } catch (err) {
+          set({ error: extractError(err) });
           throw err;
         }
       },

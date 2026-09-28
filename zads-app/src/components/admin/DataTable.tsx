@@ -11,7 +11,7 @@ import {
   type SortingState,
 } from "@tanstack/react-table";
 import { useState } from "react";
-import { ChevronUp, ChevronDown, ChevronsUpDown, ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronUp, ChevronDown, ChevronsUpDown, ChevronLeft, ChevronRight, RefreshCw } from "lucide-react";
 
 interface DataTableProps<TData> {
   data: TData[];
@@ -25,6 +25,8 @@ interface DataTableProps<TData> {
   onPageChange?: (newPage: number) => void;
   searchValue?: string;
   onSearchChange?: (newSearch: string) => void;
+  onRefresh?: () => void;
+  refreshLabel?: string;
 }
 
 export function DataTable<TData>({
@@ -39,6 +41,8 @@ export function DataTable<TData>({
   onPageChange,
   searchValue,
   onSearchChange,
+  onRefresh,
+  refreshLabel = "Refresh",
 }: DataTableProps<TData>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [localGlobalFilter, setLocalGlobalFilter] = useState("");
@@ -98,13 +102,27 @@ export function DataTable<TData>({
 
   return (
     <div className="space-y-3">
-      {/* Search */}
-      <input
-        value={effectiveSearch}
-        onChange={(e) => handleSearchChange(e.target.value)}
-        placeholder={searchPlaceholder}
-        className="w-full max-w-xs rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-      />
+      {/* Search + optional refresh (refresh sits visually left of search in RTL) */}
+      <div className="flex items-center gap-2">
+        <input
+          value={effectiveSearch}
+          onChange={(e) => handleSearchChange(e.target.value)}
+          placeholder={searchPlaceholder}
+          className="w-full max-w-xs rounded-lg border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+        />
+        {onRefresh && (
+          <button
+            type="button"
+            onClick={onRefresh}
+            disabled={isLoading}
+            title={refreshLabel}
+            aria-label={refreshLabel}
+            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-border bg-white text-slate-600 transition-colors hover:bg-slate-50 hover:text-primary disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
+          </button>
+        )}
+      </div>
 
       {/* Desktop table */}
       <div className="hidden overflow-hidden rounded-xl border border-border md:block">
