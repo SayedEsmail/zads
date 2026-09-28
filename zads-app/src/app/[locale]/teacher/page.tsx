@@ -77,11 +77,16 @@ export default function TeacherDashboardPage() {
   const handleSendContact = () => {
     if (!selectedRequest) return;
     setIsSending(true);
-    api
-      .post("/contact-requests/teacher", {
+    contactStore
+      .createRequestAsTeacher({
         parentId: selectedRequest.parentId,
         subjectId: selectedRequest.subjectId,
         stageId: selectedRequest.stageId,
+        tutorRequestId: selectedRequest.id,
+        studyMode:
+          selectedRequest.studyMode === "both"
+            ? undefined
+            : (selectedRequest.studyMode as "online" | "offline"),
         message: message.trim() || undefined,
       })
       .then(() => {
@@ -93,8 +98,13 @@ export default function TeacherDashboardPage() {
         setSelectedRequest(null);
         setMessage("");
       })
-      .catch((err) => {
-        toast.error(err.response?.data?.message ?? err.message);
+      .catch((err: unknown) => {
+        const error = err as { response?: { data?: { message?: string } }; message?: string };
+        toast.error(
+          error.response?.data?.message ??
+            error.message ??
+            (locale === "ar" ? "تعذر إرسال الطلب" : "Unable to send request")
+        );
       })
       .finally(() => setIsSending(false));
   };
