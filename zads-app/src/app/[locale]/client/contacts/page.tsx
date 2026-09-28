@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { MessageCircle, Phone, Check, X, Clock } from "lucide-react";
 import { useContactRequestsStore } from "@/stores/contact-requests";
@@ -8,16 +8,12 @@ import { ErrorBanner } from "@/components/shared/ErrorBanner";
 import { PageSkeleton } from "@/components/shared/PageSkeleton";
 import api from "@/lib/api";
 import { toast } from "sonner";
-import type { ContactRequest } from "@/types";
 
 export default function ClientContactsPage() {
     const locale = useLocale();
     const t = useTranslations("request");
     const tCommon = useTranslations("common");
     const contactStore = useContactRequestsStore();
-
-    // Local state to hold inline message texts per request ID
-    const [replyText, setReplyText] = useState<{ [id: string]: string }>({});
 
     const handleContactClick = (requestId: string, channel: 'whatsapp' | 'phone') => {
         api.post('/analytics/contact-click', { requestId, channel }).catch(() => {
@@ -28,29 +24,6 @@ export default function ClientContactsPage() {
     useEffect(() => {
         contactStore.fetch();
     }, []);
-
-    const handleSendReply = async (r: ContactRequest) => {
-        const text = replyText[r.id]?.trim();
-        if (!text) return;
-
-        try {
-            if (r.initiatedBy === "teacher") {
-                // If initiated by teacher, parent replies via updateParentStatus (which updates replyMessage)
-                await contactStore.updateParentStatus(r.id, r.status, text);
-            } else {
-                // If initiated by parent, parent updates their own initial message
-                await contactStore.updateParentMessage(r.id, text);
-            }
-            toast.success(locale === "ar" ? "تم إرسال رسالتك بنجاح!" : "Message sent successfully!");
-            setReplyText((prev) => {
-                const copy = { ...prev };
-                delete copy[r.id];
-                return copy;
-            });
-        } catch (err) {
-            toast.error(locale === "ar" ? "حدث خطأ أثناء إرسال الرسالة" : "Error sending message");
-        }
-    };
 
     const handleAcceptRequest = async (id: string) => {
         try {
@@ -219,86 +192,29 @@ export default function ClientContactsPage() {
                                     </div>
                                 )}
 
-                                {/* Symmetric Message/Reply Panel when accepted */}
+                                {/* After accept/reject: show locked messages only (API forbids edits on resolved requests) */}
                                 {r.status === "accepted" && (
                                     <div className="space-y-3 pt-3 border-t border-slate-100">
-                                        {/* Display the active side's reply message or edit trigger */}
-                                        {isTeacherInitiated ? (
-                                            /* If teacher initiated, parent replies to replyMessage */
-                                            r.replyMessage ? (
-                                                <div className="text-xs space-y-1">
-                                                    <div className="flex items-center justify-between">
-                                                        <span className="text-slate-400 font-bold block">
-                                                            {locale === "ar" ? "💬 ردّك الحالي على المعلم:" : "💬 Your Current Reply:"}
-                                                        </span>
-                                                        <button
-                                                            onClick={() => {
-                                                                setReplyText((prev) => ({ ...prev, [r.id]: r.replyMessage || "" }));
-                                                            }}
-                                                            className="text-primary hover:underline text-[10px] font-bold cursor-pointer bg-transparent border-0"
-                                                        >
-                                                            {locale === "ar" ? "تعديل الرد" : "Edit Reply"}
-                                                        </button>
-                                                    </div>
-                                                    <p className="text-slate-700 bg-slate-50 border border-slate-100 p-3 rounded-xl leading-relaxed italic text-start">
-                                                        {r.replyMessage}
-                                                    </p>
-                                                </div>
-                                            ) : null
-                                        ) : (
-                                            /* If parent initiated, parent replies/edits message */
-                                            r.message ? (
-                                                <div className="text-xs space-y-1">
-                                                    <div className="flex items-center justify-between">
-                                                        <span className="text-slate-400 font-bold block">
-                                                            {locale === "ar" ? "💬 رسالتك الحالية للمعلم:" : "💬 Your Current Message:"}
-                                                        </span>
-                                                        <button
-                                                            onClick={() => {
-                                                                setReplyText((prev) => ({ ...prev, [r.id]: r.message || "" }));
-                                                            }}
-                                                            className="text-primary hover:underline text-[10px] font-bold cursor-pointer bg-transparent border-0"
-                                                        >
-                                                            {locale === "ar" ? "تعديل الرسالة" : "Edit Message"}
-                                                        </button>
-                                                    </div>
-                                                    <p className="text-slate-700 bg-slate-50 border border-slate-100 p-3 rounded-xl leading-relaxed italic text-start">
-                                                        {r.message}
-                                                    </p>
-                                                </div>
-                                            ) : null
-                                        )}
-
-                                        {/* Input Box for typing new message/reply */}
-                                        {((isTeacherInitiated && !r.replyMessage) || (!isTeacherInitiated && !r.message) || replyText[r.id] !== undefined) && (
-                                            <div className="space-y-2">
-                                                <label className="block text-[10px] font-black text-slate-500 uppercase tracking-wider">
-                                                    {locale === "ar" ? "اكتب رسالة رد للمعلم:" : "Write a message to teacher:"}
-                                                </label>
-                                                <div className="flex gap-2">
-                                                    <textarea
-                                                        value={replyText[r.id] ?? ""}
-                                                        onChange={(e) =>
-                                                            setReplyText((prev) => ({ ...prev, [r.id]: e.target.value }))
-                                                        }
-                                                        placeholder={
-                                                            locale === "ar"
-                                                                ? "مثال: أهلاً بك يا أستاذ، أريد تنسيق الموعد..."
-                                                                : "Example: Hello teacher, I want to coordinate the schedule..."
-                                                        }
-                                                        rows={2}
-                                                        className="flex-1 rounded-xl border border-border px-3.5 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 bg-white"
-                                                    />
-                                                    <button
-                                                        onClick={() => handleSendReply(r)}
-                                                        disabled={!(replyText[r.id] ?? "").trim()}
-                                                        className="self-end rounded-xl bg-primary hover:bg-primary-dark text-white px-4 py-2.5 text-xs font-bold shadow-md transition-colors disabled:opacity-50 cursor-pointer h-[40px] flex items-center justify-center shrink-0"
-                                                    >
-                                                        {locale === "ar" ? "إرسال الرسالة" : "Send"}
-                                                    </button>
-                                                </div>
+                                        {isTeacherInitiated && r.replyMessage ? (
+                                            <div className="text-xs space-y-1">
+                                                <span className="text-slate-400 font-bold block">
+                                                    {locale === "ar" ? "💬 ردّك على المعلم:" : "💬 Your Reply:"}
+                                                </span>
+                                                <p className="text-slate-700 bg-slate-50 border border-slate-100 p-3 rounded-xl leading-relaxed italic text-start">
+                                                    {r.replyMessage}
+                                                </p>
                                             </div>
-                                        )}
+                                        ) : null}
+                                        {!isTeacherInitiated && r.message ? (
+                                            <div className="text-xs space-y-1">
+                                                <span className="text-slate-400 font-bold block">
+                                                    {locale === "ar" ? "💬 رسالتك للمعلم:" : "💬 Your Message:"}
+                                                </span>
+                                                <p className="text-slate-700 bg-slate-50 border border-slate-100 p-3 rounded-xl leading-relaxed italic text-start">
+                                                    {r.message}
+                                                </p>
+                                            </div>
+                                        ) : null}
                                     </div>
                                 )}
                             </div>

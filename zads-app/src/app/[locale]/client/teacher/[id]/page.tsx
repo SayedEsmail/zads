@@ -149,12 +149,16 @@ export default function TeacherDetailPage() {
             <div className="space-y-1">
               <h1 className="text-2xl font-black text-slate-800 leading-tight">{user?.name}</h1>
               <div className="flex flex-wrap items-center gap-2.5 text-xs text-muted-foreground font-medium">
-                <span className="flex items-center gap-0.5 text-amber-500">
-                  <Star className="h-4 w-4 fill-warning text-warning" />
-                  <strong className="text-slate-800 text-sm font-bold ms-0.5">{Number(teacher.avgRating).toFixed(1)}</strong>
-                  <span className="text-slate-400">({teacher.ratingCount})</span>
-                </span>
-                <span className="text-slate-300">•</span>
+                {Number(teacher.ratingCount) > 0 && (
+                  <>
+                    <span className="flex items-center gap-0.5 text-amber-500">
+                      <Star className="h-4 w-4 fill-warning text-warning" />
+                      <strong className="text-slate-800 text-sm font-bold ms-0.5">{Number(teacher.avgRating).toFixed(1)}</strong>
+                      <span className="text-slate-400">({teacher.ratingCount})</span>
+                    </span>
+                    <span className="text-slate-300">•</span>
+                  </>
+                )}
                 {teacher.area && (
                   <span className="flex items-center gap-1">
                     <MapPin className="h-3.5 w-3.5 text-slate-400" />
@@ -166,7 +170,9 @@ export default function TeacherDetailPage() {
                 )}
                 {teacher.isVerified && (
                   <>
-                    <span className="text-slate-300">•</span>
+                    {teacher.area || Number(teacher.ratingCount) > 0 ? (
+                      <span className="text-slate-300">•</span>
+                    ) : null}
                     <span className="rounded-full bg-emerald-50 border border-emerald-200 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
                       {tCommon("verified")}
                     </span>
