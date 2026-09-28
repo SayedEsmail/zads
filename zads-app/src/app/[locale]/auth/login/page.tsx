@@ -10,9 +10,10 @@ import { z } from "zod";
 import { useAuthStore } from "@/stores/auth";
 import { ErrorBanner } from "@/components/shared/ErrorBanner";
 import { sanitizeInternalCallbackUrl } from "@/lib/utils";
+import { EGYPTIAN_PHONE_MESSAGE, EGYPTIAN_PHONE_REGEX } from "@/lib/phone";
 
 const schema = z.object({
-  phone: z.string().min(8, "Invalid phone number"),
+  phone: z.string().regex(EGYPTIAN_PHONE_REGEX, EGYPTIAN_PHONE_MESSAGE),
   password: z.string().min(6, "Password too short"),
 });
 type FormValues = z.infer<typeof schema>;
@@ -75,7 +76,7 @@ export default function LoginPage() {
             {...register("phone")}
             type="tel"
             dir="ltr"
-            placeholder="05xxxxxxxx"
+            placeholder="01xxxxxxxxx"
             className="w-full rounded-[1.25rem] border border-border bg-white px-4 py-3.5 text-sm font-medium focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
           />
           {errors.phone && (

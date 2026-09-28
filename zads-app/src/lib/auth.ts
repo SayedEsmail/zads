@@ -35,6 +35,9 @@ const API_BASE = process.env.API_BASE_URL ?? "http://localhost:3000";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   trustHost: true,
+  // Keep NextAuth off /api/auth/* so the BFF can proxy Express auth routes
+  // (register/login/profile) without colliding with the Auth.js catch-all.
+  basePath: "/api/nextauth",
   providers: [
     CredentialsProvider({
       name: "credentials",

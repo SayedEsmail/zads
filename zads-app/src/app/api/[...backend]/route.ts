@@ -49,11 +49,6 @@ async function proxy(req: NextRequest, context: RouteContext) {
     return NextResponse.json({ success: false, message: "Route not found" }, { status: 404 });
   }
 
-  // NextAuth owns /api/auth/*; never forward those here.
-  if (subpath === "auth" || subpath.startsWith("auth/")) {
-    return NextResponse.json({ success: false, message: "Route not found" }, { status: 404 });
-  }
-
   const incoming = new URL(req.url);
   const target = `${API_BASE}/api/${subpath}${incoming.search}`;
 

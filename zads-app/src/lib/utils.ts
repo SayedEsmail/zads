@@ -22,10 +22,19 @@ export function getInitials(name: string): string {
 
 /** Extract a human-readable error message from any thrown value */
 export function extractError(err: unknown): string {
-  if (err instanceof Error) return err.message;
+  if (err && typeof err === "object") {
+    const axiosErr = err as {
+      response?: { data?: { message?: string; errors?: Array<{ message?: string }> } };
+      message?: string;
+    };
+    const data = axiosErr.response?.data;
+    if (data?.errors?.length && data.errors[0]?.message) {
+      return data.errors.map((e) => e.message).filter(Boolean).join("; ") || data.message || "Validation error";
+    }
+    if (data?.message) return data.message;
+    if (typeof axiosErr.message === "string" && axiosErr.message) return axiosErr.message;
+  }
   if (typeof err === "string") return err;
-  const axiosErr = err as { response?: { data?: { message?: string } } };
-  if (axiosErr?.response?.data?.message) return axiosErr.response.data.message;
   return "An unexpected error occurred";
 }
 

@@ -13,10 +13,11 @@ import { ErrorBanner } from "@/components/shared/ErrorBanner";
 import { sanitizeInternalCallbackUrl } from "@/lib/utils";
 import { trackEvent } from "@/lib/analytics";
 import { Eye, EyeOff } from "lucide-react";
+import { EGYPTIAN_PHONE_MESSAGE, EGYPTIAN_PHONE_REGEX } from "@/lib/phone";
 
 const schema = z.object({
   name: z.string().min(2, "Name is required"),
-  phone: z.string().min(8, "Invalid phone number"),
+  phone: z.string().regex(EGYPTIAN_PHONE_REGEX, EGYPTIAN_PHONE_MESSAGE),
   password: z.string().min(8, "Minimum 8 characters"),
 });
 
@@ -92,7 +93,7 @@ export default function RegisterTeacherPage() {
             {...register("phone")}
             type="tel"
             dir="ltr"
-            placeholder="05xxxxxxxx"
+            placeholder="01xxxxxxxxx"
             className="w-full rounded-[1.25rem] border border-border bg-white px-4 py-3.5 text-sm font-medium focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
           />
           {errors.phone && <p className="mt-1.5 px-1 text-xs font-medium text-destructive">{errors.phone.message}</p>}

@@ -20,9 +20,24 @@ export interface StoreSlice<T> {
 
 /**
  * Helper: extract an error message from any thrown value.
+ * Prefer API response bodies over Axios's generic status-code message.
  */
 export function extractError(err: unknown): string {
-  if (err instanceof Error) return err.message;
+  if (err && typeof err === "object") {
+    const axiosErr = err as {
+      response?: { data?: { message?: string; errors?: Array<{ message?: string }> } };
+      message?: string;
+    };
+    const data = axiosErr.response?.data;
+    if (data?.errors?.length && data.errors[0]?.message) {
+      return data.errors.map((e) => e.message).filter(Boolean).join("; ") || data.message || "Validation error";
+    }
+    if (data?.message) return data.message;
+    if (typeof axiosErr.message === "string" && axiosErr.message && !axiosErr.message.startsWith("Request failed with status code")) {
+      return axiosErr.message;
+    }
+    if (axiosErr.message) return axiosErr.message;
+  }
   if (typeof err === "string") return err;
   return "An unexpected error occurred";
 }
