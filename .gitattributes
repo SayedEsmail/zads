@@ -1,0 +1,2 @@
+# Archived Nuxt/Vuetify apps: keep in the repo, exclude from GitHub language stats.
+legacy/** linguist-vendored
