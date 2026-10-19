@@ -118,14 +118,14 @@ pnpm run test:local
 | `tests/z03-admin-contracts.test.js` | Admin endpoints: 401 for unauthenticated calls, paginated teachers / parents / contact-request lists, contact stats contract |
 | `tests/z04-z08-privacy-contracts.test.js` | Phone and certificate masking on public teacher search and details, search filters, contact-request state machine (409 on duplicate pending, initiator cannot accept, phones revealed to both sides only on `accepted`), teacher availability validation (HH:mm, ranges, overlaps) |
 
-The same command runs in CI on every push that touches `zads-api/`, before the deploy job. Front-end checks in CI are `eslint` and a production `next build`.
+The same command runs in CI on every push that touches `zads-api/`, before the deploy job; there it points at a throw-away `postgres:16` service container through `TEST_DATABASE_URL` instead of the embedded server. Front-end checks in CI are `eslint` and a production `next build`.
 
 ## CI/CD
 
 Two workflows, one per package, triggered by path filters:
 
 - **zads-app**: install → lint → `next build` → deploy to Vercel (production) on `main`.
-- **zads-api**: install → `prisma generate` → lint → `test:local` → deploy to Vercel on `main`.
+- **zads-api**: install → `prisma generate` → lint → `test:local` against a Postgres service container → deploy to Vercel on `main`.
 
 Secrets (Vercel token / project ids, `NEXT_PUBLIC_API_URL`) live in GitHub Actions secrets and Vercel environment variables only. No credential of any kind is in this repository or its history.
 
