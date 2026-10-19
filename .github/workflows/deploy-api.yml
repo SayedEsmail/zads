@@ -54,6 +54,9 @@ jobs:
         run: pnpm --filter zads-api run lint
         continue-on-error: true # Suppress non-blocking styling warnings
 
+      - name: API integration tests (embedded Postgres)
+        run: pnpm --filter zads-api run test:local
+
   deploy:
     name: Deploy API to Vercel
     needs: build-and-test

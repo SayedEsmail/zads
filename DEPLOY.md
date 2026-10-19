@@ -263,7 +263,7 @@ Before production:
 
 - Rotate/revoke any Firebase service account key that was ever committed to Git history.
 - Rotate/reset the Neon password if a connection string was ever exposed.
-- Keep `zads-api/serviceAccountKey.json` untracked and ignored.
+- Keep `zads-api/serviceAccountKey.json` untracked and ignored; on Vercel provide the key through `FIREBASE_SERVICE_ACCOUNT_JSON` only.
 - Use strong unique values for `JWT_SECRET`, `NEXTAUTH_SECRET`, and `AUTH_SECRET`.
 - Do not expose `.env` files or real credentials in Git.
 - Restrict `CORS_ORIGIN` to the deployed web app domain.
