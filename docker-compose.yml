@@ -1,0 +1,63 @@
+# Local product stack: `docker compose up --build` → http://localhost:3001
+# Postgres + API (migrations, reference seed) + demo teachers + web app.
+# Nothing here is a real credential: the Postgres password is a local-only
+# default you can override, and JWT/Auth secrets are generated at container
+# start unless you set JWT_SECRET / AUTH_SECRET in your shell or a .env file.
+name: zads
+
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: zads
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-zads-local-only}
+      POSTGRES_DB: zads
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U zads -d zads"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  zads-api:
+    build: ./zads-api
+    image: zads-api:local
+    environment:
+      DATABASE_URL: postgresql://zads:${POSTGRES_PASSWORD:-zads-local-only}@postgres:5432/zads?schema=public
+      DIRECT_URL: postgresql://zads:${POSTGRES_PASSWORD:-zads-local-only}@postgres:5432/zads?schema=public
+      JWT_SECRET: ${JWT_SECRET:-}
+      JWT_EXPIRES_IN: 7d
+    depends_on:
+      postgres:
+        condition: service_healthy
+    # Not published on the host: the app reaches it on the compose network.
+
+  # One-shot: demo teachers through the API (idempotent, safe on every `up`).
+  seed:
+    build: ./zads-api # same image as zads-api (cached), so compose never tries to pull it
+    image: zads-api:local
+    command: ["node", "scripts/seed-demo.js"]
+    environment:
+      API_URL: http://zads-api:3000
+    depends_on:
+      zads-api:
+        condition: service_healthy
+    restart: "no"
+
+  zads-app:
+    build: ./zads-app
+    environment:
+      API_BASE_URL: http://zads-api:3000
+      NEXTAUTH_URL: http://localhost:3001
+      AUTH_SECRET: ${AUTH_SECRET:-}
+    ports:
+      - "3001:3001"
+    depends_on:
+      zads-api:
+        condition: service_healthy
+      seed:
+        condition: service_completed_successfully
+
+volumes:
+  pgdata:
