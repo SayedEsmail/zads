@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
+import { signOut } from "next-auth/react";
 import Image from "next/image";
 import { MapPin, Star, GraduationCap, Award, Clock, BookOpen } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
@@ -12,9 +13,15 @@ import { formatPrice, getInitials } from "@/lib/utils";
 import type { Teacher } from "@/types";
 import { useContactRequestsStore } from "@/stores/contact-requests";
 import { toast } from "sonner";
+import { trackEvent } from "@/lib/analytics";
+import { createContactRequest } from "./actions";
 
 const DAYS_AR = ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
 const DAYS_EN = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+/** Same key format as stores/contact-requests.ts so API-side idempotency behaves identically. */
+const newIdempotencyKey = () =>
+  `cr_p_${typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `${Date.now()}_${Math.random().toString(36).slice(2)}`}`;
 
 export default function TeacherDetailPage() {
   const locale = useLocale();
@@ -35,7 +42,8 @@ export default function TeacherDetailPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const { sent, fetch: fetchSentRequests, createRequest, isLoading: isLoadingRequests } = useContactRequestsStore();
+  const { sent, fetch: fetchSentRequests, isLoading: isLoadingRequests } = useContactRequestsStore();
+  const pendingIntentKeys = useRef(new Map<string, string>());
 
   useEffect(() => {
     fetchSentRequests();
@@ -88,22 +96,43 @@ export default function TeacherDetailPage() {
           : `[Preferred Time: ${selectedSlot}]\n${finalMessage}`;
       }
 
-      await createRequest({
+      const payload = {
         teacherId: id,
         subjectId: selectedSubjectRate?.subjectId || undefined,
         stageId: selectedSubjectRate?.stageId || undefined,
         message: finalMessage || undefined,
         studyMode: studyMode as "online" | "offline",
         preferredTime: selectedSlot || undefined,
-      });
+      };
+      // Reuse the key while the same intent is retried so a lost response
+      // cannot create a second request; a success frees it.
+      const intent = JSON.stringify(payload);
+      let idempotencyKey = pendingIntentKeys.current.get(intent);
+      if (!idempotencyKey) {
+        idempotencyKey = newIdempotencyKey();
+        pendingIntentKeys.current.set(intent, idempotencyKey);
+      }
+
+      const result = await createContactRequest({ ...payload, locale: locale as "ar" | "en", idempotencyKey });
+      if (!result.ok) {
+        if (result.status === 401) {
+          await signOut({ redirect: true, callbackUrl: "/en/auth/login" });
+          return;
+        }
+        setSubmitError(result.error || "حدث خطأ أثناء إرسال الطلب");
+        return;
+      }
+      pendingIntentKeys.current.delete(intent);
+      trackEvent("contact_request", { teacher_id: id, study_mode: payload.studyMode });
+      void fetchSentRequests();
 
       toast.success("تم إرسال طلب التواصل المباشر بنجاح!");
       setShowDialog(false);
       setMessage("");
       setSelectedSlot("");
     } catch (err) {
-      const axiosErr = err as { response?: { data?: { message?: string } }; message?: string };
-      setSubmitError(axiosErr.response?.data?.message ?? axiosErr.message ?? "حدث خطأ أثناء إرسال الطلب");
+      const e = err as { message?: string };
+      setSubmitError(e.message ?? "حدث خطأ أثناء إرسال الطلب");
     } finally {
       setIsSubmitting(false);
     }

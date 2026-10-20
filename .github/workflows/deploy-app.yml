@@ -7,6 +7,12 @@ on:
     paths:
       - 'zads-app/**'
       - '.github/workflows/deploy-app.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'zads-app/**'
+      - '.github/workflows/deploy-app.yml'
   workflow_dispatch:
 
 env:
@@ -16,6 +22,9 @@ jobs:
   build-and-test:
     name: Build & Test
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: zads-app
 
     steps:
       - name: Checkout Code
@@ -26,10 +35,11 @@ jobs:
         with:
           node-version: 20
 
+      # pnpm-lock.yaml is lockfile v9; pnpm 8 ignored it and resolved unpinned versions.
       - name: Install pnpm
         uses: pnpm/action-setup@v3
         with:
-          version: 8
+          version: 9
 
       - name: Get pnpm store directory
         shell: bash
@@ -40,18 +50,18 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          key: ${{ runner.os }}-pnpm9-store-${{ hashFiles('zads-app/pnpm-lock.yaml') }}
           restore-keys: |
-            ${{ runner.os }}-pnpm-store-
+            ${{ runner.os }}-pnpm9-store-
 
       - name: Install Dependencies
-        run: pnpm --filter zads-app install
+        run: pnpm install --frozen-lockfile
 
       - name: Run Linter
-        run: pnpm --filter zads-app run lint
+        run: pnpm run lint
 
       - name: Build Application
-        run: pnpm --filter zads-app run build
+        run: pnpm run build
         env:
           NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
           NEXT_PUBLIC_GA_MEASUREMENT_ID: G-00DPVWBBDZ

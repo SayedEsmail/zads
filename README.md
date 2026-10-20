@@ -88,7 +88,7 @@ pnpm install
 cp .env.example .env            # set DATABASE_URL / DIRECT_URL / JWT_SECRET
 pnpm run db:migrate              # prisma migrate dev
 pnpm run db:seed                 # creates the admin user
-pnpm run dev                     # http://localhost:3000/api
+pnpm run dev                     # http://127.0.0.1:3000/api
 
 # 2. Web app
 cd ../zads-app

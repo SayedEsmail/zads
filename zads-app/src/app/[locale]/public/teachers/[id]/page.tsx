@@ -1,10 +1,7 @@
-"use client";
-
-import { use, useEffect, useState } from "react";
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { useLocale, useTranslations } from "next-intl";
-import { useSession } from "next-auth/react";
+import { notFound } from "next/navigation";
 import {
   MapPin,
   Star,
@@ -13,77 +10,61 @@ import {
   BookOpen,
   Calendar,
   MessageCircle,
-  GraduationCap,
   ShieldCheck,
-  ArrowRight,
-  ArrowLeft
 } from "lucide-react";
-import api from "@/lib/api";
+import { auth } from "@/lib/auth";
+import { getTeacher } from "@/lib/server-api";
 import { formatPrice, getInitials } from "@/lib/utils";
-import { trackEvent } from "@/lib/analytics";
-import { ErrorBanner } from "@/components/shared/ErrorBanner";
-import { PageSkeleton } from "@/components/shared/PageSkeleton";
-import type { Teacher } from "@/types";
+import { TrackTeacherView } from "./TrackTeacherView";
 
 const DAYS_AR = ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
 const DAYS_EN = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
-export default function PublicTeacherDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string; locale: string }>;
-}) {
-  const { id } = use(params);
-  const locale = useLocale();
-  const { data: session } = useSession();
-  const Arrow = locale === "ar" ? ArrowLeft : ArrowRight;
+type Props = { params: Promise<{ id: string; locale: string }> };
 
-  const [teacher, setTeacher] = useState<Teacher | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    api
-      .get<{ data: Teacher }>(`/teachers/${id}`)
-      .then((res) => {
-        if (!cancelled) {
-          setTeacher(res.data.data);
-          trackEvent("view_teacher_profile", { teacher_id: id, source: "public" });
-        }
-      })
-      .catch((err) => {
-        if (!cancelled) {
-          setError(err.response?.data?.message ?? err.message ?? "حدث خطأ أثناء تحميل بيانات المعلم");
-        }
-      })
-      .finally(() => {
-        if (!cancelled) setIsLoading(false);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [id]);
-
-  if (isLoading) return <PageSkeleton rows={6} />;
-
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id, locale } = await params;
+  const isAr = locale === "ar";
+  // Same request-scoped call as the page (React cache), so the API counts one view.
+  const teacher = await getTeacher(id).catch(() => null);
   if (!teacher) {
-    return (
-      <div className="max-w-2xl mx-auto py-12 px-4">
-        <ErrorBanner error={error ?? (locale === "ar" ? "المعلم غير موجود" : "Teacher not found")} />
-        <div className="mt-4 text-center">
-          <Link
-            href={`/${locale}/public/teachers`}
-            className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
-          >
-            <span>{locale === "ar" ? "العودة لدليل المعلمين" : "Back to teachers directory"}</span>
-            <Arrow className="h-4 w-4" />
-          </Link>
-        </div>
-      </div>
-    );
+    return { title: isAr ? "المعلم غير موجود | زاد" : "Teacher not found | Zads" };
   }
+
+  const name = teacher.user?.name ?? "";
+  const subjects = [...new Set(teacher.subjects?.map((s) => (isAr ? s.subject?.nameAr : s.subject?.nameEn)).filter(Boolean))]
+    .slice(0, 3)
+    .join(isAr ? "، " : ", ");
+  const area = teacher.area ? (isAr ? teacher.area.nameAr : teacher.area.nameEn ?? teacher.area.nameAr) : "";
+  const path = `/${locale}/public/teachers/${id}`;
+
+  return {
+    title: isAr ? `${name}${subjects ? ` — ${subjects}` : ""} | زاد` : `${name}${subjects ? ` — ${subjects}` : ""} | Zads`,
+    description: teacher.bio?.slice(0, 160) ||
+      (isAr
+        ? `ملف المعلم ${name}${area ? ` في ${area}` : ""}: المواد والأسعار والمواعيد المتاحة على زاد.`
+        : `${name}'s teacher profile${area ? ` in ${area}` : ""}: subjects, rates and availability on Zads.`),
+    alternates: {
+      canonical: path,
+      languages: {
+        ar: `/ar/public/teachers/${id}`,
+        en: `/en/public/teachers/${id}`,
+      },
+    },
+    openGraph: {
+      title: name,
+      type: "profile",
+      locale: isAr ? "ar_EG" : "en_US",
+      ...(teacher.user?.avatarUrl ? { images: [teacher.user.avatarUrl] } : {}),
+    },
+  };
+}
+
+export default async function PublicTeacherDetailPage({ params }: Props) {
+  const { id, locale } = await params;
+  // Profile is public; only the contact link target depends on the session.
+  const [teacher, session] = await Promise.all([getTeacher(id), auth()]);
+  if (!teacher) notFound();
 
   const user = teacher.user;
   const area = teacher.area;
@@ -94,6 +75,7 @@ export default function PublicTeacherDetailPage({
 
   return (
     <div className="min-h-screen bg-slate-50/60 py-8 px-4">
+      <TrackTeacherView teacherId={teacher.id} />
       <div className="max-w-3xl mx-auto space-y-6">
         {/* Breadcrumb */}
         <nav className="flex items-center gap-2 text-xs text-muted-foreground">

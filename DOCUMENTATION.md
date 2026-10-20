@@ -68,7 +68,7 @@ npx prisma migrate deploy
 pnpm run db:seed
 pnpm run dev
 ```
-API runs on `http://localhost:3000` (base: `http://localhost:3000/api`).
+API runs on `http://127.0.0.1:3000` (base: `http://127.0.0.1:3000/api`). The app's `API_BASE_URL` uses `127.0.0.1` too: on Node 18+ `localhost` can resolve to `::1`, where the API is not listening.
 
 #### Frontend Next.js App Setup
 ```bash
