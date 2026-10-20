@@ -55,7 +55,9 @@ export async function proxy(request: NextRequest) {
   const token = await getToken({
     req: request,
     secret: process.env.AUTH_SECRET,
-    secureCookie: process.env.NODE_ENV === "production",
+    // Auth.js picks the __Secure- cookie from the request protocol, not NODE_ENV;
+    // match it so `next start` over plain http (local prod checks) still sees the session.
+    secureCookie: request.nextUrl.protocol === "https:",
   });
 
   // If on an auth page and already logged in → redirect to role home
