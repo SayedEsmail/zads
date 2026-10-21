@@ -1,0 +1,67 @@
+name: docker-compose
+
+# Proves `docker compose up` brings the product up on localhost:3001 with seed data.
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'docker-compose.yml'
+      - 'zads-app/**'
+      - 'zads-api/**'
+      - '.github/workflows/docker.yml'
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
+jobs:
+  compose-smoke:
+    name: Compose up smoke test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Build and start the stack
+        run: docker compose up --build --detach
+
+      - name: Wait for the app on localhost:3001
+        run: |
+          for i in $(seq 1 90); do
+            if curl -fsS -o /dev/null http://localhost:3001/en/public; then echo "app up after ${i}x2s"; exit 0; fi
+            sleep 2
+          done
+          echo "app did not come up"; exit 1
+
+      - name: Seed ran and the demo teachers are server-rendered
+        run: |
+          test "$(docker inspect -f '{{.State.ExitCode}}' "$(docker compose ps -a -q seed)")" = "0"
+          curl -fsS http://localhost:3001/ar/public/teachers -o ar.html
+          curl -fsS http://localhost:3001/en/public/teachers -o en.html
+          grep -q 'سارة حسن' ar.html
+          grep -q 'Omar Khaled' en.html
+          grep -q 'dir="rtl"' ar.html
+          echo "seeded teachers present in the initial HTML (ar + en)"
+
+      # prisma/seed.js clears teacher areas; seed-if-empty.js must skip it on restart.
+      - name: Restart keeps data and does not reseed locations
+        run: |
+          docker compose restart zads-api
+          for i in $(seq 1 60); do
+            curl -fsS http://localhost:3001/en/public/teachers -o en2.html && grep -q 'Omar Khaled' en2.html && break
+            sleep 2
+          done
+          grep -q 'Omar Khaled' en2.html
+          docker compose exec -T zads-api node -e "
+            const { PrismaClient } = require('@prisma/client'); const p = new PrismaClient();
+            p.teacher.count({ where: { areaId: { not: null } } }).then((n) => { console.log('teachers with area:', n); process.exit(n >= 2 ? 0 : 1); });"
+
+      - name: Logs on failure
+        if: failure()
+        run: docker compose logs --no-color
+
+      - name: Tear down
+        if: always()
+        run: docker compose down --volumes

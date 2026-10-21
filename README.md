@@ -79,7 +79,7 @@ The old apps stay in `legacy/` on purpose: they are the proof of the before/afte
 
 ## Running it locally
 
-Prerequisites: Node 20+, pnpm 8+, PostgreSQL (or a Neon branch).
+Prerequisites: Node 20+, pnpm 9+, PostgreSQL (or a Neon branch).
 
 ```bash
 # 1. API
@@ -101,6 +101,33 @@ Seeded admin: phone `01000000000`, password `admin123`. Register teacher and cli
 
 Push notifications are optional: set `FIREBASE_SERVICE_ACCOUNT_JSON` (the service-account JSON as a string) or `GOOGLE_APPLICATION_CREDENTIALS` (a path to it). Without either, the API logs a warning and disables push.
 
+## Run with Docker
+
+The whole product (Postgres, API, demo data, web app) from the repository root, with nothing to install but Docker:
+
+```bash
+docker compose up --build
+```
+
+Then open **http://localhost:3001** (it redirects to `/ar/public`; `/en/...` for English).
+
+What `docker compose up` does:
+
+| Service | Image | Role |
+|---|---|---|
+| `postgres` | `postgres:16` | Database, data kept in the `pgdata` volume |
+| `zads-api` | `zads-api/Dockerfile` | `prisma migrate deploy`, then `prisma/seed.js` **only on an empty database** (locations, subjects, stages, admin), then the API on port 3000 inside the compose network |
+| `seed` | same image | One-shot: two demo teachers through the public API (math in 6th of October, English in Sheikh Zayed). Skips teachers that already exist |
+| `zads-app` | `zads-app/Dockerfile` | `next start` on port 3001, talking to the API at `http://zads-api:3000` |
+
+Both Dockerfiles are multi-stage, install from the pnpm 9 lockfiles (`--frozen-lockfile`) and run as the unprivileged `node` user. No secret is baked into an image or committed: the Postgres password is a local-only default (`POSTGRES_PASSWORD` overrides it), and `JWT_SECRET` / `AUTH_SECRET` are generated at container start. Sessions therefore reset when a container restarts; set both in your shell or a root `.env` file to keep them:
+
+```bash
+JWT_SECRET=$(openssl rand -hex 32) AUTH_SECRET=$(openssl rand -base64 32) docker compose up --build
+```
+
+Seeded admin: phone `01000000000`, password `admin123` (local seed only). Stop with `docker compose down`; add `--volumes` to drop the database.
+
 ## Tests
 
 The API has three HTTP integration suites that exercise the real Express app against a **disposable embedded PostgreSQL** (no Docker, no shared database):
@@ -118,14 +145,35 @@ pnpm run test:local
 | `tests/z03-admin-contracts.test.js` | Admin endpoints: 401 for unauthenticated calls, paginated teachers / parents / contact-request lists, contact stats contract |
 | `tests/z04-z08-privacy-contracts.test.js` | Phone and certificate masking on public teacher search and details, search filters, contact-request state machine (409 on duplicate pending, initiator cannot accept, phones revealed to both sides only on `accepted`), teacher availability validation (HH:mm, ranges, overlaps) |
 
-The same command runs in CI on every push that touches `zads-api/`, before the deploy job; there it points at a throw-away `postgres:16` service container through `TEST_DATABASE_URL` instead of the embedded server. Front-end checks in CI are `eslint` and a production `next build`.
+The same command runs in CI on every push that touches `zads-api/`, before the deploy job; there it points at a throw-away `postgres:16` service container through `TEST_DATABASE_URL` instead of the embedded server. Front-end checks in CI are `eslint`, a production `next build` and the Playwright suite below.
+
+### Browser end-to-end tests (Playwright)
+
+`zads-app/e2e/` drives the real app in Chromium against the real API on a disposable Postgres, in **Arabic and English** (one Playwright project per locale):
+
+| Spec | Flow |
+|---|---|
+| `register-parent.spec.ts` | Parent registers through the form, is signed in and lands on `/[locale]/client` (also checks `dir="rtl"` / `ltr`) |
+| `search-teacher.spec.ts` | Signed-in parent filters by subject → governorate → city → area and gets only the matching teacher |
+| `contact-request.spec.ts` | Parent sends a contact request from the teacher page; the UI shows it as pending and `GET /api/contact-requests/my` returns it as `pending` |
+
+```bash
+cd zads-app
+pnpm exec playwright install chromium   # once
+pnpm run build
+TEST_DATABASE_URL=postgresql://user:pass@127.0.0.1:5432/zads_e2e pnpm run test:e2e
+```
+
+The Playwright config starts two servers: `zads-api/scripts/e2e-server.js` (same idea as `test-local.js`: `TEST_DATABASE_URL` must be an empty, local, throw-away database, otherwise an embedded Postgres is used on Linux; then `migrate deploy`, `prisma/seed.js` and two demo teachers via `scripts/seed-demo.js`) and `next start` on `127.0.0.1:3101`. Test accounts use random phones and passwords, secrets are generated per run, and Google Analytics requests are blocked. Failures keep a screenshot and a trace under `zads-app/test-results/` (uploaded as a CI artifact).
+
 
 ## CI/CD
 
-Two workflows, one per package, triggered by path filters:
+Three workflows, triggered by path filters on pushes to `main` and on pull requests (deploy jobs run on `main` only). All installs use pnpm 9 with `--frozen-lockfile`:
 
-- **zads-app**: install → lint → `next build` → deploy to Vercel (production) on `main`.
+- **zads-app**: install → lint → `next build`, and in parallel **e2e**: `postgres:16` service container → API from this repo (`scripts/e2e-server.js`) → `next build` → Playwright (ar + en), screenshots/traces uploaded on failure. Deploy to Vercel (production) runs only after **both** jobs pass. API changes also trigger this workflow on PRs, since the e2e job runs the API.
 - **zads-api**: install → `prisma generate` → lint → `test:local` against a Postgres service container → deploy to Vercel on `main`.
+- **docker-compose** (PRs): `docker compose up --build`, waits for `localhost:3001`, checks the demo teachers are in the server-rendered HTML (ar + en) and that a restart does not reseed.
 
 Secrets (Vercel token / project ids, `NEXT_PUBLIC_API_URL`) live in GitHub Actions secrets and Vercel environment variables only. No credential of any kind is in this repository or its history.
 

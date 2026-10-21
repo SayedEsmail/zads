@@ -12,6 +12,8 @@ on:
       - main
     paths:
       - 'zads-app/**'
+      # The e2e job runs the API from this repo, so API changes must pass it too.
+      - 'zads-api/**'
       - '.github/workflows/deploy-app.yml'
   workflow_dispatch:
 
@@ -67,9 +69,98 @@ jobs:
           NEXT_PUBLIC_GA_MEASUREMENT_ID: G-00DPVWBBDZ
           NEXT_PUBLIC_APP_URL: https://zads.app
 
+  e2e:
+    name: E2E (Playwright)
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: zads
+          POSTGRES_PASSWORD: zads-e2e-only
+          POSTGRES_DB: zads_e2e
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U zads"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Cache pnpm dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm9-e2e-${{ hashFiles('zads-app/pnpm-lock.yaml', 'zads-api/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm9-
+
+      - name: Install API dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: zads-api
+
+      - name: Install app dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: zads-app
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('zads-app/pnpm-lock.yaml') }}
+
+      - name: Install Playwright Chromium
+        run: pnpm exec playwright install --with-deps chromium
+        working-directory: zads-app
+
+      - name: Build app
+        run: pnpm run build
+        working-directory: zads-app
+        env:
+          NEXT_PUBLIC_APP_URL: http://127.0.0.1:3101
+
+      # The Playwright config starts the API (zads-api/scripts/e2e-server.js:
+      # migrate, seed, demo teachers) and `next start`, both on 127.0.0.1.
+      - name: Run Playwright (ar + en)
+        run: pnpm run test:e2e
+        working-directory: zads-app
+        env:
+          CI: 'true'
+          TEST_DATABASE_URL: postgresql://zads:zads-e2e-only@localhost:5432/zads_e2e?schema=public
+
+      - name: Upload failure screenshots and traces
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-results
+          path: |
+            zads-app/test-results/
+            zads-app/playwright-report/
+          retention-days: 14
+
   deploy:
     name: Deploy to Production
-    needs: build-and-test
+    needs: [build-and-test, e2e]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     env:

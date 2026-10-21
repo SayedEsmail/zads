@@ -6,7 +6,8 @@
     "dev": "NEXT_TELEMETRY_DISABLED=1 NODE_OPTIONS=--max-old-space-size=2048 next dev -H 127.0.0.1 -p 3001 --webpack --disable-source-maps",
     "build": "next build",
     "start": "next start -p 3001",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@base-ui/react": "^1.4.1",
@@ -33,6 +34,7 @@
     "zustand": "^5.0.12"
   },
   "devDependencies": {
+    "@playwright/test": "1.63.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
